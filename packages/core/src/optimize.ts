@@ -61,7 +61,42 @@ export type OptimizeOptions = {
   ensureCanonical?: boolean;
   /** 봇 응답에서 <img>/<picture> 제거. alt 만 남겨 인덱싱 가능하게. 기본 false. */
   stripImages?: boolean;
+  /** 페이지 경로에서 BreadcrumbList JSON-LD 자동 생성/주입. 기본 false. */
+  injectBreadcrumb?: boolean;
 };
+
+const HAS_BREADCRUMB_JSONLD =
+  /<script[^>]+type=["']application\/ld\+json["'][^>]*>[\s\S]*?"@type"\s*:\s*"BreadcrumbList"/i;
+
+function buildBreadcrumbJsonLd(url: string): string | null {
+  try {
+    const u = new URL(url);
+    const parts = u.pathname.split('/').filter(Boolean);
+    if (!parts.length) return null;
+    const items: Array<{ '@type': string; position: number; name: string; item: string }> = [];
+    items.push({ '@type': 'ListItem', position: 1, name: 'Home', item: u.origin + '/' });
+    let acc = '';
+    parts.forEach((seg, i) => {
+      acc += `/${seg}`;
+      const name = decodeURIComponent(seg)
+        .replace(/[-_]+/g, ' ')
+        .replace(/\b\w/g, (c) => c.toUpperCase());
+      items.push({
+        '@type': 'ListItem',
+        position: i + 2,
+        name,
+        item: u.origin + acc,
+      });
+    });
+    return JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: items,
+    });
+  } catch {
+    return null;
+  }
+}
 
 export function optimizeHtml(html: string, opts: OptimizeOptions): string {
   let out = html;
@@ -79,6 +114,10 @@ export function optimizeHtml(html: string, opts: OptimizeOptions): string {
     if (!OG_URL_RE.test(out)) {
       meta.push(`<meta property="og:url" content="${escapeAttr(opts.url)}">`);
     }
+  }
+  if (opts.injectBreadcrumb && !HAS_BREADCRUMB_JSONLD.test(out)) {
+    const ld = buildBreadcrumbJsonLd(opts.url);
+    if (ld) meta.push(`<script type="application/ld+json">${ld}</script>`);
   }
   out = out.replace(HEAD_RE, (_m, attrs) => `<head${attrs}>\n${meta.join('\n')}`);
   if (opts.stripScripts) out = out.replace(SCRIPT_RE, '');

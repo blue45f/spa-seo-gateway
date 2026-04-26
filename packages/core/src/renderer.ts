@@ -147,6 +147,7 @@ async function renderOnce(
       ensureBase: true,
       ensureCanonical: true,
       stripImages: config.renderer.stripImagesFromOutput,
+      injectBreadcrumb: config.renderer.injectBreadcrumb,
     });
 
     const headers: Record<string, string> = {

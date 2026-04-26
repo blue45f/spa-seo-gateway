@@ -1,0 +1,62 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    ":pinDevDependencies",
+    ":semanticCommits",
+    ":enableVulnerabilityAlertsWithLabel(security)",
+    "group:monorepos",
+    "group:linters",
+    "group:test"
+  ],
+  "schedule": ["before 6am on monday"],
+  "timezone": "Asia/Seoul",
+  "labels": ["dependencies"],
+  "rangeStrategy": "bump",
+  "packageRules": [
+    {
+      "description": "Major bumps require manual review",
+      "matchUpdateTypes": ["major"],
+      "automerge": false,
+      "labels": ["dependencies", "major"]
+    },
+    {
+      "description": "Auto-merge minor & patch for production deps after CI",
+      "matchUpdateTypes": ["minor", "patch"],
+      "matchDepTypes": ["dependencies"],
+      "automerge": true,
+      "automergeType": "pr"
+    },
+    {
+      "description": "Group puppeteer ecosystem",
+      "matchPackageNames": ["puppeteer", "puppeteer-cluster", "@types/puppeteer"],
+      "groupName": "puppeteer"
+    },
+    {
+      "description": "Group cacheable ecosystem",
+      "matchPackageNames": [
+        "cacheable",
+        "@cacheable/memory",
+        "@cacheable/utils",
+        "keyv",
+        "@keyv/redis"
+      ],
+      "groupName": "cacheable"
+    },
+    {
+      "description": "Group fastify ecosystem",
+      "matchPackagePrefixes": ["fastify", "@fastify/"],
+      "groupName": "fastify"
+    }
+  ],
+  "vulnerabilityAlerts": {
+    "labels": ["security"],
+    "automerge": true
+  },
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": ["before 6am on monday"]
+  },
+  "prConcurrentLimit": 5,
+  "prHourlyLimit": 2
+}

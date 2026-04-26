@@ -5,6 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>spa-seo-gateway · admin</title>
     <link rel="icon" href="data:," />
+    <script>
+      // Tailwind dark mode = class-based, before CDN loads
+      window.tailwind = window.tailwind || {};
+      window.tailwind.config = { darkMode: 'class' };
+      // Restore theme from localStorage before paint to avoid FOUC
+      try {
+        const saved = localStorage.getItem('seo-admin-theme');
+        if (saved === 'dark' || (saved === null && matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.documentElement.classList.add('dark');
+        }
+      } catch {}
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js" defer></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -13,12 +25,53 @@
       pre { white-space: pre-wrap; word-break: break-word; }
       .nav-item { transition: all 120ms; }
       .nav-item.active { background: rgb(15 23 42); color: white; }
+      .dark .nav-item.active { background: rgb(99 102 241); }
+      .toast-enter { animation: slide-in 200ms ease-out; }
+      .toast-exit { animation: slide-out 200ms ease-in forwards; }
+      @keyframes slide-in { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+      @keyframes slide-out { to { transform: translateY(20px); opacity: 0; } }
+      .drag-row.dragging { opacity: 0.4; }
+      .drag-row.drag-over { border-top: 2px solid rgb(99 102 241); }
+      @media (max-width: 768px) {
+        aside.collapsed { transform: translateX(-100%); }
+        aside { transition: transform 200ms; }
+      }
     </style>
   </head>
-  <body class="bg-slate-50 text-slate-900 min-h-screen">
+  <body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 min-h-screen">
+    <!-- Mobile hamburger -->
+    <button
+      class="md:hidden fixed top-3 left-3 z-50 p-2 rounded bg-slate-900 text-white shadow-lg"
+      @click="sidebarOpen = !sidebarOpen"
+      aria-label="menu"
+      x-cloak
+    >☰</button>
+
+    <!-- Toast container -->
+    <div class="fixed bottom-4 right-4 z-[100] space-y-2 pointer-events-none" x-cloak>
+      <template x-for="t in toasts" :key="t.id">
+        <div
+          class="toast-enter pointer-events-auto px-4 py-3 rounded-lg shadow-lg text-sm flex items-start gap-3 max-w-md"
+          :class="{
+            'bg-emerald-500 text-white': t.kind === 'success',
+            'bg-red-500 text-white': t.kind === 'error',
+            'bg-amber-500 text-white': t.kind === 'warn',
+            'bg-slate-700 text-white': t.kind === 'info',
+          }"
+        >
+          <span x-text="t.icon"></span>
+          <div class="flex-1" x-text="t.message"></div>
+          <button @click="removeToast(t.id)" class="opacity-70 hover:opacity-100">✕</button>
+        </div>
+      </template>
+    </div>
+
     <div class="flex min-h-screen" x-cloak>
       <!-- Sidebar -->
-      <aside class="w-60 bg-slate-900 text-slate-200 flex flex-col">
+      <aside
+        class="w-60 bg-slate-900 dark:bg-black text-slate-200 flex flex-col fixed md:static md:translate-x-0 inset-y-0 left-0 z-40"
+        :class="{ collapsed: !sidebarOpen }"
+      >
         <div class="px-5 py-4 border-b border-slate-800">
           <div class="font-bold text-white text-lg">spa-seo-gateway</div>
           <div class="text-xs text-slate-400 mt-0.5">admin console</div>
@@ -38,24 +91,31 @@
         </nav>
         <div class="px-3 py-3 border-t border-slate-800 text-xs space-y-2">
           <div x-show="publicInfo">
-            <div class="text-slate-500">mode</div>
+            <div class="text-slate-500 dark:text-slate-400">mode</div>
             <div class="font-mono text-slate-300" x-text="publicInfo?.mode ?? '...'"></div>
           </div>
           <div class="flex items-center gap-2">
             <span class="w-2 h-2 rounded-full" :class="token ? 'bg-emerald-400' : 'bg-slate-500'"></span>
             <span x-text="token ? '인증됨' : '미인증'"></span>
-            <button x-show="token" class="ml-auto text-slate-500 hover:text-slate-300" @click="logout()">logout</button>
+            <button x-show="token" class="ml-auto text-slate-500 dark:text-slate-400 hover:text-slate-300" @click="logout()">logout</button>
           </div>
-          <a href="https://github.com/blue45f/spa-seo-gateway" target="_blank" class="text-slate-500 hover:text-slate-300 block">↗ GitHub</a>
+          <a href="https://github.com/blue45f/spa-seo-gateway" target="_blank" class="text-slate-500 dark:text-slate-400 hover:text-slate-300 block">↗ GitHub</a>
+          <button
+            class="w-full text-left text-slate-500 dark:text-slate-400 hover:text-slate-300 flex items-center gap-2"
+            @click="toggleTheme()"
+          >
+            <span x-text="theme === 'dark' ? '☀️' : '🌙'"></span>
+            <span x-text="theme === 'dark' ? '라이트 모드' : '다크 모드'"></span>
+          </button>
         </div>
       </aside>
 
       <!-- Main -->
-      <div class="flex-1 flex flex-col min-w-0">
-        <header class="bg-white border-b border-slate-200 px-6 py-3 flex items-center justify-between">
+      <div class="flex-1 flex flex-col min-w-0 md:ml-0 ml-0">
+        <header class="bg-white dark:bg-slate-900 dark:border-slate-800 border-b border-slate-200 px-6 py-3 flex items-center justify-between pl-16 md:pl-6">
           <div>
             <h1 class="font-semibold" x-text="currentNavItem()?.label"></h1>
-            <p class="text-xs text-slate-500" x-text="currentNavItem()?.subtitle"></p>
+            <p class="text-xs text-slate-500 dark:text-slate-400" x-text="currentNavItem()?.subtitle"></p>
           </div>
           <div x-show="!token && requiresAuth(tab)" class="flex items-center gap-2">
             <input
@@ -105,34 +165,34 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-5">
+              <div class="bg-white dark:bg-slate-900 dark:border-slate-800 rounded-lg shadow-sm border border-slate-200 p-5">
                 <div class="text-2xl">🤖</div>
                 <h3 class="font-semibold mt-2">봇이 들어오면 그 자리에서 렌더</h3>
-                <p class="text-sm text-slate-600 mt-1">
+                <p class="text-sm text-slate-600 dark:text-slate-300 mt-1">
                   isbot 의 1,000+ 패턴으로 봇 자동 식별 → 그 시점에 Chromium 으로 SPA 를 실행해 데이터 fetch / state 적용 / DOM 완성.
                   최종 HTML 을 봇에게 응답하고 동시에 캐시에 보관.
                 </p>
               </div>
-              <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-5">
+              <div class="bg-white dark:bg-slate-900 dark:border-slate-800 rounded-lg shadow-sm border border-slate-200 p-5">
                 <div class="text-2xl">⚡</div>
                 <h3 class="font-semibold mt-2">캐시 + SWR</h3>
-                <p class="text-sm text-slate-600 mt-1">
+                <p class="text-sm text-slate-600 dark:text-slate-300 mt-1">
                   Memory LRU + Redis 2-tier · Brotli 압축 · 만료 직후엔 stale 즉시 응답 + 백그라운드 갱신.
                   대부분의 봇 트래픽은 5ms 이내 캐시 히트.
                 </p>
               </div>
-              <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-5">
+              <div class="bg-white dark:bg-slate-900 dark:border-slate-800 rounded-lg shadow-sm border border-slate-200 p-5">
                 <div class="text-2xl">🛡️</div>
                 <h3 class="font-semibold mt-2">방어선</h3>
-                <p class="text-sm text-slate-600 mt-1">
+                <p class="text-sm text-slate-600 dark:text-slate-300 mt-1">
                   SSRF DNS 검사, host별 circuit breaker, soft 404 자동 감지, 자동 브라우저 재시작, rate limit, 호스트 화이트리스트.
                 </p>
               </div>
             </div>
 
-            <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-5">
+            <div class="bg-white dark:bg-slate-900 dark:border-slate-800 rounded-lg shadow-sm border border-slate-200 p-5">
               <h3 class="font-semibold mb-3">빠른 시작</h3>
-              <ol class="text-sm space-y-3 text-slate-700">
+              <ol class="text-sm space-y-3 text-slate-700 dark:text-slate-200">
                 <li><span class="font-bold mr-2">1</span> 좌측 메뉴에서 원하는 작업을 선택. 인증이 필요한 페이지는 우측 상단에 토큰 입력 박스가 표시됩니다.</li>
                 <li><span class="font-bold mr-2">2</span> 처음이라면 <button class="text-indigo-600 hover:underline" @click="goTab('test')">렌더 테스트</button> 에서 간단한 URL 한 개를 렌더해 동작 확인.</li>
                 <li><span class="font-bold mr-2">3</span> <button class="text-indigo-600 hover:underline" @click="goTab('routes')">라우트</button> 에서 URL 패턴별 캐시 TTL / waitUntil / ignore 정의.</li>
@@ -142,7 +202,7 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-5">
+              <div class="bg-white dark:bg-slate-900 dark:border-slate-800 rounded-lg shadow-sm border border-slate-200 p-5">
                 <h3 class="font-semibold mb-2">아키텍처 한눈에</h3>
                 <pre class="text-xs bg-slate-50 p-3 rounded border border-slate-200 overflow-auto">Bot ─→ Edge/CDN  ──→ spa-seo-gateway
               (UA로 분기)        ├─ bot detect (isbot)
@@ -159,7 +219,7 @@
                                  └─ 응답
 Human ──→ Edge/CDN ──→ origin (gateway는 204 또는 proxy)</pre>
               </div>
-              <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-5">
+              <div class="bg-white dark:bg-slate-900 dark:border-slate-800 rounded-lg shadow-sm border border-slate-200 p-5">
                 <h3 class="font-semibold mb-2">바로가기</h3>
                 <ul class="text-sm space-y-1.5">
                   <li>📚 <a href="https://github.com/blue45f/spa-seo-gateway/blob/main/docs/GETTING-STARTED.md" target="_blank" class="text-indigo-600 hover:underline">설치 가이드</a></li>
@@ -177,13 +237,13 @@ Human ──→ Edge/CDN ──→ origin (gateway는 204 또는 proxy)</pre>
           <!-- DASHBOARD -->
           <!-- ============================================================ -->
           <section x-show="tab === 'dashboard'" class="space-y-4">
-            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm">
+            <div class="bg-blue-50 dark:bg-indigo-950 dark:border-indigo-900 border border-blue-200 rounded-lg p-4 text-sm">
               <div class="flex items-start gap-3">
                 <div class="text-2xl">📊</div>
                 <div class="flex-1">
-                  <h3 class="font-semibold text-blue-900 mb-1">대시보드 — 게이트웨이 현재 상태</h3>
-                  <p class="text-blue-800 mb-2">현재 운영 모드, 캐시 설정, 활성 circuit breaker 를 한눈에.</p>
-                  <ul class="text-blue-800 list-disc ml-5 space-y-0.5 text-xs">
+                  <h3 class="font-semibold text-blue-900 dark:text-indigo-200 mb-1">대시보드 — 게이트웨이 현재 상태</h3>
+                  <p class="text-blue-800 dark:text-indigo-300 mb-2">현재 운영 모드, 캐시 설정, 활성 circuit breaker 를 한눈에.</p>
+                  <ul class="text-blue-800 dark:text-indigo-300 list-disc ml-5 space-y-0.5 text-xs">
                     <li><strong>mode</strong>: render-only(단일) / proxy / cms(다중사이트) / saas(다중테넌트)</li>
                     <li><strong>cache</strong>: TTL 만료 후 SWR 윈도우 동안엔 stale 응답 가능</li>
                     <li><strong>Circuit breakers</strong>: host 별로 50% 실패율 도달 시 OPEN. 30초 후 HALF-OPEN</li>
@@ -193,24 +253,24 @@ Human ──→ Edge/CDN ──→ origin (gateway는 204 또는 proxy)</pre>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
               <template x-for="card in dashboardCards()" :key="card.label">
-                <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-5">
-                  <div class="text-xs uppercase tracking-wider text-slate-500" x-text="card.label"></div>
+                <div class="bg-white dark:bg-slate-900 dark:border-slate-800 rounded-lg shadow-sm border border-slate-200 p-5">
+                  <div class="text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400" x-text="card.label"></div>
                   <div class="mt-2 text-2xl font-semibold" x-text="card.value"></div>
-                  <div class="mt-1 text-sm text-slate-500" x-text="card.detail"></div>
+                  <div class="mt-1 text-sm text-slate-500 dark:text-slate-400" x-text="card.detail"></div>
                 </div>
               </template>
             </div>
-            <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-5">
+            <div class="bg-white dark:bg-slate-900 dark:border-slate-800 rounded-lg shadow-sm border border-slate-200 p-5">
               <h2 class="font-semibold mb-3">Circuit breakers</h2>
-              <div x-show="!Object.keys(site?.breakers ?? {}).length" class="text-sm text-slate-500">아직 활동한 host 가 없습니다.</div>
+              <div x-show="!Object.keys(site?.breakers ?? {}).length" class="text-sm text-slate-500 dark:text-slate-400">아직 활동한 host 가 없습니다.</div>
               <table x-show="Object.keys(site?.breakers ?? {}).length" class="w-full text-sm">
-                <thead class="text-slate-500"><tr><th class="text-left py-2">host</th><th class="text-left py-2">state</th><th class="text-left py-2">stats</th></tr></thead>
+                <thead class="text-slate-500 dark:text-slate-400"><tr><th class="text-left py-2">host</th><th class="text-left py-2">state</th><th class="text-left py-2">stats</th></tr></thead>
                 <tbody>
                   <template x-for="[host, info] in Object.entries(site?.breakers ?? {})" :key="host">
                     <tr class="border-t border-slate-100">
                       <td class="py-2 font-mono" x-text="host"></td>
                       <td class="py-2"><span class="px-2 py-0.5 rounded text-xs font-medium" :class="info.opened ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700'" x-text="info.opened ? 'OPEN' : 'CLOSED'"></span></td>
-                      <td class="py-2 text-xs text-slate-600 font-mono" x-text="JSON.stringify(info.stats).slice(0, 100)"></td>
+                      <td class="py-2 text-xs text-slate-600 dark:text-slate-300 font-mono" x-text="JSON.stringify(info.stats).slice(0, 100)"></td>
                     </tr>
                   </template>
                 </tbody>
@@ -222,14 +282,14 @@ Human ──→ Edge/CDN ──→ origin (gateway는 204 또는 proxy)</pre>
           <!-- ROUTES -->
           <!-- ============================================================ -->
           <section x-show="tab === 'routes'" class="space-y-4">
-            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm">
+            <div class="bg-blue-50 dark:bg-indigo-950 dark:border-indigo-900 border border-blue-200 rounded-lg p-4 text-sm">
               <div class="flex items-start gap-3">
                 <div class="text-2xl">🛣️</div>
                 <div class="flex-1">
-                  <h3 class="font-semibold text-blue-900 mb-1">라우트 오버라이드 — URL 패턴별 동작 분기</h3>
-                  <p class="text-blue-800 mb-2">URL 의 <code>pathname + search</code> 에 정규식이 매칭되면 해당 라우트의 설정이 글로벌 설정을 오버라이드. <strong>위에서 아래로 첫 매칭이 승리</strong>합니다.</p>
-                  <details class="mt-2"><summary class="cursor-pointer font-semibold text-blue-900">필드 가이드</summary>
-                    <ul class="text-blue-800 list-disc ml-5 mt-2 space-y-1 text-xs">
+                  <h3 class="font-semibold text-blue-900 dark:text-indigo-200 mb-1">라우트 오버라이드 — URL 패턴별 동작 분기</h3>
+                  <p class="text-blue-800 dark:text-indigo-300 mb-2">URL 의 <code>pathname + search</code> 에 정규식이 매칭되면 해당 라우트의 설정이 글로벌 설정을 오버라이드. <strong>위에서 아래로 첫 매칭이 승리</strong>합니다.</p>
+                  <details class="mt-2"><summary class="cursor-pointer font-semibold text-blue-900 dark:text-indigo-200">필드 가이드</summary>
+                    <ul class="text-blue-800 dark:text-indigo-300 list-disc ml-5 mt-2 space-y-1 text-xs">
                       <li><strong>pattern</strong>: 정규식. 예) <code>^/$</code> (홈), <code>^/products/</code> (제품 하위), <code>^/(account|cart)(/|$)</code></li>
                       <li><strong>ttl</strong>: 라우트별 캐시 수명 (ms). 빠른 변경(60–600초) vs 정적(24시간)</li>
                       <li><strong>waitUntil</strong>: <code>networkidle2</code> 가 안전, 무거운 SPA 는 <code>networkidle0</code></li>
@@ -238,17 +298,17 @@ Human ──→ Edge/CDN ──→ origin (gateway는 204 또는 proxy)</pre>
                       <li><strong>ignore</strong>: true 면 렌더 스킵, 204 응답</li>
                     </ul>
                   </details>
-                  <details class="mt-2"><summary class="cursor-pointer font-semibold text-blue-900">예시 라우트 패턴</summary>
+                  <details class="mt-2"><summary class="cursor-pointer font-semibold text-blue-900 dark:text-indigo-200">예시 라우트 패턴</summary>
                     <pre class="bg-white border border-blue-100 rounded p-2 mt-2 text-xs overflow-auto">^/(account|admin|cart|checkout)(/|$)  ignore=true             ← 인증/결제는 렌더 금지
 ^/products/[0-9]+                      ttl=21600000  selector=[data-product]  ← 6h
 ^/blog/                                ttl=86400000             ← 24h
 ^/                                     ttl=600000               ← 10분 (홈)</pre>
                   </details>
-                  <p class="text-blue-700 text-xs mt-2">💾 <strong>저장 (메모리)</strong>는 즉시 적용. <strong>저장 + 디스크 영구화</strong>는 <code>seo-gateway.config.json</code> 에 기록.</p>
+                  <p class="text-blue-700 dark:text-indigo-400 text-xs mt-2">💾 <strong>저장 (메모리)</strong>는 즉시 적용. <strong>저장 + 디스크 영구화</strong>는 <code>seo-gateway.config.json</code> 에 기록.</p>
                 </div>
               </div>
             </div>
-            <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-5 space-y-4">
+            <div class="bg-white dark:bg-slate-900 dark:border-slate-800 rounded-lg shadow-sm border border-slate-200 p-5 space-y-4">
               <div class="flex items-center justify-between">
                 <h2 class="font-semibold">Route overrides</h2>
                 <div class="flex gap-2">
@@ -258,17 +318,38 @@ Human ──→ Edge/CDN ──→ origin (gateway는 204 또는 proxy)</pre>
                 </div>
               </div>
               <table class="w-full text-sm">
-                <thead class="text-slate-500"><tr><th class="text-left py-2">pattern</th><th class="text-left py-2">ttl(ms)</th><th class="text-left py-2">waitUntil</th><th class="text-left py-2">selector</th><th class="text-left py-2">waitMs</th><th class="text-left py-2">ignore</th><th></th></tr></thead>
+                <caption class="sr-only">Drag rows to reorder — first match wins</caption>
+                <thead class="text-slate-500 dark:text-slate-400 dark:text-slate-400">
+                  <tr>
+                    <th class="w-6"></th>
+                    <th class="text-left py-2">pattern</th>
+                    <th class="text-left py-2">ttl(ms)</th>
+                    <th class="text-left py-2">waitUntil</th>
+                    <th class="text-left py-2">selector</th>
+                    <th class="text-left py-2">waitMs</th>
+                    <th class="text-left py-2">ignore</th>
+                    <th></th>
+                  </tr>
+                </thead>
                 <tbody>
                   <template x-for="(r, i) in routes" :key="i">
-                    <tr class="border-t border-slate-100">
-                      <td class="py-1.5"><input class="w-full font-mono px-2 py-1 border border-slate-200 rounded" x-model="r.pattern" /></td>
-                      <td class="py-1.5"><input type="number" class="w-28 px-2 py-1 border border-slate-200 rounded" x-model.number="r.ttlMs" /></td>
-                      <td class="py-1.5"><select class="px-2 py-1 border border-slate-200 rounded" x-model="r.waitUntil"><option value="">(default)</option><option>load</option><option>domcontentloaded</option><option>networkidle0</option><option>networkidle2</option></select></td>
-                      <td class="py-1.5"><input class="w-full font-mono px-2 py-1 border border-slate-200 rounded" x-model="r.waitSelector" /></td>
-                      <td class="py-1.5"><input type="number" class="w-20 px-2 py-1 border border-slate-200 rounded" x-model.number="r.waitMs" /></td>
+                    <tr
+                      class="drag-row border-t border-slate-100 dark:border-slate-800"
+                      draggable="true"
+                      @dragstart="dragStart($event, i)"
+                      @dragover.prevent="dragOver($event)"
+                      @dragleave="dragLeave($event)"
+                      @drop.prevent="drop($event, i)"
+                      @dragend="dragEnd($event)"
+                    >
+                      <td class="py-1.5 text-slate-400 cursor-grab text-center select-none" title="드래그해서 순서 변경">⋮⋮</td>
+                      <td class="py-1.5"><input class="w-full font-mono px-2 py-1 border border-slate-200 dark:border-slate-700 dark:bg-slate-900 rounded" x-model="r.pattern" /></td>
+                      <td class="py-1.5"><input type="number" class="w-28 px-2 py-1 border border-slate-200 dark:border-slate-700 dark:bg-slate-900 rounded" x-model.number="r.ttlMs" /></td>
+                      <td class="py-1.5"><select class="px-2 py-1 border border-slate-200 dark:border-slate-700 dark:bg-slate-900 rounded" x-model="r.waitUntil"><option value="">(default)</option><option>load</option><option>domcontentloaded</option><option>networkidle0</option><option>networkidle2</option></select></td>
+                      <td class="py-1.5"><input class="w-full font-mono px-2 py-1 border border-slate-200 dark:border-slate-700 dark:bg-slate-900 rounded" x-model="r.waitSelector" /></td>
+                      <td class="py-1.5"><input type="number" class="w-20 px-2 py-1 border border-slate-200 dark:border-slate-700 dark:bg-slate-900 rounded" x-model.number="r.waitMs" /></td>
                       <td class="py-1.5 text-center"><input type="checkbox" x-model="r.ignore" /></td>
-                      <td class="py-1.5 text-right"><button class="text-red-600 hover:underline" @click="routes.splice(i,1)">삭제</button></td>
+                      <td class="py-1.5 text-right"><button class="text-red-600 hover:underline" @click="routes.splice(i,1); toast('라우트 삭제됨','warn')">삭제</button></td>
                     </tr>
                   </template>
                 </tbody>
@@ -280,32 +361,32 @@ Human ──→ Edge/CDN ──→ origin (gateway는 204 또는 proxy)</pre>
           <!-- CACHE -->
           <!-- ============================================================ -->
           <section x-show="tab === 'cache'" class="space-y-4">
-            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm">
+            <div class="bg-blue-50 dark:bg-indigo-950 dark:border-indigo-900 border border-blue-200 rounded-lg p-4 text-sm">
               <div class="flex items-start gap-3">
                 <div class="text-2xl">🗄️</div>
                 <div class="flex-1">
-                  <h3 class="font-semibold text-blue-900 mb-1">캐시 — 렌더 결과의 보관과 무효화</h3>
-                  <p class="text-blue-800 mb-2">기본 24h TTL · 1h SWR 윈도우. 봇 트래픽 95%+ 가 캐시에서 즉시 응답.</p>
-                  <details><summary class="cursor-pointer font-semibold text-blue-900">언제 무효화?</summary>
-                    <ul class="text-blue-800 list-disc ml-5 mt-2 space-y-1 text-xs">
+                  <h3 class="font-semibold text-blue-900 dark:text-indigo-200 mb-1">캐시 — 렌더 결과의 보관과 무효화</h3>
+                  <p class="text-blue-800 dark:text-indigo-300 mb-2">기본 24h TTL · 1h SWR 윈도우. 봇 트래픽 95%+ 가 캐시에서 즉시 응답.</p>
+                  <details><summary class="cursor-pointer font-semibold text-blue-900 dark:text-indigo-200">언제 무효화?</summary>
+                    <ul class="text-blue-800 dark:text-indigo-300 list-disc ml-5 mt-2 space-y-1 text-xs">
                       <li>배포 직후 — CI 에 <code>POST /admin/api/cache/clear</code> 추가</li>
                       <li>특정 페이지 콘텐츠 수정 — URL 입력 + URL 무효화</li>
                       <li>Search Console 에서 인덱스 누락 발견 시</li>
                     </ul>
                   </details>
-                  <p class="text-blue-700 text-xs mt-2">⚠️ <strong>전체 초기화</strong>는 다음 봇 트래픽 시 모든 페이지 cold render.</p>
+                  <p class="text-blue-700 dark:text-indigo-400 text-xs mt-2">⚠️ <strong>전체 초기화</strong>는 다음 봇 트래픽 시 모든 페이지 cold render.</p>
                 </div>
               </div>
             </div>
-            <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-5 space-y-4">
+            <div class="bg-white dark:bg-slate-900 dark:border-slate-800 rounded-lg shadow-sm border border-slate-200 p-5 space-y-4">
               <h2 class="font-semibold">Cache 상태</h2>
-              <pre class="text-xs bg-slate-50 p-3 rounded border border-slate-200" x-text="JSON.stringify(site?.cache, null, 2)"></pre>
+              <pre class="text-xs bg-slate-50 dark:bg-slate-950 dark:border-slate-700 p-3 rounded border border-slate-200" x-text="JSON.stringify(site?.cache, null, 2)"></pre>
               <div class="flex gap-2 items-center flex-wrap">
                 <input type="text" class="flex-1 px-3 py-2 border border-slate-200 rounded min-w-[20rem]" placeholder="https://www.example.com/path" x-model="invalidateUrl" />
                 <button class="px-3 py-2 text-sm rounded bg-amber-500 text-white hover:bg-amber-400" @click="invalidate()">URL 무효화</button>
                 <button class="px-3 py-2 text-sm rounded bg-red-500 text-white hover:bg-red-400" @click="confirmClear()">전체 초기화</button>
               </div>
-              <div x-show="lastCacheResult" class="text-sm text-slate-700 bg-slate-50 p-2 rounded" x-text="lastCacheResult"></div>
+              <div x-show="lastCacheResult" class="text-sm text-slate-700 dark:text-slate-200 bg-slate-50 p-2 rounded" x-text="lastCacheResult"></div>
             </div>
           </section>
 
@@ -313,30 +394,30 @@ Human ──→ Edge/CDN ──→ origin (gateway는 204 또는 proxy)</pre>
           <!-- WARM -->
           <!-- ============================================================ -->
           <section x-show="tab === 'warm'" class="space-y-4">
-            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm">
+            <div class="bg-blue-50 dark:bg-indigo-950 dark:border-indigo-900 border border-blue-200 rounded-lg p-4 text-sm">
               <div class="flex items-start gap-3">
                 <div class="text-2xl">🔥</div>
                 <div class="flex-1">
-                  <h3 class="font-semibold text-blue-900 mb-1">Sitemap 사전 워밍 — cold path 제거</h3>
-                  <p class="text-blue-800 mb-2"><code>sitemap.xml</code> 을 파싱해 안의 URL 들을 미리 렌더링. 결과를 캐시에 저장 → 실제 봇 트래픽은 즉시 hit.</p>
-                  <details><summary class="cursor-pointer font-semibold text-blue-900">언제 실행?</summary>
-                    <ul class="text-blue-800 list-disc ml-5 mt-2 space-y-1 text-xs">
+                  <h3 class="font-semibold text-blue-900 dark:text-indigo-200 mb-1">Sitemap 사전 워밍 — cold path 제거</h3>
+                  <p class="text-blue-800 dark:text-indigo-300 mb-2"><code>sitemap.xml</code> 을 파싱해 안의 URL 들을 미리 렌더링. 결과를 캐시에 저장 → 실제 봇 트래픽은 즉시 hit.</p>
+                  <details><summary class="cursor-pointer font-semibold text-blue-900 dark:text-indigo-200">언제 실행?</summary>
+                    <ul class="text-blue-800 dark:text-indigo-300 list-disc ml-5 mt-2 space-y-1 text-xs">
                       <li><strong>배포 직후</strong> — CI 파이프라인에서 cache/clear 다음 단계</li>
                       <li><strong>주기적</strong> — cron 으로 매 N시간마다</li>
                       <li><strong>대규모 콘텐츠 추가 후</strong></li>
                     </ul>
                   </details>
-                  <details class="mt-2"><summary class="cursor-pointer font-semibold text-blue-900">파라미터</summary>
-                    <ul class="text-blue-800 list-disc ml-5 mt-2 space-y-1 text-xs">
+                  <details class="mt-2"><summary class="cursor-pointer font-semibold text-blue-900 dark:text-indigo-200">파라미터</summary>
+                    <ul class="text-blue-800 dark:text-indigo-300 list-disc ml-5 mt-2 space-y-1 text-xs">
                       <li><strong>max</strong>: 워밍할 최대 URL 수 (기본 1000)</li>
                       <li><strong>concurrency</strong>: 동시 렌더 (기본 4, POOL_MAX 보다 작게)</li>
                     </ul>
                   </details>
-                  <p class="text-blue-700 text-xs mt-2">ℹ️ sitemap-index 도 자동 재귀 파싱.</p>
+                  <p class="text-blue-700 dark:text-indigo-400 text-xs mt-2">ℹ️ sitemap-index 도 자동 재귀 파싱.</p>
                 </div>
               </div>
             </div>
-            <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-5 space-y-4">
+            <div class="bg-white dark:bg-slate-900 dark:border-slate-800 rounded-lg shadow-sm border border-slate-200 p-5 space-y-4">
               <h2 class="font-semibold">Sitemap pre-warm</h2>
               <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
                 <input class="md:col-span-3 px-3 py-2 border border-slate-200 rounded" placeholder="https://www.example.com/sitemap.xml" x-model="warm.sitemap" />
@@ -347,7 +428,7 @@ Human ──→ Edge/CDN ──→ origin (gateway는 204 또는 proxy)</pre>
                   <span x-show="warm.running">실행 중...</span>
                 </button>
               </div>
-              <pre x-show="warm.result" class="text-xs bg-slate-50 p-3 rounded border border-slate-200" x-text="JSON.stringify(warm.result, null, 2)"></pre>
+              <pre x-show="warm.result" class="text-xs bg-slate-50 dark:bg-slate-950 dark:border-slate-700 p-3 rounded border border-slate-200" x-text="JSON.stringify(warm.result, null, 2)"></pre>
             </div>
           </section>
 
@@ -355,26 +436,26 @@ Human ──→ Edge/CDN ──→ origin (gateway는 204 또는 proxy)</pre>
           <!-- RENDER TEST -->
           <!-- ============================================================ -->
           <section x-show="tab === 'test'" class="space-y-4">
-            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm">
+            <div class="bg-blue-50 dark:bg-indigo-950 dark:border-indigo-900 border border-blue-200 rounded-lg p-4 text-sm">
               <div class="flex items-start gap-3">
                 <div class="text-2xl">🧪</div>
                 <div class="flex-1">
-                  <h3 class="font-semibold text-blue-900 mb-1">렌더 테스트 — 디버깅 도구</h3>
-                  <p class="text-blue-800 mb-2">URL 을 입력하면 풀에서 페이지를 잡아 즉시 렌더, 결과 HTML 첫 4KB 미리보기. 캐시 우회.</p>
-                  <details><summary class="cursor-pointer font-semibold text-blue-900">활용 시나리오</summary>
-                    <ul class="text-blue-800 list-disc ml-5 mt-2 space-y-1 text-xs">
+                  <h3 class="font-semibold text-blue-900 dark:text-indigo-200 mb-1">렌더 테스트 — 디버깅 도구</h3>
+                  <p class="text-blue-800 dark:text-indigo-300 mb-2">URL 을 입력하면 풀에서 페이지를 잡아 즉시 렌더, 결과 HTML 첫 4KB 미리보기. 캐시 우회.</p>
+                  <details><summary class="cursor-pointer font-semibold text-blue-900 dark:text-indigo-200">활용 시나리오</summary>
+                    <ul class="text-blue-800 dark:text-indigo-300 list-disc ml-5 mt-2 space-y-1 text-xs">
                       <li>새 라우트 추가 후 — waitUntil/selector 동작 확인</li>
                       <li>모바일 vs 데스크톱 차이 검증 — UA 변경</li>
                       <li>quality gate 트리거 확인 — soft 404 페이지로</li>
                       <li>응답 헤더 확인 — x-prerender-route, x-prerender-viewport, x-prerender-quality</li>
                     </ul>
                   </details>
-                  <details class="mt-2"><summary class="cursor-pointer font-semibold text-blue-900">자주 쓰는 봇 UA (클릭 → 채워넣기)</summary>
+                  <details class="mt-2"><summary class="cursor-pointer font-semibold text-blue-900 dark:text-indigo-200">자주 쓰는 봇 UA (클릭 → 채워넣기)</summary>
                     <div class="space-y-1 mt-2 text-xs">
                       <template x-for="ua in botUAs" :key="ua.name">
                         <button class="block w-full text-left bg-white border border-blue-100 rounded p-2 hover:bg-blue-50" @click="renderTest.ua = ua.value">
-                          <div class="font-semibold text-blue-900" x-text="ua.name"></div>
-                          <div class="text-blue-700 font-mono text-[10px] mt-0.5 truncate" x-text="ua.value"></div>
+                          <div class="font-semibold text-blue-900 dark:text-indigo-200" x-text="ua.name"></div>
+                          <div class="text-blue-700 dark:text-indigo-400 font-mono text-[10px] mt-0.5 truncate" x-text="ua.value"></div>
                         </button>
                       </template>
                     </div>
@@ -382,7 +463,7 @@ Human ──→ Edge/CDN ──→ origin (gateway는 204 또는 proxy)</pre>
                 </div>
               </div>
             </div>
-            <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-5 space-y-4">
+            <div class="bg-white dark:bg-slate-900 dark:border-slate-800 rounded-lg shadow-sm border border-slate-200 p-5 space-y-4">
               <h2 class="font-semibold">Render test</h2>
               <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
                 <input class="md:col-span-2 px-3 py-2 border border-slate-200 rounded" placeholder="대상 URL — 절대 경로 (https://...)" x-model="renderTest.url" />
@@ -398,7 +479,7 @@ Human ──→ Edge/CDN ──→ origin (gateway는 204 또는 proxy)</pre>
                   <span>duration: <strong x-text="renderTest.result?.durationMs + ' ms'"></strong></span>
                   <span>bytes: <strong x-text="renderTest.result?.bytes"></strong></span>
                 </div>
-                <details><summary class="cursor-pointer text-sm text-slate-700">응답 헤더 (x-prerender-*)</summary>
+                <details><summary class="cursor-pointer text-sm text-slate-700 dark:text-slate-200">응답 헤더 (x-prerender-*)</summary>
                   <pre class="text-xs bg-slate-50 p-2 rounded mt-1" x-text="JSON.stringify(renderTest.result?.headers, null, 2)"></pre>
                 </details>
                 <pre class="text-xs bg-slate-50 p-3 rounded border border-slate-200 max-h-96 overflow-auto" x-text="renderTest.result?.bodyPreview"></pre>
@@ -410,46 +491,46 @@ Human ──→ Edge/CDN ──→ origin (gateway는 204 또는 proxy)</pre>
           <!-- METRICS -->
           <!-- ============================================================ -->
           <section x-show="tab === 'metrics'" class="space-y-4">
-            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm">
+            <div class="bg-blue-50 dark:bg-indigo-950 dark:border-indigo-900 border border-blue-200 rounded-lg p-4 text-sm">
               <div class="flex items-start gap-3">
                 <div class="text-2xl">📈</div>
                 <div class="flex-1">
-                  <h3 class="font-semibold text-blue-900 mb-1">메트릭 — 실시간 운영 상태</h3>
-                  <p class="text-blue-800 mb-2"><code>/metrics</code> 의 Prometheus exposition 을 파싱해 시각화. 5초마다 자동 갱신.</p>
-                  <details><summary class="cursor-pointer font-semibold text-blue-900">핵심 지표 보는 법</summary>
-                    <ul class="text-blue-800 list-disc ml-5 mt-2 space-y-1 text-xs">
+                  <h3 class="font-semibold text-blue-900 dark:text-indigo-200 mb-1">메트릭 — 실시간 운영 상태</h3>
+                  <p class="text-blue-800 dark:text-indigo-300 mb-2"><code>/metrics</code> 의 Prometheus exposition 을 파싱해 시각화. 5초마다 자동 갱신.</p>
+                  <details><summary class="cursor-pointer font-semibold text-blue-900 dark:text-indigo-200">핵심 지표 보는 법</summary>
+                    <ul class="text-blue-800 dark:text-indigo-300 list-disc ml-5 mt-2 space-y-1 text-xs">
                       <li><strong>Cache hit ratio</strong>: 95%+ 정상. 70% 미만이면 라우트 TTL 늘리거나 워밍 강화</li>
                       <li><strong>Render p95</strong>: 5초 미만이 일반. 그 이상이면 waitUntil 완화 or origin 점검</li>
                       <li><strong>Inflight</strong>: 풀에 묶여있는 동시 렌더 수. POOL_MAX 에 자주 도달하면 풀 확장</li>
                       <li><strong>Error reasons</strong>: timeout/network/crashed/ssrf/circuit-open 별 분류</li>
                     </ul>
                   </details>
-                  <p class="text-blue-700 text-xs mt-2">ℹ️ Prometheus 본격 운영은 <code>/metrics</code> 엔드포인트를 직접 스크레이프하세요. 이 페이지는 빠른 점검용.</p>
+                  <p class="text-blue-700 dark:text-indigo-400 text-xs mt-2">ℹ️ Prometheus 본격 운영은 <code>/metrics</code> 엔드포인트를 직접 스크레이프하세요. 이 페이지는 빠른 점검용.</p>
                 </div>
               </div>
             </div>
             <div class="flex gap-2 items-center">
               <label class="text-sm flex items-center gap-2"><input type="checkbox" x-model="metrics.autoRefresh"> 자동 갱신 (5s)</label>
               <button class="px-3 py-1.5 text-sm rounded bg-slate-100 hover:bg-slate-200" @click="loadMetrics()">새로고침</button>
-              <span class="text-xs text-slate-500" x-text="metrics.lastUpdated ? '갱신: ' + metrics.lastUpdated : ''"></span>
+              <span class="text-xs text-slate-500 dark:text-slate-400" x-text="metrics.lastUpdated ? '갱신: ' + metrics.lastUpdated : ''"></span>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
               <template x-for="m in metricsCards()" :key="m.label">
-                <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-4">
-                  <div class="text-xs uppercase tracking-wider text-slate-500" x-text="m.label"></div>
+                <div class="bg-white dark:bg-slate-900 dark:border-slate-800 rounded-lg shadow-sm border border-slate-200 p-4">
+                  <div class="text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400" x-text="m.label"></div>
                   <div class="mt-1 text-xl font-semibold" x-text="m.value"></div>
-                  <div class="mt-0.5 text-xs text-slate-500" x-text="m.detail"></div>
+                  <div class="mt-0.5 text-xs text-slate-500 dark:text-slate-400" x-text="m.detail"></div>
                 </div>
               </template>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-5">
+              <div class="bg-white dark:bg-slate-900 dark:border-slate-800 rounded-lg shadow-sm border border-slate-200 p-5">
                 <h3 class="font-semibold mb-3">렌더 지연 (ms)</h3>
-                <div x-show="!metrics.renderHist?.length" class="text-sm text-slate-500">데이터 수집 중...</div>
+                <div x-show="!metrics.renderHist?.length" class="text-sm text-slate-500 dark:text-slate-400">데이터 수집 중...</div>
                 <table x-show="metrics.renderHist?.length" class="w-full text-sm">
-                  <thead class="text-slate-500"><tr><th class="text-left py-1">outcome / host</th><th class="text-right py-1">p50</th><th class="text-right py-1">p95</th><th class="text-right py-1">p99</th><th class="text-right py-1">count</th></tr></thead>
+                  <thead class="text-slate-500 dark:text-slate-400"><tr><th class="text-left py-1">outcome / host</th><th class="text-right py-1">p50</th><th class="text-right py-1">p95</th><th class="text-right py-1">p99</th><th class="text-right py-1">count</th></tr></thead>
                   <tbody>
                     <template x-for="h in metrics.renderHist" :key="h.key">
                       <tr class="border-t border-slate-100"><td class="py-1 font-mono text-xs" x-text="h.key"></td><td class="py-1 text-right" x-text="h.p50?.toFixed(0)"></td><td class="py-1 text-right" x-text="h.p95?.toFixed(0)"></td><td class="py-1 text-right" x-text="h.p99?.toFixed(0)"></td><td class="py-1 text-right" x-text="h.count"></td></tr>
@@ -457,7 +538,7 @@ Human ──→ Edge/CDN ──→ origin (gateway는 204 또는 proxy)</pre>
                   </tbody>
                 </table>
               </div>
-              <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-5">
+              <div class="bg-white dark:bg-slate-900 dark:border-slate-800 rounded-lg shadow-sm border border-slate-200 p-5">
                 <h3 class="font-semibold mb-3">에러 분류</h3>
                 <div x-show="!Object.keys(metrics.errors ?? {}).length" class="text-sm text-emerald-600">에러 없음 ✓</div>
                 <table x-show="Object.keys(metrics.errors ?? {}).length" class="w-full text-sm">
@@ -470,7 +551,7 @@ Human ──→ Edge/CDN ──→ origin (gateway는 204 또는 proxy)</pre>
               </div>
             </div>
 
-            <details class="bg-white rounded-lg shadow-sm border border-slate-200 p-3">
+            <details class="bg-white dark:bg-slate-900 dark:border-slate-800 rounded-lg shadow-sm border border-slate-200 p-3">
               <summary class="cursor-pointer text-sm font-semibold">Raw Prometheus exposition</summary>
               <pre class="text-[10px] bg-slate-50 p-2 rounded mt-2 max-h-96 overflow-auto" x-text="metrics.raw"></pre>
             </details>
@@ -480,25 +561,25 @@ Human ──→ Edge/CDN ──→ origin (gateway는 204 또는 proxy)</pre>
           <!-- API EXPLORER -->
           <!-- ============================================================ -->
           <section x-show="tab === 'api'" class="space-y-4">
-            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm">
+            <div class="bg-blue-50 dark:bg-indigo-950 dark:border-indigo-900 border border-blue-200 rounded-lg p-4 text-sm">
               <div class="flex items-start gap-3">
                 <div class="text-2xl">🔌</div>
                 <div class="flex-1">
-                  <h3 class="font-semibold text-blue-900 mb-1">API Explorer — 모든 엔드포인트 한눈에</h3>
-                  <p class="text-blue-800">현재 모드에서 등록된 admin API 엔드포인트들. 각 항목의 [Try it] 버튼으로 바로 호출.</p>
+                  <h3 class="font-semibold text-blue-900 dark:text-indigo-200 mb-1">API Explorer — 모든 엔드포인트 한눈에</h3>
+                  <p class="text-blue-800 dark:text-indigo-300">현재 모드에서 등록된 admin API 엔드포인트들. 각 항목의 [Try it] 버튼으로 바로 호출.</p>
                 </div>
               </div>
             </div>
             <template x-for="ep in apiEndpoints()" :key="ep.method + ep.path">
-              <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-4">
+              <div class="bg-white dark:bg-slate-900 dark:border-slate-800 rounded-lg shadow-sm border border-slate-200 p-4">
                 <div class="flex items-center gap-3 mb-2">
                   <span class="px-2 py-0.5 rounded text-xs font-bold" :class="methodColor(ep.method)" x-text="ep.method"></span>
                   <code class="font-mono text-sm" x-text="ep.path"></code>
                   <span class="ml-auto text-[10px] uppercase tracking-wider" :class="ep.auth === 'admin' ? 'text-amber-600' : ep.auth === 'apiKey' ? 'text-purple-600' : 'text-emerald-600'" x-text="ep.auth"></span>
                 </div>
-                <p class="text-sm text-slate-600 mb-2" x-text="ep.desc"></p>
+                <p class="text-sm text-slate-600 dark:text-slate-300 mb-2" x-text="ep.desc"></p>
                 <details>
-                  <summary class="cursor-pointer text-xs text-slate-500">예시</summary>
+                  <summary class="cursor-pointer text-xs text-slate-500 dark:text-slate-400">예시</summary>
                   <pre class="text-xs bg-slate-50 p-2 rounded mt-2 overflow-auto" x-text="ep.example"></pre>
                 </details>
               </div>
@@ -509,16 +590,16 @@ Human ──→ Edge/CDN ──→ origin (gateway는 204 또는 proxy)</pre>
           <!-- LIBRARY -->
           <!-- ============================================================ -->
           <section x-show="tab === 'library'" class="space-y-4">
-            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm">
+            <div class="bg-blue-50 dark:bg-indigo-950 dark:border-indigo-900 border border-blue-200 rounded-lg p-4 text-sm">
               <div class="flex items-start gap-3">
                 <div class="text-2xl">📦</div>
                 <div class="flex-1">
-                  <h3 class="font-semibold text-blue-900 mb-1">라이브러리로 사용 — npm 패키지 통합</h3>
-                  <p class="text-blue-800 mb-2">
+                  <h3 class="font-semibold text-blue-900 dark:text-indigo-200 mb-1">라이브러리로 사용 — npm 패키지 통합</h3>
+                  <p class="text-blue-800 dark:text-indigo-300 mb-2">
                     이 게이트웨이는 단일 바이너리로도 쓸 수 있지만, 각 기능이 분리된 npm 패키지라
                     <strong>기존 Fastify 앱에 부분적으로 통합</strong>하거나, <strong>커스텀 게이트웨이를 직접 만들</strong> 수도 있습니다.
                   </p>
-                  <p class="text-blue-700 text-xs mt-1">
+                  <p class="text-blue-700 dark:text-indigo-400 text-xs mt-1">
                     👉 아래는 현재 워크스페이스의 패키지 사용 예시입니다. npm 발행 후엔 동일한 코드가 외부 프로젝트에서도 동작합니다.
                   </p>
                 </div>
@@ -526,12 +607,12 @@ Human ──→ Edge/CDN ──→ origin (gateway는 204 또는 proxy)</pre>
             </div>
 
             <!-- 설치 -->
-            <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-5 space-y-3">
+            <div class="bg-white dark:bg-slate-900 dark:border-slate-800 rounded-lg shadow-sm border border-slate-200 p-5 space-y-3">
               <h2 class="font-semibold flex items-center gap-2">⬇️ 설치</h2>
-              <div class="text-sm text-slate-700">
+              <div class="text-sm text-slate-700 dark:text-slate-200">
                 <p class="mb-2">필요한 부분만 골라 설치합니다.</p>
                 <table class="w-full text-sm border-collapse">
-                  <thead class="text-left text-slate-500 border-b">
+                  <thead class="text-left text-slate-500 dark:text-slate-400 border-b">
                     <tr>
                       <th class="py-2">패키지</th>
                       <th class="py-2">목적</th>
@@ -542,22 +623,22 @@ Human ──→ Edge/CDN ──→ origin (gateway는 204 또는 proxy)</pre>
                     <tr>
                       <td class="py-2"><code class="text-indigo-600">@spa-seo-gateway/core</code></td>
                       <td class="py-2">렌더링 엔진 (HTTP 비의존)</td>
-                      <td class="py-2 text-slate-500 text-xs">puppeteer 24+</td>
+                      <td class="py-2 text-slate-500 dark:text-slate-400 text-xs">puppeteer 24+</td>
                     </tr>
                     <tr>
                       <td class="py-2"><code class="text-indigo-600">@spa-seo-gateway/admin-ui</code></td>
                       <td class="py-2">어드민 UI Fastify 플러그인 (이 페이지)</td>
-                      <td class="py-2 text-slate-500 text-xs">core, fastify 5</td>
+                      <td class="py-2 text-slate-500 dark:text-slate-400 text-xs">core, fastify 5</td>
                     </tr>
                     <tr>
                       <td class="py-2"><code class="text-indigo-600">@spa-seo-gateway/multi-tenant</code></td>
                       <td class="py-2">SaaS 모드 — 다중 테넌트</td>
-                      <td class="py-2 text-slate-500 text-xs">core, fastify 5</td>
+                      <td class="py-2 text-slate-500 dark:text-slate-400 text-xs">core, fastify 5</td>
                     </tr>
                     <tr>
                       <td class="py-2"><code class="text-indigo-600">@spa-seo-gateway/cms</code></td>
                       <td class="py-2">CMS 모드 — 다중 사이트</td>
-                      <td class="py-2 text-slate-500 text-xs">core, fastify 5</td>
+                      <td class="py-2 text-slate-500 dark:text-slate-400 text-xs">core, fastify 5</td>
                     </tr>
                   </tbody>
                 </table>
@@ -573,9 +654,9 @@ yarn add @spa-seo-gateway/core @spa-seo-gateway/admin-ui fastify</pre>
             </div>
 
             <!-- 시나리오 1: 자체 게이트웨이 구성 -->
-            <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-5 space-y-3">
+            <div class="bg-white dark:bg-slate-900 dark:border-slate-800 rounded-lg shadow-sm border border-slate-200 p-5 space-y-3">
               <h2 class="font-semibold flex items-center gap-2">🛠️ 시나리오 1 — 직접 게이트웨이 구성</h2>
-              <p class="text-sm text-slate-700">
+              <p class="text-sm text-slate-700 dark:text-slate-200">
                 현재 <code>apps/gateway</code> 가 하는 일을 직접 구성. 가장 흔한 사용법.
               </p>
               <pre class="text-xs bg-slate-50 p-3 rounded border border-slate-200 overflow-auto">// my-gateway.ts
@@ -632,9 +713,9 @@ process.on('SIGTERM', async () => {
             </div>
 
             <!-- 시나리오 2: SaaS 통합 -->
-            <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-5 space-y-3">
+            <div class="bg-white dark:bg-slate-900 dark:border-slate-800 rounded-lg shadow-sm border border-slate-200 p-5 space-y-3">
               <h2 class="font-semibold flex items-center gap-2">🏢 시나리오 2 — SaaS 다중 테넌트</h2>
-              <p class="text-sm text-slate-700">
+              <p class="text-sm text-slate-700 dark:text-slate-200">
                 <code>FileTenantStore</code> (또는 직접 구현한 store) 와 함께 multi-tenant 플러그인 등록.
               </p>
               <pre class="text-xs bg-slate-50 p-3 rounded border border-slate-200 overflow-auto">import Fastify from 'fastify';
@@ -660,7 +741,7 @@ await registerAdminUI(app, { prefix: '/admin/ui' });
 await browserPool.start();
 await app.listen({ port: 3000 });</pre>
               <details class="text-xs">
-                <summary class="cursor-pointer text-blue-700 font-semibold">커스텀 TenantStore (Postgres / Redis 등)</summary>
+                <summary class="cursor-pointer text-blue-700 dark:text-indigo-400 font-semibold">커스텀 TenantStore (Postgres / Redis 등)</summary>
                 <pre class="bg-slate-50 p-3 rounded border border-slate-200 mt-2 overflow-auto">import { type TenantStore, type Tenant } from '@spa-seo-gateway/multi-tenant';
 import { sql } from './db.js';
 
@@ -691,9 +772,9 @@ export class PostgresTenantStore implements TenantStore {
             </div>
 
             <!-- 시나리오 3: CMS 통합 -->
-            <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-5 space-y-3">
+            <div class="bg-white dark:bg-slate-900 dark:border-slate-800 rounded-lg shadow-sm border border-slate-200 p-5 space-y-3">
               <h2 class="font-semibold flex items-center gap-2">🌐 시나리오 3 — CMS 다중 사이트</h2>
-              <p class="text-sm text-slate-700">
+              <p class="text-sm text-slate-700 dark:text-slate-200">
                 같은 조직이 여러 사이트(마케팅 / 블로그 / 도큐먼트) 를 운영할 때.
               </p>
               <pre class="text-xs bg-slate-50 p-3 rounded border border-slate-200 overflow-auto">import Fastify from 'fastify';
@@ -714,9 +795,9 @@ await app.listen({ port: 3000 });
             </div>
 
             <!-- 시나리오 4: 기존 앱 임베드 -->
-            <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-5 space-y-3">
+            <div class="bg-white dark:bg-slate-900 dark:border-slate-800 rounded-lg shadow-sm border border-slate-200 p-5 space-y-3">
               <h2 class="font-semibold flex items-center gap-2">🔧 시나리오 4 — 기존 Fastify 앱에 임베드</h2>
-              <p class="text-sm text-slate-700">
+              <p class="text-sm text-slate-700 dark:text-slate-200">
                 이미 Fastify 백엔드가 있다면, 봇 트래픽만 SEO 렌더로 분기하는 미들웨어로 사용.
               </p>
               <pre class="text-xs bg-slate-50 p-3 rounded border border-slate-200 overflow-auto">import {
@@ -752,9 +833,9 @@ app.addHook('onRequest', async (req, reply) => {
             </div>
 
             <!-- 시나리오 5: CLI -->
-            <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-5 space-y-3">
+            <div class="bg-white dark:bg-slate-900 dark:border-slate-800 rounded-lg shadow-sm border border-slate-200 p-5 space-y-3">
               <h2 class="font-semibold flex items-center gap-2">🖥️ 시나리오 5 — 단발 렌더 CLI / 스크립트</h2>
-              <p class="text-sm text-slate-700">
+              <p class="text-sm text-slate-700 dark:text-slate-200">
                 서버 없이 빌드 단계 / cron 으로 단발 렌더링.
               </p>
               <pre class="text-xs bg-slate-50 p-3 rounded border border-slate-200 overflow-auto">import { browserPool, render } from '@spa-seo-gateway/core';
@@ -774,10 +855,10 @@ try {
             </div>
 
             <!-- 핵심 API -->
-            <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-5 space-y-3">
+            <div class="bg-white dark:bg-slate-900 dark:border-slate-800 rounded-lg shadow-sm border border-slate-200 p-5 space-y-3">
               <h2 class="font-semibold flex items-center gap-2">📚 핵심 API 레퍼런스 (@spa-seo-gateway/core)</h2>
               <table class="w-full text-sm">
-                <thead class="text-left text-slate-500 border-b">
+                <thead class="text-left text-slate-500 dark:text-slate-400 border-b">
                   <tr><th class="py-2">함수</th><th class="py-2">설명</th></tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
@@ -794,15 +875,15 @@ try {
                   <tr><td class="py-2"><code>shutdownCache()</code></td><td class="py-2">Redis 연결 종료 (graceful 종료 시)</td></tr>
                 </tbody>
               </table>
-              <p class="text-xs text-slate-500">
+              <p class="text-xs text-slate-500 dark:text-slate-400">
                 전체 export 는 <a href="https://github.com/blue45f/spa-seo-gateway/blob/main/packages/core/src/index.ts" target="_blank" class="text-indigo-600 hover:underline">packages/core/src/index.ts</a> 참고.
               </p>
             </div>
 
             <!-- 환경 / 설정 -->
-            <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-5 space-y-3">
+            <div class="bg-white dark:bg-slate-900 dark:border-slate-800 rounded-lg shadow-sm border border-slate-200 p-5 space-y-3">
               <h2 class="font-semibold flex items-center gap-2">⚙️ 라이브러리 모드에서의 설정</h2>
-              <p class="text-sm text-slate-700">
+              <p class="text-sm text-slate-700 dark:text-slate-200">
                 <code>@spa-seo-gateway/core</code> 는 모듈 로드 시점에 환경변수와 <code>seo-gateway.config.json</code> 을 자동 로드합니다.
                 기존 환경변수 그대로 (<code>POOL_MAX</code>, <code>WAIT_UNTIL</code>, <code>ADMIN_TOKEN</code> 등) 동작합니다.
               </p>
@@ -816,15 +897,15 @@ SWR_WINDOW_MS=3600000
 ADMIN_TOKEN=secret
 REDIS_CACHE_ENABLED=true
 REDIS_URL=redis://localhost:6379</pre>
-              <p class="text-xs text-slate-500">
+              <p class="text-xs text-slate-500 dark:text-slate-400">
                 자세한 설정은 <a href="https://github.com/blue45f/spa-seo-gateway/blob/main/docs/CONFIGURATION.md" target="_blank" class="text-indigo-600 hover:underline">CONFIGURATION.md</a>.
               </p>
             </div>
 
             <!-- 운영 팁 -->
-            <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-5 space-y-3">
+            <div class="bg-white dark:bg-slate-900 dark:border-slate-800 rounded-lg shadow-sm border border-slate-200 p-5 space-y-3">
               <h2 class="font-semibold flex items-center gap-2">💡 라이브러리 사용 시 팁</h2>
-              <ul class="text-sm text-slate-700 space-y-2 list-disc ml-5">
+              <ul class="text-sm text-slate-700 dark:text-slate-200 space-y-2 list-disc ml-5">
                 <li><strong>풀 시작 / 종료 직접 관리</strong> — <code>browserPool.start()</code> 를 앱 시작 시, <code>browserPool.stop()</code> + <code>shutdownCache()</code> 를 SIGTERM 처리에 호출.</li>
                 <li><strong>다른 풀 라이프사이클과 독립</strong> — 한 프로세스에서 여러 게이트웨이를 띄우는 건 지원하지 않습니다 (모듈 싱글톤). 필요하면 별도 프로세스.</li>
                 <li><strong>Redis 활성 권장</strong> — 멀티 노드 + 재시작 안전성. <code>REDIS_CACHE_ENABLED=true</code></li>
@@ -857,22 +938,22 @@ REDIS_URL=redis://localhost:6379</pre>
           <!-- HELP -->
           <!-- ============================================================ -->
           <section x-show="tab === 'help'" class="space-y-4">
-            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm">
+            <div class="bg-blue-50 dark:bg-indigo-950 dark:border-indigo-900 border border-blue-200 rounded-lg p-4 text-sm">
               <div class="flex items-start gap-3">
                 <div class="text-2xl">❓</div>
                 <div class="flex-1">
-                  <h3 class="font-semibold text-blue-900 mb-1">도움말 — 자주 묻는 질문 / 트러블슈팅</h3>
-                  <p class="text-blue-800">처음 접하는 분들이 흔히 만나는 상황과 해결법.</p>
+                  <h3 class="font-semibold text-blue-900 dark:text-indigo-200 mb-1">도움말 — 자주 묻는 질문 / 트러블슈팅</h3>
+                  <p class="text-blue-800 dark:text-indigo-300">처음 접하는 분들이 흔히 만나는 상황과 해결법.</p>
                 </div>
               </div>
             </div>
             <template x-for="faq in faqs" :key="faq.q">
-              <details class="bg-white rounded-lg shadow-sm border border-slate-200 p-4">
+              <details class="bg-white dark:bg-slate-900 dark:border-slate-800 rounded-lg shadow-sm border border-slate-200 p-4">
                 <summary class="cursor-pointer font-semibold" x-text="faq.q"></summary>
-                <div class="mt-2 text-sm text-slate-700 leading-relaxed" x-html="faq.a"></div>
+                <div class="mt-2 text-sm text-slate-700 dark:text-slate-200 leading-relaxed" x-html="faq.a"></div>
               </details>
             </template>
-            <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-5 text-sm">
+            <div class="bg-white dark:bg-slate-900 dark:border-slate-800 rounded-lg shadow-sm border border-slate-200 p-5 text-sm">
               <h3 class="font-semibold mb-2">더 자세한 가이드</h3>
               <ul class="space-y-1.5">
                 <li>📚 <a href="https://github.com/blue45f/spa-seo-gateway/blob/main/docs/GETTING-STARTED.md" target="_blank" class="text-indigo-600 hover:underline">5분 시작 가이드</a></li>
@@ -888,9 +969,9 @@ REDIS_URL=redis://localhost:6379</pre>
           </section>
         </main>
 
-        <footer class="border-t border-slate-200 px-6 py-3 text-xs text-slate-500 flex justify-between bg-white">
+        <footer class="border-t border-slate-200 px-6 py-3 text-xs text-slate-500 dark:text-slate-400 flex justify-between bg-white">
           <span>spa-seo-gateway · open-source dynamic rendering</span>
-          <a href="https://github.com/blue45f/spa-seo-gateway" target="_blank" class="hover:text-slate-700">github</a>
+          <a href="https://github.com/blue45f/spa-seo-gateway" target="_blank" class="hover:text-slate-700 dark:text-slate-200">github</a>
         </footer>
       </div>
     </div>
@@ -903,6 +984,12 @@ REDIS_URL=redis://localhost:6379</pre>
           tab: 'welcome',
           publicInfo: null,
           metricsTimer: null,
+          theme: localStorage.getItem('seo-admin-theme') ||
+            (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'),
+          sidebarOpen: window.innerWidth >= 768,
+          toasts: [],
+          _toastId: 0,
+          _dragSrc: null,
 
           navItems: [
             { id: 'welcome', icon: '👋', label: '소개', subtitle: '게이트웨이 한눈에 보기', public: true },
@@ -971,6 +1058,50 @@ REDIS_URL=redis://localhost:6379</pre>
             { name: 'KakaoTalk', value: 'kakaotalk-scrap/1.0' },
           ],
 
+          toggleTheme() {
+            this.theme = this.theme === 'dark' ? 'light' : 'dark';
+            localStorage.setItem('seo-admin-theme', this.theme);
+            document.documentElement.classList.toggle('dark', this.theme === 'dark');
+          },
+
+          toast(message, kind = 'info') {
+            const icons = { success: '✓', error: '✗', warn: '⚠', info: 'ℹ️' };
+            const id = ++this._toastId;
+            this.toasts.push({ id, message, kind, icon: icons[kind] || 'ℹ️' });
+            setTimeout(() => this.removeToast(id), 4000);
+          },
+          removeToast(id) {
+            this.toasts = this.toasts.filter((t) => t.id !== id);
+          },
+
+          dragStart(ev, i) {
+            this._dragSrc = i;
+            ev.target.classList.add('dragging');
+            ev.dataTransfer.effectAllowed = 'move';
+          },
+          dragOver(ev) {
+            ev.dataTransfer.dropEffect = 'move';
+            ev.currentTarget.classList.add('drag-over');
+          },
+          dragLeave(ev) {
+            ev.currentTarget.classList.remove('drag-over');
+          },
+          drop(ev, dst) {
+            ev.currentTarget.classList.remove('drag-over');
+            const src = this._dragSrc;
+            if (src === null || src === dst) return;
+            const arr = this.routes.slice();
+            const [moved] = arr.splice(src, 1);
+            arr.splice(dst, 0, moved);
+            this.routes = arr;
+            this.toast(`라우트 순서 변경 (${src + 1} → ${dst + 1})`, 'info');
+          },
+          dragEnd(ev) {
+            ev.target.classList.remove('dragging');
+            this._dragSrc = null;
+            document.querySelectorAll('.drag-over').forEach((el) => el.classList.remove('drag-over'));
+          },
+
           requiresAuth(tabId) {
             return !this.navItems.find((n) => n.id === tabId)?.public;
           },
@@ -988,7 +1119,7 @@ REDIS_URL=redis://localhost:6379</pre>
           },
 
           methodColor(m) {
-            return ({ GET: 'bg-emerald-100 text-emerald-800', POST: 'bg-blue-100 text-blue-800', PUT: 'bg-amber-100 text-amber-800', DELETE: 'bg-red-100 text-red-800' })[m] || 'bg-slate-100';
+            return ({ GET: 'bg-emerald-100 text-emerald-800', POST: 'bg-blue-100 text-blue-800 dark:text-indigo-300', PUT: 'bg-amber-100 text-amber-800', DELETE: 'bg-red-100 text-red-800' })[m] || 'bg-slate-100';
           },
 
           apiEndpoints() {
@@ -1118,7 +1249,7 @@ REDIS_URL=redis://localhost:6379</pre>
                 ...(r.ignore ? { ignore: true } : {}),
               }));
               await this.api('PUT', '/admin/api/routes', { routes: cleaned, persist });
-              alert(persist ? '저장 + 디스크 영구화 완료' : '메모리 저장 완료');
+              this.toast(persist ? '저장 + 디스크 영구화 완료' : '메모리 저장 완료', 'success');
             } catch (e) { this.error = e.message; }
           },
 
