@@ -293,7 +293,7 @@ export async function registerMultiTenant(
       );
       if (!detection.isBot) {
         httpRequests.inc({ route: 'tenant-pass', status: 'pass', kind: 'human' });
-        reply.code(204).header('x-bypass-reason', detection.reason);
+        reply.code(204).header('x-bypass-reason', detection.reason).send();
         return reply;
       }
 
@@ -319,7 +319,7 @@ export async function registerMultiTenant(
 
       const route = matchTenantRoute(tenant, target);
       if (route?.ignore) {
-        reply.code(204).header('x-prerender-route', route.pattern);
+        reply.code(204).header('x-prerender-route', route.pattern).send();
         return reply;
       }
 

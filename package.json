@@ -28,6 +28,7 @@
     "@types/autocannon": "^7.12.7",
     "@types/node": "^25.6.0",
     "autocannon": "^8.0.0",
+    "fastify": "^5.8.5",
     "husky": "^9.1.7",
     "lint-staged": "^16.4.0",
     "tsx": "^4.21.0",

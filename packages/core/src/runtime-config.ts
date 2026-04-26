@@ -36,29 +36,29 @@ export function matchRoute(targetUrl: string): RouteOverride | null {
   return null;
 }
 
-const PERSIST_FILE =
-  process.env.GATEWAY_CONFIG_FILE ?? resolve(process.cwd(), 'seo-gateway.config.json');
+function defaultPersistFile(): string {
+  return process.env.GATEWAY_CONFIG_FILE ?? resolve(process.cwd(), 'seo-gateway.config.json');
+}
 
-export async function persistRoutesToFile(): Promise<{
-  ok: boolean;
-  path: string;
-  error?: string;
-}> {
+export async function persistRoutesToFile(
+  filePath?: string,
+): Promise<{ ok: boolean; path: string; error?: string }> {
+  const target = filePath ?? defaultPersistFile();
   try {
     let existing: Record<string, unknown> = {};
     try {
-      existing = JSON.parse(await fs.readFile(PERSIST_FILE, 'utf8')) as Record<string, unknown>;
+      existing = JSON.parse(await fs.readFile(target, 'utf8')) as Record<string, unknown>;
     } catch {
       /* file may not exist; start fresh */
     }
     const merged = { ...existing, routes: getRoutes() };
-    const tmp = `${PERSIST_FILE}.tmp`;
+    const tmp = `${target}.tmp`;
     await fs.writeFile(tmp, `${JSON.stringify(merged, null, 2)}\n`, 'utf8');
-    await fs.rename(tmp, PERSIST_FILE);
-    logger.info({ path: PERSIST_FILE }, 'routes persisted');
-    return { ok: true, path: PERSIST_FILE };
+    await fs.rename(tmp, target);
+    logger.info({ path: target }, 'routes persisted');
+    return { ok: true, path: target };
   } catch (e) {
-    return { ok: false, path: PERSIST_FILE, error: (e as Error).message };
+    return { ok: false, path: target, error: (e as Error).message };
   }
 }
 

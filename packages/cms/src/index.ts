@@ -299,7 +299,7 @@ export async function registerCms(app: FastifyInstance, opts: RegisterOptions): 
       );
       if (!detection.isBot) {
         httpRequests.inc({ route: 'site-pass', status: 'pass', kind: 'human' });
-        reply.code(204).header('x-bypass-reason', detection.reason);
+        reply.code(204).header('x-bypass-reason', detection.reason).send();
         return reply;
       }
 
@@ -312,7 +312,7 @@ export async function registerCms(app: FastifyInstance, opts: RegisterOptions): 
 
       const route = matchSiteRoute(site, target);
       if (route?.ignore) {
-        reply.code(204).header('x-prerender-route', route.pattern);
+        reply.code(204).header('x-prerender-route', route.pattern).send();
         return reply;
       }
 

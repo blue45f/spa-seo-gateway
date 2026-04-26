@@ -51,7 +51,24 @@
       </nav>
 
       <!-- Dashboard -->
-      <section x-show="tab === 'dashboard'" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <section x-show="tab === 'dashboard'" class="space-y-4">
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm">
+          <div class="flex items-start gap-3">
+            <div class="text-2xl">📊</div>
+            <div class="flex-1">
+              <h3 class="font-semibold text-blue-900 mb-1">대시보드 — 게이트웨이 현재 상태</h3>
+              <p class="text-blue-800 mb-2">
+                현재 운영 모드, origin URL, 캐시 설정, 활성 circuit breaker 상태를 한눈에 확인합니다.
+              </p>
+              <ul class="text-blue-800 list-disc ml-5 space-y-0.5 text-xs">
+                <li><strong>mode</strong>: <code>render-only</code>(단일) / <code>proxy</code>(자체 프록시) / <code>cms</code>(다중사이트) / <code>saas</code>(다중테넌트)</li>
+                <li><strong>cache</strong>: TTL 만료 후 SWR 윈도우 동안엔 stale 응답이 즉시 가능. Redis 활성 시 멀티노드 공유</li>
+                <li><strong>Circuit breakers</strong>: host 별로 50% 실패율 도달 시 OPEN. 30초 후 HALF-OPEN 으로 전환</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <template x-for="card in dashboardCards()">
           <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-5">
             <div class="text-xs uppercase tracking-wider text-slate-500" x-text="card.label"></div>
@@ -90,10 +107,46 @@
             </tbody>
           </table>
         </div>
+        </div>
       </section>
 
       <!-- Routes editor -->
-      <section x-show="tab === 'routes'" class="bg-white rounded-lg shadow-sm border border-slate-200 p-5 space-y-4">
+      <section x-show="tab === 'routes'" class="space-y-4">
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm">
+          <div class="flex items-start gap-3">
+            <div class="text-2xl">🛣️</div>
+            <div class="flex-1">
+              <h3 class="font-semibold text-blue-900 mb-1">라우트 오버라이드 — URL 패턴별 동작 분기</h3>
+              <p class="text-blue-800 mb-2">
+                URL 의 <code>pathname + search</code> 에 정규식이 매칭되면 해당 라우트의 설정이 글로벌 설정을 오버라이드합니다.
+                <strong>위에서 아래로 첫 매칭이 승리</strong>하므로 더 구체적인 패턴을 위로 두세요.
+              </p>
+              <details class="mt-2">
+                <summary class="cursor-pointer font-semibold text-blue-900">필드 가이드</summary>
+                <ul class="text-blue-800 list-disc ml-5 mt-2 space-y-1 text-xs">
+                  <li><strong>pattern</strong>: 정규식. 예) <code>^/$</code> (홈), <code>^/products/</code> (제품 하위), <code>^/(account|cart)(/|$)</code> (인증 페이지)</li>
+                  <li><strong>ttl</strong>: 라우트별 캐시 수명 (ms). 빠르게 변하는 페이지(홈, 검색결과)는 짧게(60_000–600_000), 정적 페이지(블로그)는 길게(86_400_000)</li>
+                  <li><strong>waitUntil</strong>: <code>networkidle2</code> 가 가장 안전(기본). 데이터 늦게 오는 SPA 는 <code>networkidle0</code>, 빠른 정적 페이지는 <code>domcontentloaded</code></li>
+                  <li><strong>selector</strong>: 특정 DOM 요소가 나타날 때까지 대기. 예) <code>[data-product-loaded]</code></li>
+                  <li><strong>waitMs</strong>: waitUntil 충족 후 추가 대기. 애니메이션/지연 데이터 로딩 시</li>
+                  <li><strong>ignore</strong>: true 면 렌더하지 않고 204 반환. 인증 필요 페이지/내부 라우트에</li>
+                </ul>
+              </details>
+              <details class="mt-2">
+                <summary class="cursor-pointer font-semibold text-blue-900">예시</summary>
+                <pre class="bg-white border border-blue-100 rounded p-2 mt-2 text-xs overflow-auto"
+>^/(account|admin|cart|checkout)(/|$)  ignore=true             ← 인증/결제는 렌더 금지
+^/products/[0-9]+                      ttl=21600000  selector=[data-product]  ← 6h
+^/blog/                                ttl=86400000             ← 24h
+^/                                     ttl=600000               ← 10분 (홈)</pre>
+              </details>
+              <p class="text-blue-700 text-xs mt-2">
+                💾 <strong>저장 (메모리)</strong>는 즉시 적용되지만 재시작 시 사라집니다. <strong>저장 + 디스크 영구화</strong>는 <code>seo-gateway.config.json</code> 에 기록.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-5 space-y-4">
         <div class="flex items-center justify-between">
           <h2 class="font-semibold">Route overrides</h2>
           <div class="flex gap-2">
@@ -119,6 +172,7 @@
         </div>
 
         <table class="w-full text-sm">
+          <caption class="sr-only">Route overrides table — first match wins</caption>
           <thead class="text-slate-500">
             <tr>
               <th class="text-left py-2">pattern (regex)</th>
@@ -152,53 +206,151 @@
             </template>
           </tbody>
         </table>
+        </div>
       </section>
 
       <!-- Cache -->
-      <section x-show="tab === 'cache'" class="bg-white rounded-lg shadow-sm border border-slate-200 p-5 space-y-4">
-        <h2 class="font-semibold">Cache</h2>
-        <pre class="text-xs bg-slate-50 p-3 rounded border border-slate-200" x-text="JSON.stringify(site?.cache, null, 2)"></pre>
-        <div class="flex gap-2 items-center">
-          <input type="text" class="flex-1 px-3 py-2 border border-slate-200 rounded" placeholder="https://www.example.com/path" x-model="invalidateUrl" />
-          <button class="px-3 py-2 text-sm rounded bg-amber-500 text-white hover:bg-amber-400" @click="invalidate()">URL 무효화</button>
-          <button class="px-3 py-2 text-sm rounded bg-red-500 text-white hover:bg-red-400" @click="confirmClear()">전체 초기화</button>
+      <section x-show="tab === 'cache'" class="space-y-4">
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm">
+          <div class="flex items-start gap-3">
+            <div class="text-2xl">🗄️</div>
+            <div class="flex-1">
+              <h3 class="font-semibold text-blue-900 mb-1">캐시 — 렌더 결과의 보관과 무효화</h3>
+              <p class="text-blue-800 mb-2">
+                기본 24시간 TTL 안에서는 같은 URL 의 봇 요청은 캐시에서 즉시 응답.
+                TTL 만료 후 1시간 SWR 윈도우 동안엔 stale 응답을 즉시 주고 백그라운드에서 갱신.
+              </p>
+              <details>
+                <summary class="cursor-pointer font-semibold text-blue-900">언제 무효화?</summary>
+                <ul class="text-blue-800 list-disc ml-5 mt-2 space-y-1 text-xs">
+                  <li>배포 직후 — 빌드 파이프라인에 <code>POST /admin/cache/clear</code> 추가 권장</li>
+                  <li>특정 페이지 콘텐츠 수정 — URL 입력 + <code>URL 무효화</code></li>
+                  <li>Search Console 에서 인덱스 누락 발견 시 — 해당 URL 만 무효화하고 봇 재방문 유도</li>
+                </ul>
+              </details>
+              <p class="text-blue-700 text-xs mt-2">
+                ⚠️ <strong>전체 초기화</strong>는 다음 봇 트래픽 시 모든 페이지가 cold render 됩니다. 트래픽 큰 사이트에선 신중히.
+              </p>
+            </div>
+          </div>
         </div>
-        <div x-show="lastCacheResult" class="text-sm text-slate-700 bg-slate-50 p-2 rounded" x-text="lastCacheResult"></div>
+        <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-5 space-y-4">
+          <h2 class="font-semibold">Cache 상태</h2>
+          <pre class="text-xs bg-slate-50 p-3 rounded border border-slate-200" x-text="JSON.stringify(site?.cache, null, 2)"></pre>
+          <div class="flex gap-2 items-center flex-wrap">
+            <input type="text" class="flex-1 px-3 py-2 border border-slate-200 rounded min-w-[20rem]" placeholder="https://www.example.com/path" x-model="invalidateUrl" />
+            <button class="px-3 py-2 text-sm rounded bg-amber-500 text-white hover:bg-amber-400" @click="invalidate()">URL 무효화</button>
+            <button class="px-3 py-2 text-sm rounded bg-red-500 text-white hover:bg-red-400" @click="confirmClear()">전체 초기화</button>
+          </div>
+          <div x-show="lastCacheResult" class="text-sm text-slate-700 bg-slate-50 p-2 rounded" x-text="lastCacheResult"></div>
+        </div>
       </section>
 
       <!-- Warm -->
-      <section x-show="tab === 'warm'" class="bg-white rounded-lg shadow-sm border border-slate-200 p-5 space-y-4">
-        <h2 class="font-semibold">Sitemap pre-warm</h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
-          <input class="md:col-span-3 px-3 py-2 border border-slate-200 rounded" placeholder="https://www.example.com/sitemap.xml" x-model="warm.sitemap" />
-          <input type="number" class="px-3 py-2 border border-slate-200 rounded" placeholder="max URLs (1000)" x-model.number="warm.max" />
-          <input type="number" class="px-3 py-2 border border-slate-200 rounded" placeholder="concurrency (4)" x-model.number="warm.concurrency" />
-          <button class="px-3 py-2 rounded bg-emerald-500 text-white hover:bg-emerald-400" @click="runWarm()" :disabled="warm.running">
-            <span x-show="!warm.running">시작</span>
-            <span x-show="warm.running">실행 중...</span>
-          </button>
+      <section x-show="tab === 'warm'" class="space-y-4">
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm">
+          <div class="flex items-start gap-3">
+            <div class="text-2xl">🔥</div>
+            <div class="flex-1">
+              <h3 class="font-semibold text-blue-900 mb-1">Sitemap 사전 워밍 — cold path 제거</h3>
+              <p class="text-blue-800 mb-2">
+                <code>sitemap.xml</code> 을 파싱해 안에 적힌 URL 들을 미리 렌더링합니다. 결과는 캐시에 저장되어
+                실제 봇 트래픽이 들어왔을 때 즉시 hit. <strong>cold render 처음 한 번의 지연을 미리 흡수</strong>.
+              </p>
+              <details>
+                <summary class="cursor-pointer font-semibold text-blue-900">언제 실행?</summary>
+                <ul class="text-blue-800 list-disc ml-5 mt-2 space-y-1 text-xs">
+                  <li><strong>배포 직후</strong> — CI 파이프라인에서 <code>cache/clear</code> 다음 단계로 호출</li>
+                  <li><strong>주기적</strong> — cron 으로 매 N시간마다 실행 (TTL 만료 전에 미리 갱신)</li>
+                  <li><strong>대규모 콘텐츠 추가 후</strong> — 신규 URL 들이 즉시 봇에게 노출되도록</li>
+                </ul>
+              </details>
+              <details class="mt-2">
+                <summary class="cursor-pointer font-semibold text-blue-900">파라미터</summary>
+                <ul class="text-blue-800 list-disc ml-5 mt-2 space-y-1 text-xs">
+                  <li><strong>max</strong>: 워밍할 최대 URL 수 (sitemap-index 의 모든 sub 합산). 기본 1000</li>
+                  <li><strong>concurrency</strong>: 동시 렌더 수. POOL_MAX 보다 작아야 일반 봇 트래픽도 받음. 기본 4</li>
+                </ul>
+              </details>
+              <p class="text-blue-700 text-xs mt-2">
+                ℹ️ sitemap-index (여러 sitemap 묶음) 도 자동 재귀 파싱. 큰 sitemap 은 시간이 걸리므로 백그라운드 실행.
+              </p>
+            </div>
+          </div>
         </div>
-        <pre x-show="warm.result" class="text-xs bg-slate-50 p-3 rounded border border-slate-200" x-text="JSON.stringify(warm.result, null, 2)"></pre>
+        <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-5 space-y-4">
+          <h2 class="font-semibold">Sitemap pre-warm</h2>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+            <input class="md:col-span-3 px-3 py-2 border border-slate-200 rounded" placeholder="https://www.example.com/sitemap.xml" x-model="warm.sitemap" />
+            <input type="number" class="px-3 py-2 border border-slate-200 rounded" placeholder="max URLs (1000)" x-model.number="warm.max" />
+            <input type="number" class="px-3 py-2 border border-slate-200 rounded" placeholder="concurrency (4)" x-model.number="warm.concurrency" />
+            <button class="px-3 py-2 rounded bg-emerald-500 text-white hover:bg-emerald-400" @click="runWarm()" :disabled="warm.running">
+              <span x-show="!warm.running">시작</span>
+              <span x-show="warm.running">실행 중...</span>
+            </button>
+          </div>
+          <pre x-show="warm.result" class="text-xs bg-slate-50 p-3 rounded border border-slate-200" x-text="JSON.stringify(warm.result, null, 2)"></pre>
+        </div>
       </section>
 
       <!-- Render test -->
-      <section x-show="tab === 'test'" class="bg-white rounded-lg shadow-sm border border-slate-200 p-5 space-y-4">
-        <h2 class="font-semibold">Render test</h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
-          <input class="md:col-span-2 px-3 py-2 border border-slate-200 rounded" placeholder="대상 URL" x-model="renderTest.url" />
-          <input class="px-3 py-2 border border-slate-200 rounded" placeholder="UA (기본 Googlebot)" x-model="renderTest.ua" />
-        </div>
-        <button class="px-3 py-2 rounded bg-slate-900 text-white hover:bg-slate-700" @click="runRenderTest()" :disabled="renderTest.running">
-          <span x-show="!renderTest.running">렌더 실행</span>
-          <span x-show="renderTest.running">렌더 중...</span>
-        </button>
-        <div x-show="renderTest.result" class="space-y-2">
-          <div class="text-sm flex gap-4">
-            <span>status: <strong x-text="renderTest.result?.status"></strong></span>
-            <span>duration: <strong x-text="renderTest.result?.durationMs + ' ms'"></strong></span>
-            <span>bytes: <strong x-text="renderTest.result?.bytes"></strong></span>
+      <section x-show="tab === 'test'" class="space-y-4">
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm">
+          <div class="flex items-start gap-3">
+            <div class="text-2xl">🧪</div>
+            <div class="flex-1">
+              <h3 class="font-semibold text-blue-900 mb-1">렌더 테스트 — 디버깅 도구</h3>
+              <p class="text-blue-800 mb-2">
+                URL 을 입력하면 풀에서 페이지를 잡아 즉시 렌더링하고, 결과 HTML 의 첫 4KB 를 미리보기.
+                캐시 우회 — 새 렌더가 항상 실행됩니다.
+              </p>
+              <details>
+                <summary class="cursor-pointer font-semibold text-blue-900">활용 시나리오</summary>
+                <ul class="text-blue-800 list-disc ml-5 mt-2 space-y-1 text-xs">
+                  <li><strong>새 라우트 추가 후</strong> — waitUntil/selector 가 의도대로 동작하는지 확인</li>
+                  <li><strong>모바일 vs 데스크톱 차이 검증</strong> — UA 칸에 모바일 UA 넣어 viewport 차이 확인</li>
+                  <li><strong>quality gate 트리거 확인</strong> — soft 404 페이지로 테스트해 status 가 자동 다운그레이드 되는지</li>
+                  <li><strong>응답 헤더 확인</strong> — <code>x-prerender-route</code>, <code>x-prerender-viewport</code>, <code>x-prerender-quality</code></li>
+                </ul>
+              </details>
+              <details class="mt-2">
+                <summary class="cursor-pointer font-semibold text-blue-900">자주 쓰는 봇 UA</summary>
+                <pre class="bg-white border border-blue-100 rounded p-2 mt-2 text-xs overflow-auto"
+>Googlebot (데스크톱):  Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)
+Googlebot (모바일):    Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 ... Mobile (compatible; Googlebot/2.1; +http://www.google.com/bot.html)
+Bingbot:               Mozilla/5.0 (compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm)
+Naver Yeti:            Mozilla/5.0 (compatible; Yeti/1.1; +http://naver.me/spd)
+Twitter:               Twitterbot/1.0
+Facebook:              facebookexternalhit/1.1</pre>
+              </details>
+              <p class="text-blue-700 text-xs mt-2">
+                💡 비어있으면 기본 Googlebot UA 사용. CLI 버전은 <code>pnpm check -- &lt;url&gt;</code>.
+              </p>
+            </div>
           </div>
-          <pre class="text-xs bg-slate-50 p-3 rounded border border-slate-200 max-h-96 overflow-auto" x-text="renderTest.result?.bodyPreview"></pre>
+        </div>
+        <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-5 space-y-4">
+          <h2 class="font-semibold">Render test</h2>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+            <input class="md:col-span-2 px-3 py-2 border border-slate-200 rounded" placeholder="대상 URL — 절대 경로 (https://...)" x-model="renderTest.url" />
+            <input class="px-3 py-2 border border-slate-200 rounded" placeholder="UA (비우면 Googlebot)" x-model="renderTest.ua" />
+          </div>
+          <button class="px-3 py-2 rounded bg-slate-900 text-white hover:bg-slate-700" @click="runRenderTest()" :disabled="renderTest.running">
+            <span x-show="!renderTest.running">렌더 실행</span>
+            <span x-show="renderTest.running">렌더 중...</span>
+          </button>
+          <div x-show="renderTest.result" class="space-y-2">
+            <div class="text-sm flex gap-4 flex-wrap">
+              <span>status: <strong x-text="renderTest.result?.status"></strong></span>
+              <span>duration: <strong x-text="renderTest.result?.durationMs + ' ms'"></strong></span>
+              <span>bytes: <strong x-text="renderTest.result?.bytes"></strong></span>
+            </div>
+            <details>
+              <summary class="cursor-pointer text-sm text-slate-700">응답 헤더 (x-prerender-*)</summary>
+              <pre class="text-xs bg-slate-50 p-2 rounded mt-1" x-text="JSON.stringify(renderTest.result?.headers, null, 2)"></pre>
+            </details>
+            <pre class="text-xs bg-slate-50 p-3 rounded border border-slate-200 max-h-96 overflow-auto" x-text="renderTest.result?.bodyPreview"></pre>
+          </div>
         </div>
       </section>
     </main>
