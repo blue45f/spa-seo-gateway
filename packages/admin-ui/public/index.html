@@ -1107,46 +1107,43 @@ REDIS_URL=redis://localhost:6379</pre>
           <!-- ============================================================ -->
           <section x-show="tab === 'visual'" class="space-y-4">
             <div class="bg-purple-50 dark:bg-purple-950 dark:border-purple-900 border border-purple-200 rounded-lg p-4 text-sm">
-              <h3 class="font-semibold text-purple-900 dark:text-purple-200 mb-1">시각 회귀 (Visual Regression)</h3>
-              <p class="text-purple-800 dark:text-purple-300">
-                URL 의 스크린샷을 캡처해 로컬 baseline 과 picture diff. 첫 실행은 baseline 으로 저장,
-                이후 실행부터 픽셀 단위 차이를 측정. CSS 회귀·레이아웃 깨짐을 즉시 감지.
-              </p>
+              <h3 class="font-semibold text-purple-900 dark:text-purple-200 mb-1" x-text="t('visual.title')"></h3>
+              <p class="text-purple-800 dark:text-purple-300" x-text="t('visual.desc')"></p>
             </div>
             <div class="bg-white dark:bg-slate-900 dark:border-slate-800 rounded-lg shadow-sm border border-slate-200 p-5 space-y-3">
               <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <label class="block">
-                  <span class="text-sm font-medium">URL</span>
+                  <span class="text-sm font-medium" x-text="t('visual.url')"></span>
                   <input type="url" class="mt-1 w-full px-3 py-2 rounded border border-slate-300 dark:border-slate-700 dark:bg-slate-800 text-sm" placeholder="https://www.example.com/" x-model="visual.url">
                 </label>
                 <label class="block">
-                  <span class="text-sm font-medium">모드</span>
+                  <span class="text-sm font-medium" x-text="t('visual.mode')"></span>
                   <select class="mt-1 w-full px-3 py-2 rounded border border-slate-300 dark:border-slate-700 dark:bg-slate-800 text-sm" x-model="visual.mode">
-                    <option value="auto">auto — 없으면 baseline 저장</option>
-                    <option value="create">create — 새 baseline 강제 저장</option>
-                    <option value="compare">compare — 비교만</option>
+                    <option value="auto" x-text="t('visual.mode.auto')"></option>
+                    <option value="create" x-text="t('visual.mode.create')"></option>
+                    <option value="compare" x-text="t('visual.mode.compare')"></option>
                   </select>
                 </label>
                 <label class="block">
-                  <span class="text-sm font-medium">threshold (0~1)</span>
+                  <span class="text-sm font-medium" x-text="t('visual.threshold')"></span>
                   <input type="number" step="0.01" min="0" max="1" class="mt-1 w-full px-3 py-2 rounded border border-slate-300 dark:border-slate-700 dark:bg-slate-800 text-sm" x-model.number="visual.threshold">
                 </label>
                 <label class="block">
-                  <span class="text-sm font-medium">전체 페이지 캡처</span>
+                  <span class="text-sm font-medium" x-text="t('visual.fullPage')"></span>
                   <label class="mt-2 flex items-center gap-2 text-sm">
                     <input type="checkbox" x-model="visual.fullPage"> fullPage
                   </label>
                 </label>
               </div>
-              <button class="px-4 py-2 rounded bg-slate-900 dark:bg-indigo-600 text-white text-sm font-medium hover:bg-slate-700" :disabled="visual.running" @click="runVisualDiff()" x-text="visual.running ? '캡처 중...' : '캡처 + 비교'"></button>
+              <button class="px-4 py-2 rounded bg-slate-900 dark:bg-indigo-600 text-white text-sm font-medium hover:bg-slate-700" :disabled="visual.running" @click="runVisualDiff()" x-text="visual.running ? t('visual.running') : t('visual.run')"></button>
               <div x-show="visual.result" class="mt-4 space-y-2 text-sm">
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
-                  <div class="bg-slate-50 dark:bg-slate-800 rounded p-3"><div class="text-xs text-slate-500 dark:text-slate-400">diff %</div><div class="font-mono text-lg" x-text="visual.result?.diffPercent?.toFixed(3) + '%'"></div></div>
-                  <div class="bg-slate-50 dark:bg-slate-800 rounded p-3"><div class="text-xs text-slate-500 dark:text-slate-400">diff pixels</div><div class="font-mono text-lg" x-text="visual.result?.diffPixels"></div></div>
-                  <div class="bg-slate-50 dark:bg-slate-800 rounded p-3"><div class="text-xs text-slate-500 dark:text-slate-400">크기</div><div class="font-mono" x-text="visual.result?.width + '×' + visual.result?.height"></div></div>
-                  <div class="bg-slate-50 dark:bg-slate-800 rounded p-3"><div class="text-xs text-slate-500 dark:text-slate-400">소요</div><div class="font-mono" x-text="visual.result?.durationMs + 'ms'"></div></div>
+                  <div class="bg-slate-50 dark:bg-slate-800 rounded p-3"><div class="text-xs text-slate-500 dark:text-slate-400" x-text="t('visual.diff')"></div><div class="font-mono text-lg" x-text="visual.result?.diffPercent?.toFixed(3) + '%'"></div></div>
+                  <div class="bg-slate-50 dark:bg-slate-800 rounded p-3"><div class="text-xs text-slate-500 dark:text-slate-400" x-text="t('visual.diffPx')"></div><div class="font-mono text-lg" x-text="visual.result?.diffPixels"></div></div>
+                  <div class="bg-slate-50 dark:bg-slate-800 rounded p-3"><div class="text-xs text-slate-500 dark:text-slate-400" x-text="t('visual.size')"></div><div class="font-mono" x-text="visual.result?.width + '×' + visual.result?.height"></div></div>
+                  <div class="bg-slate-50 dark:bg-slate-800 rounded p-3"><div class="text-xs text-slate-500 dark:text-slate-400" x-text="t('visual.duration')"></div><div class="font-mono" x-text="visual.result?.durationMs + 'ms'"></div></div>
                 </div>
-                <div x-show="visual.result?.baselineCreated" class="text-xs text-emerald-600 dark:text-emerald-400">✓ 새 baseline 저장됨</div>
+                <div x-show="visual.result?.baselineCreated" class="text-xs text-emerald-600 dark:text-emerald-400" x-text="t('visual.created')"></div>
                 <div class="text-xs text-slate-500 dark:text-slate-400">
                   baseline path: <code x-text="visual.result?.baselinePath"></code>
                 </div>
@@ -1163,19 +1160,15 @@ REDIS_URL=redis://localhost:6379</pre>
           <!-- ============================================================ -->
           <section x-show="tab === 'ai'" class="space-y-4">
             <div class="bg-emerald-50 dark:bg-emerald-950 dark:border-emerald-900 border border-emerald-200 rounded-lg p-4 text-sm">
-              <h3 class="font-semibold text-emerald-900 dark:text-emerald-200 mb-1">AI 기반 schema.org JSON-LD 추론</h3>
-              <p class="text-emerald-800 dark:text-emerald-300">
-                URL 본문을 LLM 에 보내 Article/Product/FAQPage/HowTo 등 적합한 schema.org 마크업을 자동 추론.
-                BYO 패턴 — 시작 시 <code class="bg-white dark:bg-slate-800 px-1 rounded">setAiSchemaAdapter()</code> 로
-                Anthropic/OpenAI/Custom 어댑터를 주입하세요.
-              </p>
+              <h3 class="font-semibold text-emerald-900 dark:text-emerald-200 mb-1" x-text="t('ai.title')"></h3>
+              <p class="text-emerald-800 dark:text-emerald-300" x-text="t('ai.desc')"></p>
             </div>
             <div class="bg-white dark:bg-slate-900 dark:border-slate-800 rounded-lg shadow-sm border border-slate-200 p-5 space-y-3">
               <label class="block">
                 <span class="text-sm font-medium">URL</span>
                 <input type="url" class="mt-1 w-full px-3 py-2 rounded border border-slate-300 dark:border-slate-700 dark:bg-slate-800 text-sm" placeholder="https://www.example.com/blog/post" x-model="ai.url">
               </label>
-              <button class="px-4 py-2 rounded bg-slate-900 dark:bg-indigo-600 text-white text-sm font-medium hover:bg-slate-700" :disabled="ai.running" @click="runAiSchema()" x-text="ai.running ? '추론 중...' : '추론 실행'"></button>
+              <button class="px-4 py-2 rounded bg-slate-900 dark:bg-indigo-600 text-white text-sm font-medium hover:bg-slate-700" :disabled="ai.running" @click="runAiSchema()" x-text="ai.running ? t('ai.running') : t('ai.run')"></button>
               <template x-for="(s, i) in ai.suggestions" :key="i">
                 <div class="border border-slate-200 dark:border-slate-700 rounded p-3 text-sm">
                   <div class="flex items-center gap-2 mb-2">
@@ -1190,7 +1183,7 @@ REDIS_URL=redis://localhost:6379</pre>
               <div x-show="ai.error" class="mt-3 bg-red-50 border border-red-200 text-red-800 rounded px-3 py-2 text-sm" x-text="ai.error"></div>
             </div>
             <div class="bg-white dark:bg-slate-900 dark:border-slate-800 rounded-lg shadow-sm border border-slate-200 p-5 text-sm">
-              <h3 class="font-semibold mb-2">Anthropic 어댑터 빠른 설정</h3>
+              <h3 class="font-semibold mb-2" x-text="t('ai.setup')"></h3>
               <pre class="text-xs bg-slate-50 dark:bg-slate-800 p-3 rounded overflow-auto">npm install @heejun/spa-seo-gateway-anthropic @anthropic-ai/sdk
 
 import { setAiSchemaAdapter } from '@heejun/spa-seo-gateway-core';
@@ -1210,17 +1203,14 @@ setAiSchemaAdapter(
           <!-- ============================================================ -->
           <section x-show="tab === 'audit'" class="space-y-4">
             <div class="bg-amber-50 dark:bg-amber-950 dark:border-amber-900 border border-amber-200 rounded-lg p-4 text-sm">
-              <h3 class="font-semibold text-amber-900 dark:text-amber-200 mb-1">감사 로그 (HMAC chain)</h3>
-              <p class="text-amber-800 dark:text-amber-300">
-                모든 admin 액션은 SHA-256 hash chain + 옵션 HMAC 서명으로 기록됩니다.
-                <code class="bg-white dark:bg-slate-800 px-1 rounded">verifyAuditChain()</code> 으로 변조 즉시 검출.
-              </p>
+              <h3 class="font-semibold text-amber-900 dark:text-amber-200 mb-1" x-text="t('audit.title')"></h3>
+              <p class="text-amber-800 dark:text-amber-300" x-text="t('audit.desc')"></p>
             </div>
             <div class="flex flex-wrap gap-2">
-              <button class="px-3 py-1.5 rounded bg-slate-900 dark:bg-indigo-600 text-white text-sm font-medium hover:bg-slate-700" @click="loadAudit()">새로고침</button>
-              <button class="px-3 py-1.5 rounded bg-white dark:bg-slate-800 text-sm font-medium border border-slate-300 dark:border-slate-700 hover:bg-slate-50" @click="verifyAudit()">체인 검증</button>
+              <button class="px-3 py-1.5 rounded bg-slate-900 dark:bg-indigo-600 text-white text-sm font-medium hover:bg-slate-700" @click="loadAudit()" x-text="t('audit.refresh')"></button>
+              <button class="px-3 py-1.5 rounded bg-white dark:bg-slate-800 text-sm font-medium border border-slate-300 dark:border-slate-700 hover:bg-slate-50" @click="verifyAudit()" x-text="t('audit.verify')"></button>
               <span x-show="audit.verified !== null" class="ml-auto text-sm" :class="audit.verified ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'">
-                <span x-text="audit.verified ? '✓ 무결성 OK' : '✗ 변조 감지! brokenAt=' + audit.brokenAt"></span>
+                <span x-text="audit.verified ? t('audit.ok') : t('audit.broken') + ' brokenAt=' + audit.brokenAt"></span>
               </span>
             </div>
             <div class="bg-white dark:bg-slate-900 dark:border-slate-800 rounded-lg shadow-sm border border-slate-200 overflow-x-auto">
@@ -1246,7 +1236,7 @@ setAiSchemaAdapter(
                       <td class="px-3 py-2 font-mono text-[10px] text-slate-400" x-text="e.hash?.slice(0, 12) + '...'"></td>
                     </tr>
                   </template>
-                  <tr x-show="!audit.events?.length"><td colspan="6" class="px-3 py-8 text-center text-slate-500 dark:text-slate-400">기록된 감사 이벤트가 없습니다.</td></tr>
+                  <tr x-show="!audit.events?.length"><td colspan="6" class="px-3 py-8 text-center text-slate-500 dark:text-slate-400" x-text="t('audit.empty')"></td></tr>
                 </tbody>
               </table>
             </div>
@@ -1341,6 +1331,34 @@ setAiSchemaAdapter(
               'btn.invalidate': 'URL 무효화', 'btn.clear-all': '전체 초기화',
               'btn.measure': 'Lighthouse 측정',
               'mode': '모드',
+              'visual.title': '시각 회귀 (Visual Regression)',
+              'visual.desc': 'URL 의 스크린샷을 캡처해 로컬 baseline 과 picture diff. 첫 실행은 baseline 으로 저장, 이후 실행부터 픽셀 단위 차이를 측정.',
+              'visual.url': 'URL',
+              'visual.mode': '모드',
+              'visual.mode.auto': 'auto — 없으면 baseline 저장',
+              'visual.mode.create': 'create — 새 baseline 강제 저장',
+              'visual.mode.compare': 'compare — 비교만',
+              'visual.threshold': 'threshold (0~1)',
+              'visual.fullPage': '전체 페이지 캡처',
+              'visual.run': '캡처 + 비교',
+              'visual.running': '캡처 중...',
+              'visual.diff': 'diff %',
+              'visual.diffPx': 'diff pixels',
+              'visual.size': '크기',
+              'visual.duration': '소요',
+              'visual.created': '✓ 새 baseline 저장됨',
+              'ai.title': 'AI 기반 schema.org JSON-LD 추론',
+              'ai.desc': 'URL 본문을 LLM 에 보내 Article/Product/FAQPage/HowTo 등 적합한 schema.org 마크업을 자동 추론. 시작 시 setAiSchemaAdapter() 로 어댑터를 주입하세요.',
+              'ai.run': '추론 실행',
+              'ai.running': '추론 중...',
+              'ai.setup': 'Anthropic 어댑터 빠른 설정',
+              'audit.title': '감사 로그 (HMAC chain)',
+              'audit.desc': '모든 admin 액션은 SHA-256 hash chain + 옵션 HMAC 서명으로 기록됩니다. verifyAuditChain() 으로 변조 즉시 검출.',
+              'audit.refresh': '새로고침',
+              'audit.verify': '체인 검증',
+              'audit.ok': '✓ 무결성 OK',
+              'audit.broken': '✗ 변조 감지',
+              'audit.empty': '기록된 감사 이벤트가 없습니다.',
             },
             en: {
               'nav.welcome': 'Welcome', 'nav.welcome.sub': 'Gateway overview',
@@ -1367,6 +1385,34 @@ setAiSchemaAdapter(
               'btn.invalidate': 'Invalidate URL', 'btn.clear-all': 'Clear all',
               'btn.measure': 'Measure',
               'mode': 'mode',
+              'visual.title': 'Visual Regression',
+              'visual.desc': 'Capture a screenshot, diff against the local baseline. First run saves the baseline; later runs measure pixel-level differences. Catches CSS regressions and layout breakage immediately.',
+              'visual.url': 'URL',
+              'visual.mode': 'Mode',
+              'visual.mode.auto': 'auto — save baseline if missing',
+              'visual.mode.create': 'create — force new baseline',
+              'visual.mode.compare': 'compare — comparison only',
+              'visual.threshold': 'threshold (0~1)',
+              'visual.fullPage': 'Full page capture',
+              'visual.run': 'Capture + compare',
+              'visual.running': 'Capturing...',
+              'visual.diff': 'diff %',
+              'visual.diffPx': 'diff pixels',
+              'visual.size': 'size',
+              'visual.duration': 'duration',
+              'visual.created': '✓ new baseline saved',
+              'ai.title': 'AI-driven schema.org JSON-LD inference',
+              'ai.desc': 'Send page content to an LLM, get back schema.org markup (Article/Product/FAQPage/HowTo). BYO pattern — inject the adapter at startup with setAiSchemaAdapter().',
+              'ai.run': 'Run inference',
+              'ai.running': 'Inferring...',
+              'ai.setup': 'Quick setup — Anthropic adapter',
+              'audit.title': 'Audit Log (HMAC chain)',
+              'audit.desc': 'Every admin action is recorded with a SHA-256 hash chain + optional HMAC signature. Call verifyAuditChain() to detect tampering instantly.',
+              'audit.refresh': 'Refresh',
+              'audit.verify': 'Verify chain',
+              'audit.ok': '✓ integrity OK',
+              'audit.broken': '✗ tampering detected',
+              'audit.empty': 'No audit events recorded yet.',
             },
           },
           lighthouse: { url: '', running: false, result: null, error: null },

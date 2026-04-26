@@ -39,6 +39,9 @@ pnpm add @heejun/spa-seo-gateway-core @heejun/spa-seo-gateway-cms @heejun/spa-se
 
 # 코어만 (직접 미들웨어로 끼우는 경우)
 pnpm add @heejun/spa-seo-gateway-core
+
+# AI schema 추론 (선택, v1.6+)
+pnpm add @heejun/spa-seo-gateway-anthropic @anthropic-ai/sdk
 ```
 
 `puppeteer` 는 core 의 의존성이라 자동 설치되며, 처음에 chromium 을 다운로드합니다.
@@ -495,6 +498,80 @@ process.on('SIGINT', () => shutdown('SIGINT'));
 ```
 
 K8s rolling update 와 잘 맞습니다 (`terminationGracePeriodSeconds: 60` 설정).
+
+---
+
+## v1.6/1.7 신기능 사용
+
+### A/B variant — 같은 URL 에 다른 메타 태그 노출
+
+`seo-gateway.config.json` 의 routes 항목에 `variants` 배열 추가. weight 비율로 무작위 선택.
+
+```json
+{
+  "pattern": "^/products/",
+  "variants": [
+    { "title": "구매 30% 할인", "description": "...", "weight": 1 },
+    { "title": "지금 구매하면 무료배송", "description": "...", "weight": 2 }
+  ]
+}
+```
+
+선택된 variant 인덱스는 응답 헤더 `x-prerender-variant` + Prometheus `gateway_variant_impressions_total{route,variant}` 로 노출. GA/Plausible 의 cohort 와 매칭 가능.
+
+### Visual regression — 외부 SaaS 없이 회귀 감지
+
+```ts
+import { runVisualDiff } from '@heejun/spa-seo-gateway-core';
+
+const result = await runVisualDiff('https://www.example.com/', {
+  threshold: 0.1, // pixelmatch 0~1
+  fullPage: true,
+});
+
+if (result.diffPercent > 1) {
+  console.error(`회귀 감지: ${result.diffPercent}% 변경, diff=${result.diffPath}`);
+  process.exit(1);
+}
+```
+
+CI에서 PR 별로 실행해 baseline 변화 감지. baseline 은 `.data/baselines/` 에 PR 머지 후 갱신.
+
+### AI schema 추론 (Anthropic 어댑터)
+
+```ts
+import { setAiSchemaAdapter } from '@heejun/spa-seo-gateway-core';
+import { createAnthropicSchemaAdapter } from '@heejun/spa-seo-gateway-anthropic';
+
+setAiSchemaAdapter(
+  createAnthropicSchemaAdapter({
+    apiKey: process.env.ANTHROPIC_API_KEY,
+    model: 'claude-opus-4-7',
+  }),
+);
+
+// 이후 admin UI 의 AI Schema 탭, 또는 직접:
+const adapter = getAiSchemaAdapter();
+const suggestions = await adapter!.suggestSchema(html, url);
+```
+
+OpenAI 등 다른 LLM 도 `AiSchemaAdapter` 인터페이스만 맞추면 동일하게 사용 가능.
+
+### Audit chain — 변조 감지
+
+```ts
+import { recordAudit, verifyAuditChain } from '@heejun/spa-seo-gateway-core';
+
+recordAudit({ actor: 'admin', action: 'cache.clear', outcome: 'ok' });
+
+// 주기적으로 또는 incident 시:
+const { ok, brokenAt } = verifyAuditChain();
+if (!ok) {
+  alertSecurity(`Audit log tampered at index ${brokenAt}`);
+}
+```
+
+`AUDIT_WEBHOOK_SECRET` 또는 `HMAC_SECRET` 환경변수 설정 시 모든 이벤트에 HMAC-SHA256 서명. 외부 SIEM 으로 내보낼 때 변조 검증에 사용.
 
 ---
 

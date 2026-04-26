@@ -242,6 +242,18 @@ Chromium 은 장시간 가동 시 메모리가 천천히 증가합니다. `MAX_R
 - HTTP/2 지원, 스트림 응답
 - `@fastify/compress`, `@fastify/rate-limit` 등 1급 플러그인
 
+### I. v1.6/1.7 추가 모듈
+
+**A/B variants (`ab-variants.ts`)** — 렌더 후 `optimizeHtml` 다음 단계에서 weight 비율로 variant 한 개 선택, title/description/og:* 태그 교체. 응답 헤더 `x-prerender-variant` + Prometheus 카운터로 외부 분석 (GA/Plausible) 과 매칭.
+
+**Visual regression (`visual-regression.ts`)** — `runVisualDiff(url)` 가 풀에서 페이지를 캡처해 `pixelmatch` 로 baseline 과 perceptual diff. percy/chromatic 같은 외부 SaaS 의존 없이 단일 게이트웨이에서 회귀 감지. baseline 은 `.data/baselines/<safe-name>.png` 에 저장.
+
+**BYO 어댑터 (`adapters.ts`)** — `AiSchemaAdapter` / `BillingAdapter` / `SearchConsoleAdapter` 인터페이스. core 는 모양만 정의 — 실제 SDK (Anthropic / Stripe / GSC) 는 외부 패키지가 주입. AI 레퍼런스 구현체는 별도 패키지 `@heejun/spa-seo-gateway-anthropic`.
+
+**Audit chain (`audit.ts`)** — 모든 admin 액션을 `prevHash → hash` 체인 + 옵션 HMAC 서명으로 기록. `verifyAuditChain()` 으로 변조 즉시 검출. 액션 누락/순서 변경 시 `brokenAt` 인덱스 반환.
+
+**Distributed lock (`distributed-lock.ts`)** — Redis SETNX 기반. 다중 인스턴스에서 동일 URL 워밍 중복 방지. fallback 옵션으로 lock 실패 시 캐시 응답.
+
 ---
 
 ## 보안 고려사항

@@ -2,6 +2,28 @@
 
 날짜는 한국 시간(KST). 모든 커밋은 [GitHub history](https://github.com/blue45f/spa-seo-gateway/commits/main) 참고.
 
+## v1.7.1 — 2026-04-27
+
+마감 작업 — 사용자 가시 영역 갱신 + 어댑터 테스트 보강. 코어 동작 변경 없음.
+
+### Added
+- **Anthropic 어댑터에 `client` 옵션** — 사용자 정의 SDK 인스턴스 주입 가능 (테스트 / 커스텀 retry 정책). `apiKey` 없이도 client 만 주입 가능.
+- **Anthropic 어댑터 단위 테스트 17건** — `stripHtml`/`extractJson`/`isValidSuggestion` pure 헬퍼 + adapter integration (총 128건).
+- **CLI doctor 점검 항목 2개**: `Audit HMAC`, `Anthropic API key` 환경변수 안내.
+- **Migration 가이드** (`docs/MIGRATION-1.7.md`): v1.5 → v1.7 신기능 활성화 방법, breaking change 없음 명시.
+- **Helm chart 신규 환경변수**: `audit.hmacSecret`, `ai.anthropic.apiKey/model` — Secret 주입 패턴 통일.
+- **Admin UI EN locale**: 신규 3탭 (Visual/AI/Audit) 본문/버튼/필드 모두 i18n 키로 추출, 영어 번역 추가.
+
+### Changed
+- `docs/CONFIGURATION.md` — `AUDIT_*`, `ANTHROPIC_*` 환경변수 표 추가, `routes.variants` / `schemaTemplate` 필드 문서화.
+- `docs/ARCHITECTURE.md` — v1.6/1.7 모듈 (ab-variants / visual-regression / adapters / audit chain / distributed lock) 설계 결정 섹션 신설.
+- `docs/LIBRARY-USAGE.md` — v1.6/1.7 신기능 사용 예시 4개 추가.
+- `docs/GETTING-STARTED.md` — admin UI 탭 목록에 Lighthouse/Visual/AI/Audit 추가.
+
+### Internal
+- 128개 테스트 통과, 9 패키지 빌드 green.
+- CLI bump 1.1.0 → 1.2.0.
+
 ## v1.7.0 — 2026-04-27
 
 v1.6.0 의 백엔드 신기능들을 사용자 가시 영역으로 확장 — 어드민 UI 탭 + 단위 테스트 + Anthropic 레퍼런스 어댑터.

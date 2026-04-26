@@ -11,6 +11,7 @@ export default defineConfig({
         'packages/multi-tenant/src/index.ts',
       ),
       '@heejun/spa-seo-gateway-cms': resolve(__dirname, 'packages/cms/src/index.ts'),
+      '@heejun/spa-seo-gateway-anthropic': resolve(__dirname, 'packages/anthropic/src/index.ts'),
     },
   },
   test: {

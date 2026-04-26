@@ -109,10 +109,24 @@ otel:
   endpoint: ""
   serviceName: spa-seo-gateway
 
-# Audit log — file path or webhook
+# Audit log — file path or webhook + HMAC chain (v1.5+)
 audit:
   filePath: ""             # 예: /app/.data/audit.log
   webhookUrl: ""
+  # HMAC-SHA256 서명 활성화 — 변조 검출. existingSecret 권장.
+  hmacSecret:
+    value: ""
+    existingSecret: ""     # 예: gateway-secrets / key: audit-hmac
+    existingSecretKey: audit-hmac
+
+# AI schema 어댑터 (v1.6+) — @heejun/spa-seo-gateway-anthropic 사용 시
+ai:
+  anthropic:
+    apiKey:
+      value: ""
+      existingSecret: ""   # 예: gateway-secrets / key: anthropic-api-key
+      existingSecretKey: anthropic-api-key
+    model: ""              # 미지정 시 claude-opus-4-7
 
 # Cron 워밍 (sitemap 정기 사전 렌더)
 warmCron:

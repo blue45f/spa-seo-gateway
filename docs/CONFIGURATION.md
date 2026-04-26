@@ -68,6 +68,21 @@ defaults < seo-gateway.config.json < env vars
 | `RATE_LIMIT_WINDOW` | `1 minute` | 시간 윈도우 |
 | `ALLOWED_HOSTS` | (origin 만) | CSV — render 가능한 호스트 화이트리스트 |
 
+### Audit log (v1.5+)
+| 변수 | 기본 | 설명 |
+|--|--|--|
+| `AUDIT_LOG_FILE` | (없음) | 모든 admin 액션을 JSONL 파일로 기록 |
+| `AUDIT_WEBHOOK_URL` | (없음) | 액션 발생 시 POST. body 에 SHA-256 hash + prevHash 포함 |
+| `AUDIT_WEBHOOK_SECRET` 또는 `HMAC_SECRET` | (없음) | HMAC-SHA256 서명 활성화. 변조 검출에 사용 |
+
+### AI Schema 어댑터 (v1.6+, BYO)
+| 변수 | 기본 | 설명 |
+|--|--|--|
+| `ANTHROPIC_API_KEY` | (없음) | `@heejun/spa-seo-gateway-anthropic` 어댑터가 자동 인식 |
+| `ANTHROPIC_MODEL` | `claude-opus-4-7` | 어댑터에서 사용할 Claude 모델 |
+
+> 어댑터는 사용자가 시작 시 `setAiSchemaAdapter()` 로 직접 주입해야 함. 자세히는 [LIBRARY-USAGE.md](LIBRARY-USAGE.md).
+
 ### 다중 모드
 | 변수 | 기본 | 설명 |
 |--|--|--|
@@ -133,6 +148,22 @@ pnpm run schema:gen
 | `waitMs` | number | 고정 대기시간 (waitUntil 후) |
 | `blockResourceTypes` | string[] | 라우트별 차단 리소스 |
 | `viewport` | `{width,height}` | 라우트별 viewport |
+| `schemaTemplate` | enum | `Article` / `Product` / `FAQ` / `HowTo` / `WebSite` — 응답에 schema.org JSON-LD 자동 삽입 (v1.5+) |
+| `variants` | array | A/B variant 메타 태그 — 같은 URL 에 다른 title/description weight 비율 노출 (v1.6+) |
+
+#### `variants` 항목
+
+```json
+{
+  "pattern": "^/products/",
+  "variants": [
+    { "title": "구매 30% 할인", "description": "...", "weight": 1 },
+    { "title": "지금 구매하면 무료배송", "description": "...", "weight": 2 }
+  ]
+}
+```
+
+선택된 variant 인덱스는 응답 헤더 `x-prerender-variant` + Prometheus `gateway_variant_impressions_total{route,variant}` 로 노출. GA/Plausible 등 외부 분석과 매칭 가능.
 
 매칭은 첫 매치가 승리 (위에서 아래로). 라우트 어드민 UI 에서 드래그 정렬은 미지원 — 순서가 중요하면 더 구체적인 패턴을 위로.
 

@@ -103,6 +103,27 @@ export async function runDoctor(): Promise<void> {
     fix: process.env.ADMIN_TOKEN ? undefined : '.env 에 ADMIN_TOKEN=...',
   });
 
+  // Audit HMAC (v1.5+) — 변조 검출 활성화 여부
+  const auditSecret = process.env.AUDIT_WEBHOOK_SECRET ?? process.env.HMAC_SECRET;
+  checks.push({
+    label: 'Audit HMAC',
+    ok: !!auditSecret,
+    detail: auditSecret ? '서명 활성 — 변조 검출 가능' : '(없음 — 감사 로그는 hash chain 만)',
+    fix: auditSecret ? undefined : '.env 에 AUDIT_WEBHOOK_SECRET=... 추가하면 HMAC 서명 활성',
+  });
+
+  // ANTHROPIC_API_KEY (v1.6+) — AI schema 어댑터
+  checks.push({
+    label: 'Anthropic API key',
+    ok: !!process.env.ANTHROPIC_API_KEY,
+    detail: process.env.ANTHROPIC_API_KEY
+      ? '설정됨 — AI schema 어댑터 사용 가능'
+      : '(없음 — AI schema 추론 비활성)',
+    fix: process.env.ANTHROPIC_API_KEY
+      ? undefined
+      : '@heejun/spa-seo-gateway-anthropic 사용 시 .env 에 ANTHROPIC_API_KEY=sk-ant-...',
+  });
+
   s.stop('점검 완료');
 
   const failed = checks.filter((c) => !c.ok).length;

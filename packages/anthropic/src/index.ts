@@ -14,6 +14,18 @@
 import Anthropic from '@anthropic-ai/sdk';
 import type { AiSchemaAdapter, SchemaSuggestion } from '@heejun/spa-seo-gateway-core';
 
+/** Anthropic SDK `messages.create` 의 최소 인터페이스 — 테스트용 fake client 주입 가능. */
+export interface AnthropicLikeClient {
+  messages: {
+    create(params: {
+      model: string;
+      max_tokens: number;
+      system: string;
+      messages: { role: 'user'; content: string }[];
+    }): Promise<{ content: Array<{ type: string; text?: string }> }>;
+  };
+}
+
 export type AnthropicSchemaAdapterOptions = {
   apiKey?: string;
   model?: string;
@@ -21,11 +33,13 @@ export type AnthropicSchemaAdapterOptions = {
   maxHtmlChars?: number;
   /** 한 번에 추론할 최대 schema 갯수 (기본 5) */
   maxSuggestions?: number;
+  /** 직접 SDK 인스턴스 주입 (테스트/커스텀 retry 정책용). 주입 시 apiKey 무시. */
+  client?: AnthropicLikeClient;
 };
 
 const DEFAULT_MODEL = 'claude-opus-4-7';
 
-const SYSTEM_PROMPT = `당신은 SEO/검색엔진 최적화 전문가이자 schema.org 마크업 생성 전문가입니다.
+export const SYSTEM_PROMPT = `당신은 SEO/검색엔진 최적화 전문가이자 schema.org 마크업 생성 전문가입니다.
 주어진 HTML 페이지의 본문을 분석해 가장 적합한 schema.org JSON-LD 마크업을 추론합니다.
 
 규칙:
@@ -51,8 +65,8 @@ confidence 기준:
 - 0.5~0.7: 부분 시사, 보강 필요
 - 0.5 미만: 추측 — 응답에 포함하지 마세요`;
 
-function stripHtml(html: string, maxChars: number): string {
-  // 본문만 추출 — script/style/svg 제거 후 태그 stripping. 단순 휴리스틱이지만 LLM 입력 비용 절약.
+/** script/style/svg/noscript/comment 제거 후 max chars 로 자른다. LLM 입력 비용 절감. */
+export function stripHtml(html: string, maxChars: number): string {
   const cleaned = html
     .replace(/<script[\s\S]*?<\/script>/gi, '')
     .replace(/<style[\s\S]*?<\/style>/gi, '')
@@ -62,13 +76,15 @@ function stripHtml(html: string, maxChars: number): string {
   return cleaned.slice(0, maxChars);
 }
 
-function extractJson(text: string): unknown {
+/** LLM 응답에서 JSON 배열 부분만 추출. 실패 시 throw. */
+export function extractJson(text: string): unknown {
   const match = text.match(/\[[\s\S]*\]/);
   const slice = match ? match[0] : text;
   return JSON.parse(slice);
 }
 
-function isValidSuggestion(x: unknown): x is SchemaSuggestion {
+/** SchemaSuggestion shape 검증 — 필수 필드 누락/잘못된 타입은 false. */
+export function isValidSuggestion(x: unknown): x is SchemaSuggestion {
   if (!x || typeof x !== 'object') return false;
   const o = x as Record<string, unknown>;
   return (
@@ -82,18 +98,22 @@ function isValidSuggestion(x: unknown): x is SchemaSuggestion {
 export function createAnthropicSchemaAdapter(
   opts: AnthropicSchemaAdapterOptions = {},
 ): AiSchemaAdapter {
-  const apiKey = opts.apiKey ?? process.env.ANTHROPIC_API_KEY;
   const model = opts.model ?? process.env.ANTHROPIC_MODEL ?? DEFAULT_MODEL;
   const maxHtmlChars = opts.maxHtmlChars ?? 12_000;
   const maxSuggestions = opts.maxSuggestions ?? 5;
 
-  if (!apiKey) {
-    throw new Error(
-      'AnthropicSchemaAdapter: apiKey not provided (set ANTHROPIC_API_KEY or pass apiKey option)',
-    );
+  let client: AnthropicLikeClient;
+  if (opts.client) {
+    client = opts.client;
+  } else {
+    const apiKey = opts.apiKey ?? process.env.ANTHROPIC_API_KEY;
+    if (!apiKey) {
+      throw new Error(
+        'AnthropicSchemaAdapter: apiKey not provided (set ANTHROPIC_API_KEY or pass apiKey option)',
+      );
+    }
+    client = new Anthropic({ apiKey }) as unknown as AnthropicLikeClient;
   }
-
-  const client = new Anthropic({ apiKey });
 
   return {
     async suggestSchema(html, url) {
@@ -107,7 +127,7 @@ export function createAnthropicSchemaAdapter(
         messages: [{ role: 'user', content: userMessage }],
       });
 
-      const text = response.content[0]?.type === 'text' ? response.content[0].text : '';
+      const text = response.content[0]?.type === 'text' ? (response.content[0].text ?? '') : '';
       if (!text) return [];
 
       let parsed: unknown;

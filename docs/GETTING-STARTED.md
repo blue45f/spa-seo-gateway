@@ -108,6 +108,10 @@ open http://localhost:3000/admin/ui
 - **캐시** — URL 무효화, 전체 초기화
 - **워밍** — sitemap.xml 입력 → 재귀 파싱 + 동시 워밍
 - **렌더 테스트** — URL/UA 입력 → 즉시 렌더 결과와 본문 미리보기
+- **Lighthouse** (v1.4+) — 페이지 점수 측정 (peer-installed `lighthouse` 필요)
+- **시각 회귀** (v1.6+) — 스크린샷 + pixelmatch 기반 baseline diff. 외부 SaaS 없이 회귀 감지
+- **AI Schema** (v1.6+) — 본문 → schema.org JSON-LD 자동 추론 (어댑터 주입 필요)
+- **감사 로그** (v1.7+) — HMAC chain 이벤트 테이블 + 무결성 검증 버튼
 
 ## 6) 단일 URL CLI 테스트
 

@@ -97,6 +97,30 @@ spec:
             - name: AUDIT_WEBHOOK_URL
               value: {{ .Values.audit.webhookUrl | quote }}
             {{- end }}
+            {{- if .Values.audit.hmacSecret.existingSecret }}
+            - name: AUDIT_WEBHOOK_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.audit.hmacSecret.existingSecret }}
+                  key: {{ .Values.audit.hmacSecret.existingSecretKey }}
+            {{- else if .Values.audit.hmacSecret.value }}
+            - name: AUDIT_WEBHOOK_SECRET
+              value: {{ .Values.audit.hmacSecret.value | quote }}
+            {{- end }}
+            {{- if .Values.ai.anthropic.apiKey.existingSecret }}
+            - name: ANTHROPIC_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.ai.anthropic.apiKey.existingSecret }}
+                  key: {{ .Values.ai.anthropic.apiKey.existingSecretKey }}
+            {{- else if .Values.ai.anthropic.apiKey.value }}
+            - name: ANTHROPIC_API_KEY
+              value: {{ .Values.ai.anthropic.apiKey.value | quote }}
+            {{- end }}
+            {{- if .Values.ai.anthropic.model }}
+            - name: ANTHROPIC_MODEL
+              value: {{ .Values.ai.anthropic.model | quote }}
+            {{- end }}
             {{- if .Values.warmCron.enabled }}
             - name: WARM_CRON_ENABLED
               value: "true"

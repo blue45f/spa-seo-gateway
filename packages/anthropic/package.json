@@ -1,6 +1,6 @@
 {
   "name": "@heejun/spa-seo-gateway-anthropic",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Anthropic Claude reference adapter for spa-seo-gateway — schema.org JSON-LD inference",
   "type": "module",
   "main": "./dist/index.js",
