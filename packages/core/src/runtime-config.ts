@@ -64,7 +64,7 @@ export async function persistRoutesToFile(): Promise<{
 
 export type SiteSummary = {
   origin: string | undefined;
-  mode: 'render-only' | 'proxy';
+  mode: 'render-only' | 'proxy' | 'cms' | 'saas';
   routes: number;
 };
 

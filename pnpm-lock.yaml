@@ -53,9 +53,15 @@ importers:
       '@spa-seo-gateway/admin-ui':
         specifier: workspace:*
         version: link:../../packages/admin-ui
+      '@spa-seo-gateway/cms':
+        specifier: workspace:*
+        version: link:../../packages/cms
       '@spa-seo-gateway/core':
         specifier: workspace:*
         version: link:../../packages/core
+      '@spa-seo-gateway/multi-tenant':
+        specifier: workspace:*
+        version: link:../../packages/multi-tenant
       fastify:
         specifier: ^5.8.5
         version: 5.8.5

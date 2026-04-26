@@ -1,41 +1,57 @@
 # @spa-seo-gateway/multi-tenant
 
-**Status: alpha scaffold** — option B 의 골격. SaaS 형태로 게이트웨이를 운영할 때 사용.
+`saas` 모드 구현. 한 게이트웨이가 여러 외부 고객(테넌트) 의 SPA 를 동시에 SEO 렌더링.
 
-## 제공하는 것
-
-- `Tenant` 타입 (zod 스키마 포함)
-- `TenantStore` 인터페이스 + `InMemoryTenantStore` 구현
-- `registerMultiTenant(app, { store, strategy })` Fastify 플러그인 — host/subdomain/apiKey/pathPrefix 4가지 식별 전략
-- `req.tenant` decorator (Fastify) 로 라우트 핸들러에서 즉시 사용
-
-## 아직 없는 것 (TODO)
-
-- Postgres/Drizzle 어댑터
-- 빌링 (Stripe webhooks)
-- 로그인/대시보드 UI (별도 `@spa-seo-gateway/cms` 와 통합 예정)
-- 사용량 측정 (요청당 메트릭 + 정산)
-- 무료/유료 플랜 quota
-- 화이트라벨 도메인 매핑
-
-## 사용 예시 (운영 시점)
+## 사용법
 
 ```ts
 import Fastify from 'fastify';
-import { registerGateway } from '@spa-seo-gateway/server';
-import { registerMultiTenant, InMemoryTenantStore } from '@spa-seo-gateway/multi-tenant';
-
-const store = new InMemoryTenantStore();
-await store.upsert({
-  id: 'acme',
-  name: 'ACME',
-  origin: 'https://www.acme.example.com',
-  apiKey: '<long-key>',
-  routes: [],
-  plan: 'pro',
-});
+import { registerMultiTenant, FileTenantStore } from '@spa-seo-gateway/multi-tenant';
 
 const app = Fastify();
-await registerMultiTenant(app, { store, strategy: 'host', required: true });
-// 이후 라우트 핸들러는 req.tenant 로 사이트별 분기
+const store = new FileTenantStore('./tenants.json');
+
+await registerMultiTenant(app, {
+  store,
+  adminToken: process.env.ADMIN_TOKEN,
+  resolve: ['host', 'apiKey'],   // 식별 전략 (순서대로 시도)
+});
+
+await app.listen({ port: 3000 });
 ```
+
+기본 사용은 [docs/MULTI-TENANT.md](../../docs/MULTI-TENANT.md) 참고. 위 코드는 `apps/gateway` 가 `GATEWAY_MODE=saas` 일 때 자동으로 수행함.
+
+## 제공 클래스 / 함수
+
+| | 설명 |
+|--|--|
+| `TenantSchema` | zod 스키마 |
+| `Tenant` | 추출 타입 |
+| `TenantStore` | 인터페이스 (`list/byId/byApiKey/byHost/upsert/remove`) |
+| `InMemoryTenantStore` | 테스트용 |
+| `FileTenantStore(path)` | JSON 파일 영구화 (atomic rename) |
+| `registerMultiTenant(app, opts)` | Fastify 플러그인 |
+
+외부 KV/DB 어댑터는 `TenantStore` 인터페이스를 만족하면 자유롭게 교체.
+
+## 등록되는 라우트
+
+```
+GET    /admin/api/tenants                  (마스터 admin)
+POST   /admin/api/tenants
+DELETE /admin/api/tenants/:id
+GET    /admin/api/multi-tenant/stats
+POST   /admin/api/multi-tenant/cache/clear
+
+POST   /api/cache/invalidate               (테넌트 apiKey 인증)
+GET/HEAD /*                                 (테넌트 인지 렌더)
+```
+
+## 캐시 격리
+
+`cacheKey` 에 `tenant:<id>` namespace prefix 를 붙여 다른 테넌트의 캐시와 자동 격리. cross-tenant 노출 불가.
+
+## 라이선스
+
+MIT

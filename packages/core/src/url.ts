@@ -25,9 +25,9 @@ export function normalize(input: string): string {
   });
 }
 
-export function cacheKey(url: string, locale = 'default'): string {
+export function cacheKey(url: string, locale = 'default', namespace = ''): string {
   return createHash('sha1')
-    .update(`${normalize(url)}|${locale}`)
+    .update(`${namespace}|${normalize(url)}|${locale}`)
     .digest('hex')
     .slice(0, 16);
 }

@@ -63,6 +63,7 @@ export async function registerAdminUI(
       origin: config.originUrl,
       breakers: breakerStats(),
       cache: cacheStats(),
+      multiContext: config.mode === 'saas' || config.mode === 'cms',
     };
   });
 

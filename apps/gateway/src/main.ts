@@ -2,7 +2,9 @@ import compress from '@fastify/compress';
 import cors from '@fastify/cors';
 import rateLimit from '@fastify/rate-limit';
 import { registerAdminUI } from '@spa-seo-gateway/admin-ui';
+import { FileSiteStore, registerCms } from '@spa-seo-gateway/cms';
 import { browserPool, config, logger, shutdownCache } from '@spa-seo-gateway/core';
+import { FileTenantStore, registerMultiTenant } from '@spa-seo-gateway/multi-tenant';
 import Fastify from 'fastify';
 import { registerRoutes } from './routes.js';
 
@@ -38,7 +40,17 @@ async function main() {
     });
   }
 
-  await registerRoutes(app as unknown as Parameters<typeof registerRoutes>[0]);
+  if (config.mode === 'saas') {
+    const store = new FileTenantStore(config.tenantStoreFile);
+    await registerMultiTenant(app as unknown as Parameters<typeof registerMultiTenant>[0], {
+      store,
+    });
+  } else if (config.mode === 'cms') {
+    const store = new FileSiteStore(config.siteStoreFile);
+    await registerCms(app as unknown as Parameters<typeof registerCms>[0], { store });
+  } else {
+    await registerRoutes(app as unknown as Parameters<typeof registerRoutes>[0]);
+  }
   await registerAdminUI(app as unknown as Parameters<typeof registerAdminUI>[0], {
     prefix: '/admin/ui',
   });

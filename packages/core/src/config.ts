@@ -46,7 +46,9 @@ const Schema = z.object({
     host: z.string().default('0.0.0.0'),
     port: z.coerce.number().int().positive().default(3000),
   }),
-  mode: z.enum(['render-only', 'proxy']).default('render-only'),
+  mode: z.enum(['render-only', 'proxy', 'cms', 'saas']).default('render-only'),
+  tenantStoreFile: z.string().default('.data/tenants.json'),
+  siteStoreFile: z.string().default('.data/sites.json'),
   originUrl: z.string().url().optional(),
   bot: z.object({
     forceRenderHeader: z.string().default('x-force-render'),
@@ -146,6 +148,8 @@ function fromEnv(): Record<string, unknown> {
     server: { host: env.HOST, port: env.PORT },
     mode: env.GATEWAY_MODE,
     originUrl: env.ORIGIN_URL,
+    tenantStoreFile: env.TENANT_STORE_FILE,
+    siteStoreFile: env.SITE_STORE_FILE,
     bot: {
       forceRenderHeader: env.FORCE_RENDER_HEADER,
       bypassQueryParam: env.BYPASS_QUERY_PARAM,
