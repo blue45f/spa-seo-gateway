@@ -1184,7 +1184,10 @@ REDIS_URL=redis://localhost:6379</pre>
             </div>
             <div class="bg-white dark:bg-slate-900 dark:border-slate-800 rounded-lg shadow-sm border border-slate-200 p-5 text-sm">
               <h3 class="font-semibold mb-2" x-text="t('ai.setup')"></h3>
-              <pre class="text-xs bg-slate-50 dark:bg-slate-800 p-3 rounded overflow-auto">npm install @heejun/spa-seo-gateway-anthropic @anthropic-ai/sdk
+              <div class="space-y-3">
+                <div>
+                  <div class="text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Anthropic Claude</div>
+                  <pre class="text-xs bg-slate-50 dark:bg-slate-800 p-3 rounded overflow-auto">npm install @heejun/spa-seo-gateway-anthropic @anthropic-ai/sdk
 
 import { setAiSchemaAdapter } from '@heejun/spa-seo-gateway-core';
 import { createAnthropicSchemaAdapter } from '@heejun/spa-seo-gateway-anthropic';
@@ -1195,6 +1198,26 @@ setAiSchemaAdapter(
     model: 'claude-opus-4-7',
   }),
 );</pre>
+                </div>
+                <div>
+                  <div class="text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">OpenAI / Groq / Ollama (호환 엔드포인트)</div>
+                  <pre class="text-xs bg-slate-50 dark:bg-slate-800 p-3 rounded overflow-auto">npm install @heejun/spa-seo-gateway-openai
+
+import { createOpenAiSchemaAdapter } from '@heejun/spa-seo-gateway-openai';
+
+// OpenAI 공식
+setAiSchemaAdapter(createOpenAiSchemaAdapter({
+  apiKey: process.env.OPENAI_API_KEY,
+  model: 'gpt-4o-mini',
+}));
+
+// 또는 Ollama 로컬 (apiKey 불필요)
+setAiSchemaAdapter(createOpenAiSchemaAdapter({
+  baseUrl: 'http://localhost:11434/v1',
+  model: 'llama3.2',
+}));</pre>
+                </div>
+              </div>
             </div>
           </section>
 

@@ -40,8 +40,10 @@ pnpm add @heejun/spa-seo-gateway-core @heejun/spa-seo-gateway-cms @heejun/spa-se
 # 코어만 (직접 미들웨어로 끼우는 경우)
 pnpm add @heejun/spa-seo-gateway-core
 
-# AI schema 추론 (선택, v1.6+)
+# AI schema 추론 (선택, v1.6+) — Claude
 pnpm add @heejun/spa-seo-gateway-anthropic @anthropic-ai/sdk
+# 또는 OpenAI / Groq / Ollama (v1.7.2+)
+pnpm add @heejun/spa-seo-gateway-openai
 ```
 
 `puppeteer` 는 core 의 의존성이라 자동 설치되며, 처음에 chromium 을 다운로드합니다.
@@ -555,7 +557,32 @@ const adapter = getAiSchemaAdapter();
 const suggestions = await adapter!.suggestSchema(html, url);
 ```
 
-OpenAI 등 다른 LLM 도 `AiSchemaAdapter` 인터페이스만 맞추면 동일하게 사용 가능.
+OpenAI / Groq / Ollama 등은 별도 패키지로 제공 (v1.7.2+):
+
+```ts
+import { createOpenAiSchemaAdapter } from '@heejun/spa-seo-gateway-openai';
+
+// OpenAI 공식
+setAiSchemaAdapter(createOpenAiSchemaAdapter({
+  apiKey: process.env.OPENAI_API_KEY,
+  model: 'gpt-4o-mini',
+}));
+
+// Groq (무료 티어)
+setAiSchemaAdapter(createOpenAiSchemaAdapter({
+  apiKey: process.env.GROQ_API_KEY,
+  baseUrl: 'https://api.groq.com/openai/v1',
+  model: 'llama-3.3-70b-versatile',
+}));
+
+// Ollama (로컬, 완전 무료)
+setAiSchemaAdapter(createOpenAiSchemaAdapter({
+  baseUrl: 'http://localhost:11434/v1',
+  model: 'llama3.2',
+}));
+```
+
+Custom LLM 은 `AiSchemaAdapter` 인터페이스만 맞춰 직접 구현.
 
 ### Audit chain — 변조 감지
 

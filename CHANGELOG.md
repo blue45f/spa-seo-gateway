@@ -2,6 +2,22 @@
 
 날짜는 한국 시간(KST). 모든 커밋은 [GitHub history](https://github.com/blue45f/spa-seo-gateway/commits/main) 참고.
 
+## v1.7.2 — 2026-04-27
+
+OpenAI-compatible 어댑터 패키지 추가 — Anthropic 자매. resume 프로젝트의 multi-provider 패턴 참고.
+
+### Added
+- **`@heejun/spa-seo-gateway-openai`** (신규 패키지): OpenAI-compatible `chat/completions` 엔드포인트 어댑터.
+  - 동일 코드로 OpenAI / Groq / OpenRouter / Together AI / Ollama / LM Studio 모두 사용 가능
+  - SDK 의존 없음 — `fetch` 만 사용 (Node 18+ / 모던 브라우저)
+  - 로컬 엔드포인트 (Ollama 등) 는 apiKey 불필요 — 자동 감지
+  - 환경변수 `OPENAI_API_KEY`, `OPENAI_BASE_URL`, `OPENAI_MODEL` 자동 인식
+- **단위 테스트 20건** (총 148건): pure 헬퍼 + 어댑터 통합 (인증 헤더, 엔드포인트, model 전달, error handling, maxSuggestions)
+
+### Internal
+- 9 → 10 패키지, 모든 빌드 green.
+- vitest config + 루트 tsconfig 에 openai alias 추가.
+
 ## v1.7.1 — 2026-04-27
 
 마감 작업 — 사용자 가시 영역 갱신 + 어댑터 테스트 보강. 코어 동작 변경 없음.

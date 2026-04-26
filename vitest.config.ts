@@ -12,6 +12,7 @@ export default defineConfig({
       ),
       '@heejun/spa-seo-gateway-cms': resolve(__dirname, 'packages/cms/src/index.ts'),
       '@heejun/spa-seo-gateway-anthropic': resolve(__dirname, 'packages/anthropic/src/index.ts'),
+      '@heejun/spa-seo-gateway-openai': resolve(__dirname, 'packages/openai/src/index.ts'),
     },
   },
   test: {

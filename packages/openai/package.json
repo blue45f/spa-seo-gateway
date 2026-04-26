@@ -1,7 +1,7 @@
 {
-  "name": "@heejun/spa-seo-gateway-admin-ui",
-  "version": "1.7.2",
-  "description": "Embedded admin dashboard for spa-seo-gateway (Fastify plugin + static SPA)",
+  "name": "@heejun/spa-seo-gateway-openai",
+  "version": "1.0.0",
+  "description": "OpenAI-compatible reference adapter for spa-seo-gateway — works with OpenAI, Ollama, Groq, OpenRouter, LM Studio",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -13,43 +13,40 @@
   },
   "files": [
     "dist",
-    "public",
     "README.md"
   ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "clean": "rm -rf dist"
   },
-  "dependencies": {
-    "@fastify/static": "^9.1.3",
-    "@heejun/spa-seo-gateway-core": "workspace:*",
-    "fastify": "^5.8.5"
+  "peerDependencies": {
+    "@heejun/spa-seo-gateway-core": "^1.6.0"
   },
   "devDependencies": {
+    "@heejun/spa-seo-gateway-core": "workspace:*",
     "typescript": "^6.0.3"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/blue45f/spa-seo-gateway.git",
-    "directory": "packages/admin-ui"
+    "directory": "packages/openai"
   },
   "bugs": {
     "url": "https://github.com/blue45f/spa-seo-gateway/issues"
   },
-  "homepage": "https://github.com/blue45f/spa-seo-gateway/tree/main/packages/admin-ui#readme",
+  "homepage": "https://github.com/blue45f/spa-seo-gateway/tree/main/packages/openai#readme",
   "license": "MIT",
   "author": "heejun",
   "keywords": [
     "seo",
     "spa",
-    "prerender",
-    "headless",
-    "puppeteer",
-    "fastify",
-    "dynamic-rendering",
-    "react",
-    "vue",
-    "svelte"
+    "openai",
+    "ollama",
+    "groq",
+    "openrouter",
+    "schema.org",
+    "json-ld",
+    "ai"
   ],
   "publishConfig": {
     "access": "public"

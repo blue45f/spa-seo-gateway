@@ -238,6 +238,15 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
 
+  packages/openai:
+    devDependencies:
+      '@heejun/spa-seo-gateway-core':
+        specifier: workspace:*
+        version: link:../core
+      typescript:
+        specifier: ^6.0.3
+        version: 6.0.3
+
 packages:
 
   '@anthropic-ai/sdk@0.90.0':
