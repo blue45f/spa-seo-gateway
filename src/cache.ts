@@ -43,10 +43,14 @@ const cache = new Cacheable({
 });
 cache.on('error', (e: Error) => logger.warn({ err: e.message }, 'cache error'));
 
-async function fetchAndStore(key: string, fetcher: () => Promise<CacheEntry>): Promise<CacheEntry> {
+async function fetchAndStore(
+  key: string,
+  fetcher: () => Promise<CacheEntry>,
+  totalLifeMsOverride?: number,
+): Promise<CacheEntry> {
   const result = await coalesceAsync(`render:${key}`, async () => {
     const entry = await fetcher();
-    await cache.set(key, entry);
+    await cache.set(key, entry, totalLifeMsOverride);
     return entry;
   });
   if (!result) throw new Error('coalesce returned no value');
@@ -81,23 +85,26 @@ export async function shutdownCache(): Promise<void> {
 export async function cacheSwr(
   key: string,
   fetcher: () => Promise<CacheEntry>,
+  customTtlMs?: number,
 ): Promise<SwrResult> {
+  const ttl = customTtlMs ?? ttlMs;
+  const totalLife = ttl + swrMs;
   const cached = await cache.get<CacheEntry>(key);
   if (cached) {
     const age = Date.now() - cached.createdAt;
-    if (age < ttlMs) {
+    if (age < ttl) {
       cacheEvents.inc({ layer: 'cache', event: 'hit' });
       return { entry: cached, fromCache: 'cache', stale: false };
     }
-    if (age < totalLifeMs) {
+    if (age < totalLife) {
       cacheEvents.inc({ layer: 'cache', event: 'swr' });
-      void fetchAndStore(key, fetcher).catch((err) =>
+      void fetchAndStore(key, fetcher, totalLife).catch((err) =>
         logger.warn({ err: (err as Error).message, key }, 'swr revalidation failed'),
       );
       return { entry: cached, fromCache: 'cache', stale: true };
     }
   }
   cacheEvents.inc({ layer: 'cache', event: 'miss' });
-  const entry = await fetchAndStore(key, fetcher);
+  const entry = await fetchAndStore(key, fetcher, totalLife);
   return { entry, fromCache: null, stale: false };
 }

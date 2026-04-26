@@ -15,6 +15,7 @@
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "format": "biome format --write .",
+    "check": "tsx scripts/check.ts",
     "bench:smoke": "tsx benchmarks/smoke.ts",
     "bench:cache": "tsx benchmarks/cache.ts",
     "bench:cold": "tsx benchmarks/cold.ts",
@@ -29,7 +30,6 @@
     "cacheable": "^2.3.4",
     "dotenv": "^17.4.2",
     "fastify": "^5.8.5",
-    "generic-pool": "^3.9.0",
     "isbot": "^5.1.39",
     "normalize-url": "^9.0.0",
     "pino": "^10.3.1",
@@ -42,7 +42,6 @@
   "devDependencies": {
     "@biomejs/biome": "^2.4.13",
     "@types/autocannon": "^7.12.7",
-    "@types/generic-pool": "^3.8.3",
     "@types/node": "^25.6.0",
     "autocannon": "^8.0.0",
     "tsx": "^4.21.0",

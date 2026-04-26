@@ -1,15 +1,22 @@
 import type { HTTPRequest, Page } from 'puppeteer';
 import { config } from './config.js';
 
-const blockedTypes = new Set(config.renderer.blockResourceTypes);
-const blockedPatterns = config.renderer.blockUrlPatterns;
+export type InterceptionOptions = {
+  blockResourceTypes?: ReadonlyArray<string>;
+  blockUrlPatterns?: ReadonlyArray<string>;
+};
 
-export async function applyRequestInterception(page: Page): Promise<void> {
+export async function applyRequestInterception(
+  page: Page,
+  options: InterceptionOptions = {},
+): Promise<void> {
+  const blockedTypes = new Set(options.blockResourceTypes ?? config.renderer.blockResourceTypes);
+  const blockedPatterns = options.blockUrlPatterns ?? config.renderer.blockUrlPatterns;
+
   await page.setRequestInterception(true);
   page.on('request', (req: HTTPRequest) => {
     if (req.isInterceptResolutionHandled()) return;
-    const type = req.resourceType();
-    if (blockedTypes.has(type as never)) {
+    if (blockedTypes.has(req.resourceType())) {
       req.abort('blockedbyclient').catch(() => {});
       return;
     }
@@ -39,21 +46,14 @@ export type OptimizeOptions = {
 
 export function optimizeHtml(html: string, opts: OptimizeOptions): string {
   let out = html;
-
   const meta = [
     `<meta name="x-prerendered" content="${new Date().toISOString()}">`,
     `<meta name="x-prerender-source" content="spa-seo-gateway">`,
   ];
-
   if (opts.ensureBase && !BASE_RE.test(out)) {
-    const origin = new URL(opts.url).origin;
-    meta.push(`<base href="${origin}/">`);
+    meta.push(`<base href="${new URL(opts.url).origin}/">`);
   }
-
   out = out.replace(HEAD_RE, (_m, attrs) => `<head${attrs}>\n${meta.join('\n')}`);
-
-  if (opts.stripScripts) {
-    out = out.replace(SCRIPT_RE, '');
-  }
+  if (opts.stripScripts) out = out.replace(SCRIPT_RE, '');
   return out;
 }

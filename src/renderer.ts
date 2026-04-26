@@ -1,18 +1,19 @@
 import type { CacheEntry } from './cache.js';
-import { config } from './config.js';
+import { config, type RouteOverride } from './config.js';
 import { logger } from './logger.js';
 import { inflight, renderDuration, renderErrors } from './metrics.js';
 import { applyRequestInterception, optimizeHtml } from './optimize.js';
 import { browserPool } from './pool.js';
 
 const FORWARD_HEADERS = new Set(['accept-language', 'cookie', 'authorization']);
-
 const TRANSIENT_REASONS = new Set(['crashed', 'pool-exhausted', 'network']);
 const MAX_ATTEMPTS = 2;
+const MOBILE_UA_RE = /Mobile|iPhone|iPad|Android.*Mobile|Googlebot.*Mobile|bingbot.*Mobile/i;
 
 export type RenderInput = {
   url: string;
   headers: Record<string, string | string[] | undefined>;
+  route?: RouteOverride | null;
 };
 
 export async function render(input: RenderInput): Promise<CacheEntry> {
@@ -53,6 +54,16 @@ async function renderOnce(
   attempt: number,
   started: number,
 ): Promise<CacheEntry> {
+  const route = input.route ?? null;
+  const ua = input.headers['user-agent'] as string | undefined;
+  const isMobile = config.bot.detectMobile && typeof ua === 'string' && MOBILE_UA_RE.test(ua);
+
+  const viewport =
+    route?.viewport ?? (isMobile ? config.renderer.mobileViewport : config.renderer.viewport);
+  const waitUntil = route?.waitUntil ?? config.renderer.waitUntil;
+  const waitSelector = route?.waitSelector ?? config.renderer.waitSelector;
+  const blockResourceTypes = route?.blockResourceTypes ?? config.renderer.blockResourceTypes;
+
   const entry = await browserPool.withPage(async (page) => {
     const fwd: Record<string, string> = {};
     for (const [k, v] of Object.entries(input.headers)) {
@@ -61,20 +72,18 @@ async function renderOnce(
         fwd[k.toLowerCase()] = Array.isArray(v) ? v.join(', ') : v;
       }
     }
-    if (Object.keys(fwd).length > 0) {
-      await page.setExtraHTTPHeaders(fwd);
-    }
+    if (Object.keys(fwd).length > 0) await page.setExtraHTTPHeaders(fwd);
 
     const baseUa = await page.browser().userAgent();
     await page.setUserAgent(`${baseUa} ${config.renderer.userAgentSuffix}`);
-    await page.setViewport(config.renderer.viewport);
+    await page.setViewport(viewport);
     await page.setBypassCSP(true);
 
-    await applyRequestInterception(page);
+    await applyRequestInterception(page, { blockResourceTypes });
 
     const res = await page.goto(input.url, {
       timeout: config.renderer.pageTimeoutMs,
-      waitUntil: config.renderer.waitUntil,
+      waitUntil,
     });
     const status = res?.status() ?? 200;
     const respHeaders = res?.headers() ?? {};
@@ -88,10 +97,13 @@ async function renderOnce(
           /* not all SPAs use this; fall back to waitUntil */
         });
     }
-    if (config.renderer.waitSelector) {
-      await page.waitForSelector(config.renderer.waitSelector, { timeout: 5_000 }).catch(() => {
+    if (waitSelector) {
+      await page.waitForSelector(waitSelector, { timeout: 5_000 }).catch(() => {
         /* selector may not appear; do not fail render */
       });
+    }
+    if (route?.waitMs && route.waitMs > 0) {
+      await new Promise((r) => setTimeout(r, route.waitMs));
     }
 
     const html = await page.content();
@@ -101,16 +113,13 @@ async function renderOnce(
       'content-type': 'text/html; charset=utf-8',
       'x-prerendered': 'true',
       'x-prerender-status': String(status),
+      'x-prerender-viewport': isMobile ? 'mobile' : 'desktop',
     };
+    if (route) headers['x-prerender-route'] = route.pattern;
     const canonical = respHeaders.link;
     if (canonical) headers.link = canonical;
 
-    return {
-      body: optimized,
-      status,
-      headers,
-      createdAt: Date.now(),
-    };
+    return { body: optimized, status, headers, createdAt: Date.now() };
   });
   renderDuration.observe({ outcome: 'ok' }, Date.now() - started);
   if (attempt > 1) {

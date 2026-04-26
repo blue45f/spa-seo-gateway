@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "_comment": "이 파일을 'seo-gateway.config.json' 으로 복사 (또는 GATEWAY_CONFIG_FILE=경로 지정) 하면 게이트웨이가 자동 로드합니다. env 변수가 동일 키를 갖는 경우 env 가 승리합니다.",
+
+  "originUrl": "https://www.example.com",
+  "mode": "render-only",
+
+  "renderer": {
+    "poolMin": 2,
+    "poolMax": 8,
+    "waitUntil": "networkidle2",
+    "blockResourceTypes": ["image", "media", "font"],
+    "viewport": { "width": 1280, "height": 800 },
+    "mobileViewport": { "width": 390, "height": 844 }
+  },
+
+  "cache": {
+    "memory": { "ttlMs": 86400000 },
+    "swrWindowMs": 3600000,
+    "redis": {
+      "enabled": false,
+      "url": "redis://localhost:6379"
+    }
+  },
+
+  "_routes_help": "URL pathname+query 를 매칭하는 정규식. 매칭 시 해당 override 적용. ttlMs/waitUntil/waitSelector/waitMs/blockResourceTypes/viewport/ignore.",
+  "routes": [
+    {
+      "pattern": "^/$",
+      "ttlMs": 600000,
+      "waitUntil": "networkidle0"
+    },
+    {
+      "pattern": "^/products/",
+      "ttlMs": 21600000,
+      "waitSelector": "[data-product-loaded]",
+      "waitMs": 200
+    },
+    {
+      "pattern": "^/blog/",
+      "ttlMs": 86400000,
+      "blockResourceTypes": ["image", "media", "font", "stylesheet"]
+    },
+    {
+      "pattern": "^/(account|admin|cart|checkout)(/|$)",
+      "ignore": true
+    }
+  ],
+
+  "rateLimit": { "max": 240, "timeWindow": "1 minute" },
+  "log": { "level": "info", "pretty": false }
+}

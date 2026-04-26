@@ -2,7 +2,7 @@ import httpProxy from '@fastify/http-proxy';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { detectBot } from './bot.js';
 import { cacheClear, cacheDel, cacheStats, cacheSwr } from './cache.js';
-import { config } from './config.js';
+import { config, matchRoute } from './config.js';
 import { logger } from './logger.js';
 import { httpRequests, registry } from './metrics.js';
 import { browserPool } from './pool.js';
@@ -118,15 +118,26 @@ async function renderToReply(req: FastifyRequest, reply: FastifyReply): Promise<
     return;
   }
 
+  const route = matchRoute(target);
+  if (route?.ignore) {
+    httpRequests.inc({ route: 'ignore', status: '204', kind: 'bot' });
+    reply.code(204).header('x-prerender-route', route.pattern).send();
+    return;
+  }
+
   const lang = (req.headers['accept-language'] as string | undefined) ?? 'default';
   const key = cacheKey(target, lang.split(',')[0] ?? 'default');
 
   try {
-    const result = await cacheSwr(key, () =>
-      render({
-        url: target,
-        headers: req.headers as Record<string, string | string[] | undefined>,
-      }),
+    const result = await cacheSwr(
+      key,
+      () =>
+        render({
+          url: target,
+          headers: req.headers as Record<string, string | string[] | undefined>,
+          route,
+        }),
+      route?.ttlMs,
     );
     httpRequests.inc({
       route: 'render',
