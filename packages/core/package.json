@@ -1,6 +1,6 @@
 {
   "name": "@heejun/spa-seo-gateway-core",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "description": "Headless rendering engine, cache, pool, quality gate — framework-agnostic core for spa-seo-gateway",
   "type": "module",
   "main": "./dist/index.js",
@@ -33,6 +33,8 @@
     "opossum": "^9.0.0",
     "pino": "^10.3.1",
     "pino-pretty": "^13.1.3",
+    "pixelmatch": "7",
+    "pngjs": "7",
     "prom-client": "^15.1.3",
     "puppeteer": "^24.42.0",
     "puppeteer-cluster": "^0.25.0",
@@ -40,6 +42,8 @@
   },
   "devDependencies": {
     "@types/opossum": "^8.1.9",
+    "@types/pixelmatch": "^5.2.6",
+    "@types/pngjs": "^6.0.5",
     "typescript": "^6.0.3"
   },
   "repository": {

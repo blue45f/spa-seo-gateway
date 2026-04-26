@@ -1,3 +1,18 @@
+export { type AbVariant, applyVariant, selectVariant } from './ab-variants.js';
+export {
+  type AiSchemaAdapter,
+  type BillingAdapter,
+  getAiSchemaAdapter,
+  getBillingAdapter,
+  getSearchConsoleAdapter,
+  type IndexStatus,
+  type SchemaSuggestion,
+  type SearchConsoleAdapter,
+  setAiSchemaAdapter,
+  setBillingAdapter,
+  setSearchConsoleAdapter,
+  type UsageEvent,
+} from './adapters.js';
 export { type AuditEvent, getRecentAudit, recordAudit, verifyAuditChain } from './audit.js';
 export { type DetectionResult, detectBot } from './bot.js';
 export {
@@ -62,4 +77,9 @@ export {
   isStaticAssetUrl,
   normalize,
 } from './url.js';
+export {
+  runVisualDiff,
+  type VisualDiffOptions,
+  type VisualDiffResult,
+} from './visual-regression.js';
 export { startWarmCron, stopWarmCron } from './warm-cron.js';

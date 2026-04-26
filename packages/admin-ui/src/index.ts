@@ -8,6 +8,7 @@ import {
   cacheKey,
   cacheStats,
   config,
+  getAiSchemaAdapter,
   getRecentAudit,
   getRoutes,
   getSiteSummary,
@@ -16,7 +17,10 @@ import {
   recordAudit,
   render,
   runLighthouse,
+  runVisualDiff,
   setRoutes,
+  type VisualDiffOptions,
+  verifyAuditChain,
   warmFromSitemap,
 } from '@heejun/spa-seo-gateway-core';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
@@ -245,6 +249,106 @@ export async function registerAdminUI(
         };
       } catch (e) {
         reply.code(502).send({ ok: false, error: (e as Error).message });
+        return null;
+      }
+    },
+  );
+
+  app.get('/admin/api/audit/verify', (req, reply) => {
+    if (!guard(req, reply)) return null;
+    const verification = verifyAuditChain();
+    return { ok: true, verified: verification.ok, brokenAt: verification.brokenAt };
+  });
+
+  app.post<{
+    Body: {
+      url?: string;
+      mode?: VisualDiffOptions['mode'];
+      threshold?: number;
+      fullPage?: boolean;
+      width?: number;
+      height?: number;
+    };
+  }>('/admin/api/visual-diff', async (req, reply) => {
+    if (!guard(req, reply)) return null;
+    const body = req.body ?? {};
+    if (!body.url) {
+      reply.code(400).send({ ok: false, error: 'url required' });
+      return null;
+    }
+    try {
+      const result = await runVisualDiff(body.url, {
+        mode: body.mode,
+        threshold: body.threshold,
+        fullPage: body.fullPage,
+        viewport:
+          body.width && body.height ? { width: body.width, height: body.height } : undefined,
+      });
+      recordAudit({
+        actor: 'admin',
+        action: 'visual.diff',
+        target: body.url,
+        outcome: 'ok',
+        meta: { diffPercent: result.diffPercent, baselineCreated: result.baselineCreated },
+      });
+      return { ok: true, result };
+    } catch (e) {
+      recordAudit({
+        actor: 'admin',
+        action: 'visual.diff',
+        target: body.url,
+        outcome: 'error',
+        meta: { error: (e as Error).message },
+      });
+      reply.code(503).send({ ok: false, error: (e as Error).message });
+      return null;
+    }
+  });
+
+  app.post<{ Body: { url?: string; html?: string } }>(
+    '/admin/api/ai/schema',
+    async (req, reply) => {
+      if (!guard(req, reply)) return null;
+      const adapter = getAiSchemaAdapter();
+      if (!adapter) {
+        reply.code(501).send({
+          ok: false,
+          error: 'AI schema adapter not configured (call setAiSchemaAdapter at startup)',
+        });
+        return null;
+      }
+      const body = req.body ?? {};
+      if (!body.url) {
+        reply.code(400).send({ ok: false, error: 'url required' });
+        return null;
+      }
+      try {
+        let html = body.html;
+        if (!html) {
+          const entry = await render({
+            url: body.url,
+            headers: { 'user-agent': 'Googlebot/2.1' },
+          });
+          html = entry.body;
+        }
+        const suggestions = await adapter.suggestSchema(html, body.url);
+        recordAudit({
+          actor: 'admin',
+          action: 'ai.schema',
+          target: body.url,
+          outcome: 'ok',
+          meta: { count: suggestions.length },
+        });
+        return { ok: true, suggestions };
+      } catch (e) {
+        recordAudit({
+          actor: 'admin',
+          action: 'ai.schema',
+          target: body.url,
+          outcome: 'error',
+          meta: { error: (e as Error).message },
+        });
+        reply.code(503).send({ ok: false, error: (e as Error).message });
         return null;
       }
     },

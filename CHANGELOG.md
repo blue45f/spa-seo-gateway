@@ -2,6 +2,28 @@
 
 날짜는 한국 시간(KST). 모든 커밋은 [GitHub history](https://github.com/blue45f/spa-seo-gateway/commits/main) 참고.
 
+## v1.6.0 — 2026-04-27
+
+내부 시스템만으로 동작하는 고도화 — 외부 SaaS 의존 없이 게이트웨이 단독으로 A/B 테스트, 시각 회귀, 감사 로그 무결성 검증.
+
+### Added
+- **A/B variant 테스트** (`ab-variants`): 같은 URL 에 다른 title/description/og:* 를 weight 비율로 무작위 노출. `route.variants` 에 정의하면 렌더 후 자동 적용. 노출 인덱스는 `x-prerender-variant` 헤더 + `gateway_variant_impressions_total` 메트릭으로 노출되어 GA/Plausible 등 외부 분석과 매칭 가능.
+- **Visual regression** (`visual-regression`): 봇 응답 후 풀에서 스크린샷을 캡처해 baseline 과 perceptual diff. percy/chromatic 같은 외부 서비스 없이 단일 게이트웨이에서 회귀 감지. baseline 은 `.data/baselines/` 에 저장.
+- **BYO 어댑터 인터페이스** (`adapters`): `AiSchemaAdapter` (OpenAI/Anthropic 등으로 schema.org JSON-LD 추론), `BillingAdapter` (Stripe usage 보고), `SearchConsoleAdapter` (Google/Bing index 상태 조회). core 는 인터페이스만 정의 — 외부 SDK 는 사용자가 주입.
+- **Audit chain 무결성**: HMAC-SHA256 + prevHash 체인. `verifyAuditChain()` 으로 변조 여부 즉시 검출. `AUDIT_HMAC_SECRET` 설정 시 모든 이벤트에 서명.
+- **Distributed lock** (`withDistributedLock`): Redis SETNX 기반 — 다중 인스턴스 환경에서 동일 URL 중복 워밍 방지. fallback 옵션으로 lock 실패 시 캐시 응답.
+- **Per-tenant rate limit** (multi-tenant): `PLAN_LIMITS` (free=100/min, pro=1000/min, enterprise=∞) 기반 429 + retry-after.
+- **Helm chart** (`charts/spa-seo-gateway`): K8s 배포용 — Deployment/Service/PVC/Ingress/HPA/ServiceMonitor 템플릿.
+- **Admin API endpoint 확장**: `POST /admin/api/visual-diff`, `POST /admin/api/ai/schema`, `GET /admin/api/audit/verify`.
+
+### Changed
+- `RouteOverride` 에 `variants` + `schemaTemplate` 필드 추가 (`config.ts`).
+- 렌더러가 `optimizeHtml` 후 `applyVariant` 를 호출 — variant 선택 시 `x-prerender-variant` 헤더 부착.
+
+### Internal
+- `pixelmatch@7` + `pngjs@7` 추가 (visual diff).
+- 95개 테스트 모두 통과 — 신규 모듈은 컴파일/타입 검증으로 회귀 방지.
+
 ## v1.1.0 — 2026-04-27
 
 ### Added

@@ -44,3 +44,10 @@ export const renderErrors = new Counter({
   labelNames: ['reason'] as const,
   registers: [registry],
 });
+
+export const variantImpressions = new Counter({
+  name: 'gateway_variant_impressions_total',
+  help: 'A/B variant impressions per route',
+  labelNames: ['route', 'variant'] as const,
+  registers: [registry],
+});

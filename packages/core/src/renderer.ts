@@ -1,3 +1,4 @@
+import { applyVariant, selectVariant } from './ab-variants.js';
 import type { CacheEntry } from './cache.js';
 import { withBreaker } from './circuit-breaker.js';
 import { config, type RouteOverride } from './config.js';
@@ -150,7 +151,7 @@ async function renderOnce(
       }
     }
 
-    const optimized = optimizeHtml(html, {
+    let optimized = optimizeHtml(html, {
       url: input.url,
       ensureBase: true,
       ensureCanonical: true,
@@ -158,6 +159,15 @@ async function renderOnce(
       injectBreadcrumb: config.renderer.injectBreadcrumb,
       schemaTemplate: route?.schemaTemplate,
     });
+
+    let variantIndex: number | null = null;
+    if (route?.variants?.length) {
+      const sel = selectVariant(route.variants);
+      if (sel) {
+        optimized = applyVariant(optimized, sel.variant, route.pattern, sel.index);
+        variantIndex = sel.index;
+      }
+    }
 
     const headers: Record<string, string> = {
       'content-type': 'text/html; charset=utf-8',
@@ -167,6 +177,7 @@ async function renderOnce(
     };
     if (qualityReason) headers['x-prerender-quality'] = qualityReason;
     if (route) headers['x-prerender-route'] = route.pattern;
+    if (variantIndex !== null) headers['x-prerender-variant'] = String(variantIndex);
     const shortTtl = shortTtlForStatus(effectiveStatus);
     if (shortTtl != null) headers['x-prerender-short-ttl-ms'] = String(shortTtl);
     const canonical = respHeaders.link;
