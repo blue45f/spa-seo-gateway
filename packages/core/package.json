@@ -1,6 +1,6 @@
 {
   "name": "@heejun/spa-seo-gateway-core",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "Headless rendering engine, cache, pool, quality gate — framework-agnostic core for spa-seo-gateway",
   "type": "module",
   "main": "./dist/index.js",
@@ -23,6 +23,7 @@
     "@cacheable/memory": "^2.0.8",
     "@cacheable/utils": "^1.0.0",
     "@keyv/redis": "^5.1.6",
+    "@opentelemetry/api": "^1.9.1",
     "cacheable": "^2.3.4",
     "dotenv": "^17.4.2",
     "fast-xml-parser": "^5.7.2",

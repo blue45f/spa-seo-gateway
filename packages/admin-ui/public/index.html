@@ -66,7 +66,68 @@
       </template>
     </div>
 
-    <div class="flex min-h-screen" x-cloak>
+    <!-- Command Palette -->
+    <div
+      x-show="cmdPaletteOpen"
+      x-cloak
+      class="fixed inset-0 z-[80] bg-black/50 flex items-start justify-center pt-[10vh]"
+      @click.self="cmdPaletteOpen = false"
+    >
+      <div class="bg-white dark:bg-slate-900 rounded-lg shadow-2xl w-[90%] max-w-lg p-2">
+        <input
+          x-model="cmdQuery"
+          x-init="$watch('cmdPaletteOpen', v => v && setTimeout(() => $el.focus(), 50))"
+          placeholder="이동할 페이지 / 명령... (esc 닫기)"
+          class="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 dark:bg-slate-800 rounded text-sm"
+        />
+        <div class="mt-2 max-h-80 overflow-y-auto">
+          <template x-for="item in filteredCmd()" :key="item.id">
+            <button
+              class="w-full text-left px-3 py-2 rounded hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2 text-sm"
+              @click="goTab(item.id); cmdPaletteOpen = false; cmdQuery = ''"
+            >
+              <span x-text="item.icon"></span>
+              <span class="flex-1" x-text="item.label"></span>
+              <span class="text-xs text-slate-400" x-text="item.subtitle"></span>
+            </button>
+          </template>
+        </div>
+      </div>
+    </div>
+
+    <!-- Shortcuts Modal -->
+    <div
+      x-show="shortcutsOpen"
+      x-cloak
+      class="fixed inset-0 z-[80] bg-black/50 flex items-center justify-center"
+      @click.self="shortcutsOpen = false"
+    >
+      <div class="bg-white dark:bg-slate-900 rounded-lg shadow-2xl p-6 max-w-md">
+        <h3 class="font-semibold text-lg mb-3">키보드 단축키</h3>
+        <table class="w-full text-sm">
+          <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+            <tr><td class="py-2"><kbd class="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 rounded text-xs">⌘/Ctrl + K</kbd></td><td>Command palette (탭 빠른 이동)</td></tr>
+            <tr><td class="py-2"><kbd class="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 rounded text-xs">⌘/Ctrl + S</kbd></td><td>라우트 저장 (라우트 탭)</td></tr>
+            <tr><td class="py-2"><kbd class="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 rounded text-xs">?</kbd></td><td>이 도움말</td></tr>
+            <tr><td class="py-2"><kbd class="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 rounded text-xs">Esc</kbd></td><td>모달 닫기</td></tr>
+          </tbody>
+        </table>
+        <div class="mt-4 text-right">
+          <button class="px-3 py-1.5 text-sm rounded bg-slate-900 text-white hover:bg-slate-700" @click="shortcutsOpen = false">닫기</button>
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="flex min-h-screen"
+      x-cloak
+      @keydown.window.escape="cmdPaletteOpen = false; shortcutsOpen = false"
+      @keydown.window.meta.k.prevent="cmdPaletteOpen = !cmdPaletteOpen"
+      @keydown.window.ctrl.k.prevent="cmdPaletteOpen = !cmdPaletteOpen"
+      @keydown.window.meta.s.prevent="if (tab === 'routes' && token) saveRoutes(false)"
+      @keydown.window.ctrl.s.prevent="if (tab === 'routes' && token) saveRoutes(false)"
+      @keydown.window.shift.slash.prevent="shortcutsOpen = true"
+    >
       <!-- Sidebar -->
       <aside
         class="w-60 bg-slate-900 dark:bg-black text-slate-200 flex flex-col fixed md:static md:translate-x-0 inset-y-0 left-0 z-40"
@@ -990,6 +1051,9 @@ REDIS_URL=redis://localhost:6379</pre>
           toasts: [],
           _toastId: 0,
           _dragSrc: null,
+          cmdPaletteOpen: false,
+          cmdQuery: '',
+          shortcutsOpen: false,
 
           navItems: [
             { id: 'welcome', icon: '👋', label: '소개', subtitle: '게이트웨이 한눈에 보기', public: true },
@@ -1100,6 +1164,17 @@ REDIS_URL=redis://localhost:6379</pre>
             ev.target.classList.remove('dragging');
             this._dragSrc = null;
             document.querySelectorAll('.drag-over').forEach((el) => el.classList.remove('drag-over'));
+          },
+
+          filteredCmd() {
+            const q = this.cmdQuery.toLowerCase().trim();
+            if (!q) return this.navItems;
+            return this.navItems.filter(
+              (n) =>
+                n.label.toLowerCase().includes(q) ||
+                n.id.toLowerCase().includes(q) ||
+                (n.subtitle ?? '').toLowerCase().includes(q),
+            );
           },
 
           requiresAuth(tabId) {

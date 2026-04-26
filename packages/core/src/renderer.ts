@@ -6,6 +6,7 @@ import { inflight, renderDuration, renderErrors } from './metrics.js';
 import { applyRequestInterception, optimizeHtml } from './optimize.js';
 import { browserPool } from './pool.js';
 import { assessQuality, shortTtlForStatus } from './quality.js';
+import { withSpan } from './telemetry.js';
 import { isSafeTarget } from './url.js';
 
 const FORWARD_HEADERS = new Set(['accept-language', 'cookie', 'authorization']);
@@ -20,6 +21,13 @@ export type RenderInput = {
 };
 
 export async function render(input: RenderInput): Promise<CacheEntry> {
+  return withSpan('render', (_span) => renderInner(input), {
+    'http.url': input.url,
+    'gateway.route': input.route?.pattern ?? '',
+  });
+}
+
+async function renderInner(input: RenderInput): Promise<CacheEntry> {
   inflight.inc();
   const started = Date.now();
   let lastError: unknown;

@@ -47,6 +47,7 @@ export {
   type SiteSummary,
   setRoutes,
 } from './runtime-config.js';
+export { getTracer, tracingEnabled, withSpan } from './telemetry.js';
 export {
   buildTargetUrl,
   cacheKey,
