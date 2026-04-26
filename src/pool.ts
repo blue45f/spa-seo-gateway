@@ -128,24 +128,15 @@ class BrowserPool {
   }
 
   private async pickHolder(): Promise<Holder> {
-    let eligible = this.holders.filter(
-      (h) => h.browser.connected && !h.recycling,
-    );
+    let eligible = this.holders.filter((h) => h.browser.connected && !h.recycling);
     if (eligible.length === 0) {
       await this.spawn();
-      eligible = this.holders.filter(
-        (h) => h.browser.connected && !h.recycling,
-      );
+      eligible = this.holders.filter((h) => h.browser.connected && !h.recycling);
       if (eligible.length === 0) throw new Error('no browser available');
     }
-    if (
-      eligible.every((h) => h.activeCount > 0) &&
-      this.holders.length < config.renderer.poolMax
-    ) {
+    if (eligible.every((h) => h.activeCount > 0) && this.holders.length < config.renderer.poolMax) {
       await this.spawn();
-      eligible = this.holders.filter(
-        (h) => h.browser.connected && !h.recycling,
-      );
+      eligible = this.holders.filter((h) => h.browser.connected && !h.recycling);
     }
     eligible.sort((a, b) => a.activeCount - b.activeCount);
     return eligible[0]!;
@@ -181,20 +172,14 @@ class BrowserPool {
 
   private async recycle(holder: Holder): Promise<void> {
     holder.recycling = true;
-    logger.info(
-      { id: holder.id, served: holder.totalCount },
-      'recycling browser',
-    );
+    logger.info({ id: holder.id, served: holder.totalCount }, 'recycling browser');
     try {
       await holder.browser.close();
     } catch (e) {
       logger.warn({ err: (e as Error).message }, 'browser close error');
     }
     this.holders = this.holders.filter((h) => h !== holder);
-    if (
-      this.holders.length < config.renderer.poolMin &&
-      !this.stopped
-    ) {
+    if (this.holders.length < config.renderer.poolMin && !this.stopped) {
       await this.spawn();
     }
   }

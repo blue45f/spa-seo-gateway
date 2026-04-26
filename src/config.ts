@@ -55,16 +55,32 @@ const Schema = z.object({
     memory: z.object({
       enabled: z.coerce.boolean().default(true),
       maxItems: z.coerce.number().int().positive().default(500),
-      maxBytes: z.coerce.number().int().positive().default(100 * 1024 * 1024),
-      ttlMs: z.coerce.number().int().positive().default(24 * 60 * 60 * 1000),
+      maxBytes: z.coerce
+        .number()
+        .int()
+        .positive()
+        .default(100 * 1024 * 1024),
+      ttlMs: z.coerce
+        .number()
+        .int()
+        .positive()
+        .default(24 * 60 * 60 * 1000),
     }),
     redis: z.object({
       enabled: z.coerce.boolean().default(false),
       url: z.string().optional(),
-      ttlSec: z.coerce.number().int().positive().default(7 * 24 * 60 * 60),
+      ttlSec: z.coerce
+        .number()
+        .int()
+        .positive()
+        .default(7 * 24 * 60 * 60),
       keyPrefix: z.string().default('spa-seo:'),
     }),
-    swrWindowMs: z.coerce.number().int().nonnegative().default(60 * 60 * 1000),
+    swrWindowMs: z.coerce
+      .number()
+      .int()
+      .nonnegative()
+      .default(60 * 60 * 1000),
   }),
   rateLimit: z.object({
     enabled: z.coerce.boolean().default(true),
@@ -72,9 +88,7 @@ const Schema = z.object({
     timeWindow: z.string().default('1 minute'),
   }),
   log: z.object({
-    level: z
-      .enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace'])
-      .default('info'),
+    level: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace']).default('info'),
     pretty: z.coerce.boolean().default(false),
   }),
   allowedHosts: z.array(z.string()).default([]),

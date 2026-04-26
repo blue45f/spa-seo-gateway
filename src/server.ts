@@ -1,12 +1,12 @@
-import Fastify from 'fastify';
 import compress from '@fastify/compress';
 import cors from '@fastify/cors';
 import rateLimit from '@fastify/rate-limit';
+import Fastify from 'fastify';
+import { shutdownCache } from './cache.js';
 import { config } from './config.js';
+import { registerRoutes } from './handlers.js';
 import { logger } from './logger.js';
 import { browserPool } from './pool.js';
-import { shutdownCache } from './cache.js';
-import { registerRoutes } from './handlers.js';
 
 async function main() {
   const app = Fastify({
@@ -63,9 +63,7 @@ async function main() {
   process.on('uncaughtException', (err) =>
     logger.error({ err: err.message, stack: err.stack }, 'uncaught exception'),
   );
-  process.on('unhandledRejection', (reason) =>
-    logger.error({ reason }, 'unhandled rejection'),
-  );
+  process.on('unhandledRejection', (reason) => logger.error({ reason }, 'unhandled rejection'));
 
   await browserPool.start();
 

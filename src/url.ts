@@ -54,7 +54,10 @@ export function isHostAllowed(targetUrl: string): boolean {
   return allow.some((h) => h === u.host);
 }
 
-export function buildTargetUrl(req: { url: string; headers: Record<string, string | string[] | undefined> }): string {
+export function buildTargetUrl(req: {
+  url: string;
+  headers: Record<string, string | string[] | undefined>;
+}): string {
   const explicit = (req.headers['x-render-url'] as string | undefined) ?? null;
   if (explicit) return explicit;
   if (config.originUrl) {

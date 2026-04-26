@@ -25,5 +25,5 @@ const result = await autocannon({
   },
 });
 console.log(autocannon.printResult(result));
-console.log(`Cold render p95: ${result.latency.p95} ms`);
+console.log(`Cold render p90: ${result.latency.p90} ms`);
 console.log(`Cold render p99: ${result.latency.p99} ms`);

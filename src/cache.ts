@@ -1,5 +1,5 @@
-import { LRUCache } from 'lru-cache';
 import { Redis, type Redis as RedisClient } from 'ioredis';
+import { LRUCache } from 'lru-cache';
 import { config } from './config.js';
 import { logger } from './logger.js';
 import { cacheEvents } from './metrics.js';
@@ -64,12 +64,7 @@ async function getRedis(key: string): Promise<CacheEntry | null> {
 async function setRedis(key: string, entry: CacheEntry): Promise<void> {
   if (!redis) return;
   try {
-    await redis.set(
-      rk(key),
-      JSON.stringify(entry),
-      'EX',
-      config.cache.redis.ttlSec,
-    );
+    await redis.set(rk(key), JSON.stringify(entry), 'EX', config.cache.redis.ttlSec);
   } catch (e) {
     logger.warn({ err: (e as Error).message }, 'redis set failed');
   }
@@ -144,10 +139,7 @@ export async function cacheClear(): Promise<number> {
 
 const inflight = new Map<string, Promise<CacheEntry>>();
 
-async function dedup(
-  key: string,
-  fetcher: () => Promise<CacheEntry>,
-): Promise<CacheEntry> {
+async function dedup(key: string, fetcher: () => Promise<CacheEntry>): Promise<CacheEntry> {
   const existing = inflight.get(key);
   if (existing) {
     cacheEvents.inc({ layer: 'inflight', event: 'dedup' });
@@ -156,9 +148,7 @@ async function dedup(
   const p = (async () => {
     try {
       const entry = await fetcher();
-      cacheSet(key, entry).catch((err) =>
-        logger.warn({ err: err.message }, 'cache set failed'),
-      );
+      cacheSet(key, entry).catch((err) => logger.warn({ err: err.message }, 'cache set failed'));
       return entry;
     } finally {
       inflight.delete(key);
@@ -168,10 +158,7 @@ async function dedup(
   return p;
 }
 
-function revalidateInBackground(
-  key: string,
-  fetcher: () => Promise<CacheEntry>,
-): void {
+function revalidateInBackground(key: string, fetcher: () => Promise<CacheEntry>): void {
   if (inflight.has(key)) return;
   dedup(key, fetcher).catch((err) =>
     logger.warn({ err: err.message, key }, 'swr revalidation failed'),

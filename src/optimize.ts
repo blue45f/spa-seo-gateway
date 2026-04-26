@@ -1,4 +1,4 @@
-import type { Page, HTTPRequest } from 'puppeteer';
+import type { HTTPRequest, Page } from 'puppeteer';
 import { config } from './config.js';
 
 const blockedTypes = new Set(config.renderer.blockResourceTypes);
@@ -28,7 +28,8 @@ export async function applyRequestInterception(page: Page): Promise<void> {
 
 const HEAD_RE = /<head([^>]*)>/i;
 const BASE_RE = /<base[^>]*href=/i;
-const SCRIPT_RE = /<script\b(?![^>]*\btype=["']application\/(?:ld\+json|json)["'])[^>]*>[\s\S]*?<\/script>/gi;
+const SCRIPT_RE =
+  /<script\b(?![^>]*\btype=["']application\/(?:ld\+json|json)["'])[^>]*>[\s\S]*?<\/script>/gi;
 
 export type OptimizeOptions = {
   url: string;

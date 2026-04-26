@@ -1,13 +1,13 @@
-import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { Readable } from 'node:stream';
+import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
+import { detectBot } from './bot.js';
+import { cacheClear, cacheDel, cacheStats, cacheSwr } from './cache.js';
 import { config } from './config.js';
 import { logger } from './logger.js';
-import { detectBot } from './bot.js';
-import { buildTargetUrl, cacheKey, isHostAllowed } from './url.js';
-import { cacheClear, cacheDel, cacheStats, cacheSwr } from './cache.js';
-import { render } from './renderer.js';
-import { browserPool } from './pool.js';
 import { httpRequests, registry } from './metrics.js';
+import { browserPool } from './pool.js';
+import { render } from './renderer.js';
+import { buildTargetUrl, cacheKey, isHostAllowed } from './url.js';
 
 const HOP_BY_HOP = new Set([
   'connection',
@@ -68,7 +68,11 @@ export async function registerRoutes(app: FastifyInstance): Promise<void> {
   });
 
   app.all('/*', async (req, reply) => {
-    if (req.url.startsWith('/health') || req.url.startsWith('/metrics') || req.url.startsWith('/admin')) {
+    if (
+      req.url.startsWith('/health') ||
+      req.url.startsWith('/metrics') ||
+      req.url.startsWith('/admin')
+    ) {
       return;
     }
     return handleRoot(req, reply);
@@ -90,10 +94,7 @@ function checkAdmin(req: FastifyRequest, reply: FastifyReply): boolean {
   return true;
 }
 
-async function handleRoot(
-  req: FastifyRequest,
-  reply: FastifyReply,
-): Promise<unknown> {
+async function handleRoot(req: FastifyRequest, reply: FastifyReply): Promise<unknown> {
   const userAgent = req.headers['user-agent'];
   const detection = detectBot(
     userAgent,
@@ -115,10 +116,7 @@ async function handleRoot(
   return renderHandler(req, reply);
 }
 
-async function renderHandler(
-  req: FastifyRequest,
-  reply: FastifyReply,
-): Promise<unknown> {
+async function renderHandler(req: FastifyRequest, reply: FastifyReply): Promise<unknown> {
   let target: string;
   try {
     target = buildTargetUrl({
@@ -158,9 +156,7 @@ async function renderHandler(
     }
     reply.header(
       'cache-control',
-      `public, max-age=60, stale-while-revalidate=${Math.floor(
-        config.cache.swrWindowMs / 1000,
-      )}`,
+      `public, max-age=60, stale-while-revalidate=${Math.floor(config.cache.swrWindowMs / 1000)}`,
     );
     reply.header('x-cache', result.fromCache ? 'HIT' : 'MISS');
     reply.header('x-cache-stale', result.stale ? '1' : '0');
@@ -169,19 +165,13 @@ async function renderHandler(
     return result.entry.body;
   } catch (err) {
     httpRequests.inc({ route: 'render', status: '500', kind: 'error' });
-    logger.error(
-      { err: (err as Error).message, target },
-      'render handler failed',
-    );
+    logger.error({ err: (err as Error).message, target }, 'render handler failed');
     reply.code(502);
     return { error: 'render failed', message: (err as Error).message };
   }
 }
 
-async function proxyPassthrough(
-  req: FastifyRequest,
-  reply: FastifyReply,
-): Promise<unknown> {
+async function proxyPassthrough(req: FastifyRequest, reply: FastifyReply): Promise<unknown> {
   if (!config.originUrl) {
     reply.code(500);
     return { error: 'origin not configured' };

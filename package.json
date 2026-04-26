@@ -9,9 +9,12 @@
   },
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "build": "tsc -p tsconfig.json",
+    "build": "tsc -p tsconfig.build.json",
     "start": "node dist/server.js",
-    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "typecheck": "tsc -p tsconfig.json",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format --write .",
     "bench:smoke": "tsx benchmarks/smoke.ts",
     "bench:cache": "tsx benchmarks/cache.ts",
     "bench:cold": "tsx benchmarks/cold.ts",
@@ -34,6 +37,8 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.4.13",
+    "@types/autocannon": "^7.12.7",
     "@types/generic-pool": "^3.8.3",
     "@types/node": "^25.6.0",
     "autocannon": "^8.0.0",
