@@ -9,3 +9,5 @@ dist/
 coverage/
 .cache/
 puppeteer-cache/
+.vercel
+apps/demo/public/

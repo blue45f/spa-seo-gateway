@@ -1,0 +1,12 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "pnpm --filter @spa-seo-gateway/demo run build",
+  "outputDirectory": "apps/demo/public",
+  "framework": null,
+  "rewrites": [
+    { "source": "/admin/api/public/info", "destination": "/api/info" },
+    { "source": "/", "destination": "/index.html" },
+    { "source": "/admin/ui", "destination": "/index.html" },
+    { "source": "/admin/ui/", "destination": "/index.html" }
+  ]
+}
