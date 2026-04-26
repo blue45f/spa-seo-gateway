@@ -1,5 +1,8 @@
-import { Redis, type Redis as RedisClient } from 'ioredis';
-import { LRUCache } from 'lru-cache';
+import { createKeyv } from '@cacheable/memory';
+import { coalesceAsync } from '@cacheable/utils';
+import KeyvRedis from '@keyv/redis';
+import { Cacheable } from 'cacheable';
+import { Keyv } from 'keyv';
 import { config } from './config.js';
 import { logger } from './logger.js';
 import { cacheEvents } from './metrics.js';
@@ -11,205 +14,90 @@ export type CacheEntry = {
   createdAt: number;
 };
 
-export type SwrLayer = 'memory' | 'redis' | null;
-
 export type SwrResult = {
   entry: CacheEntry;
-  fromCache: SwrLayer;
+  fromCache: 'cache' | null;
   stale: boolean;
 };
 
-const lru = config.cache.memory.enabled
-  ? new LRUCache<string, CacheEntry>({
-      max: config.cache.memory.maxItems,
-      maxSize: config.cache.memory.maxBytes,
-      sizeCalculation: (e) =>
-        Buffer.byteLength(e.body, 'utf8') +
-        Buffer.byteLength(JSON.stringify(e.headers), 'utf8') +
-        64,
-      ttl: config.cache.memory.ttlMs + config.cache.swrWindowMs,
-      allowStale: true,
-    })
-  : null;
+const ttlMs = config.cache.memory.ttlMs;
+const swrMs = config.cache.swrWindowMs;
+const totalLifeMs = ttlMs + swrMs;
 
-let redis: RedisClient | null = null;
+const primary = config.cache.memory.enabled
+  ? createKeyv({ ttl: totalLifeMs, lruSize: config.cache.memory.maxItems })
+  : undefined;
+
+let secondary: Keyv | undefined;
 if (config.cache.redis.enabled && config.cache.redis.url) {
-  const client = new Redis(config.cache.redis.url, {
-    maxRetriesPerRequest: 2,
-    enableOfflineQueue: false,
-    lazyConnect: false,
-    connectTimeout: 5_000,
+  const store = new KeyvRedis(config.cache.redis.url);
+  store.on('error', (e: Error) => logger.warn({ err: e.message }, 'redis cache degrade'));
+  secondary = new Keyv({ store, namespace: config.cache.redis.keyPrefix.replace(/:$/, '') });
+}
+
+const cache = new Cacheable({
+  primary,
+  secondary,
+  ttl: totalLifeMs,
+  nonBlocking: true,
+});
+cache.on('error', (e: Error) => logger.warn({ err: e.message }, 'cache error'));
+
+async function fetchAndStore(key: string, fetcher: () => Promise<CacheEntry>): Promise<CacheEntry> {
+  const result = await coalesceAsync(`render:${key}`, async () => {
+    const entry = await fetcher();
+    await cache.set(key, entry);
+    return entry;
   });
-  client.on('error', (e) =>
-    logger.warn({ err: e.message }, 'redis error (degrading to memory only)'),
-  );
-  client.on('ready', () => logger.info('redis cache ready'));
-  redis = client;
+  if (!result) throw new Error('coalesce returned no value');
+  return result;
 }
 
-const rk = (k: string) => `${config.cache.redis.keyPrefix}${k}`;
-
-async function getRedis(key: string): Promise<CacheEntry | null> {
-  if (!redis) return null;
-  try {
-    const raw = await redis.get(rk(key));
-    if (!raw) return null;
-    return JSON.parse(raw) as CacheEntry;
-  } catch (e) {
-    logger.warn({ err: (e as Error).message }, 'redis get failed');
-    return null;
-  }
-}
-
-async function setRedis(key: string, entry: CacheEntry): Promise<void> {
-  if (!redis) return;
-  try {
-    await redis.set(rk(key), JSON.stringify(entry), 'EX', config.cache.redis.ttlSec);
-  } catch (e) {
-    logger.warn({ err: (e as Error).message }, 'redis set failed');
-  }
-}
-
-async function delRedis(key: string): Promise<void> {
-  if (!redis) return;
-  try {
-    await redis.del(rk(key));
-  } catch (e) {
-    logger.warn({ err: (e as Error).message }, 'redis del failed');
-  }
-}
-
-export async function cacheGet(
-  key: string,
-): Promise<{ entry: CacheEntry; layer: SwrLayer } | null> {
-  if (!config.cache.enabled) return null;
-  if (lru) {
-    const m = lru.get(key, { allowStale: true });
-    if (m) {
-      cacheEvents.inc({ layer: 'memory', event: 'hit' });
-      return { entry: m, layer: 'memory' };
-    }
-    cacheEvents.inc({ layer: 'memory', event: 'miss' });
-  }
-  const r = await getRedis(key);
-  if (r) {
-    cacheEvents.inc({ layer: 'redis', event: 'hit' });
-    if (lru) lru.set(key, r);
-    return { entry: r, layer: 'redis' };
-  }
-  if (redis) cacheEvents.inc({ layer: 'redis', event: 'miss' });
-  return null;
+export async function cacheGet(key: string): Promise<CacheEntry | undefined> {
+  return (await cache.get<CacheEntry>(key)) ?? undefined;
 }
 
 export async function cacheSet(key: string, entry: CacheEntry): Promise<void> {
-  if (!config.cache.enabled) return;
-  if (lru) lru.set(key, entry);
-  await setRedis(key, entry);
+  await cache.set(key, entry);
 }
 
 export async function cacheDel(key: string): Promise<void> {
-  if (lru) lru.delete(key);
-  await delRedis(key);
+  await cache.delete(key);
 }
 
 export async function cacheClear(): Promise<number> {
-  let cleared = 0;
-  if (lru) {
-    cleared += lru.size;
-    lru.clear();
-  }
-  if (redis) {
-    try {
-      const stream = redis.scanStream({
-        match: `${config.cache.redis.keyPrefix}*`,
-        count: 100,
-      });
-      const pipeline = redis.pipeline();
-      for await (const keys of stream) {
-        for (const k of keys as string[]) pipeline.del(k);
-        cleared += (keys as string[]).length;
-      }
-      await pipeline.exec();
-    } catch (e) {
-      logger.warn({ err: (e as Error).message }, 'redis clear failed');
-    }
-  }
-  return cleared;
+  await cache.clear();
+  return 0;
 }
 
-const inflight = new Map<string, Promise<CacheEntry>>();
-
-async function dedup(key: string, fetcher: () => Promise<CacheEntry>): Promise<CacheEntry> {
-  const existing = inflight.get(key);
-  if (existing) {
-    cacheEvents.inc({ layer: 'inflight', event: 'dedup' });
-    return existing;
-  }
-  const p = (async () => {
-    try {
-      const entry = await fetcher();
-      cacheSet(key, entry).catch((err) => logger.warn({ err: err.message }, 'cache set failed'));
-      return entry;
-    } finally {
-      inflight.delete(key);
-    }
-  })();
-  inflight.set(key, p);
-  return p;
+export function cacheStats() {
+  return { ttlMs, swrMs, redisEnabled: !!secondary };
 }
 
-function revalidateInBackground(key: string, fetcher: () => Promise<CacheEntry>): void {
-  if (inflight.has(key)) return;
-  dedup(key, fetcher).catch((err) =>
-    logger.warn({ err: err.message, key }, 'swr revalidation failed'),
-  );
+export async function shutdownCache(): Promise<void> {
+  await cache.disconnect();
 }
 
 export async function cacheSwr(
   key: string,
   fetcher: () => Promise<CacheEntry>,
 ): Promise<SwrResult> {
-  const ttlMs = config.cache.memory.ttlMs;
-  const swrWindow = config.cache.swrWindowMs;
-
-  const cached = await cacheGet(key);
-  const now = Date.now();
-
+  const cached = await cache.get<CacheEntry>(key);
   if (cached) {
-    const age = now - cached.entry.createdAt;
+    const age = Date.now() - cached.createdAt;
     if (age < ttlMs) {
-      return { entry: cached.entry, fromCache: cached.layer, stale: false };
+      cacheEvents.inc({ layer: 'cache', event: 'hit' });
+      return { entry: cached, fromCache: 'cache', stale: false };
     }
-    if (age < ttlMs + swrWindow) {
-      cacheEvents.inc({ layer: cached.layer ?? 'unknown', event: 'swr' });
-      revalidateInBackground(key, fetcher);
-      return { entry: cached.entry, fromCache: cached.layer, stale: true };
+    if (age < totalLifeMs) {
+      cacheEvents.inc({ layer: 'cache', event: 'swr' });
+      void fetchAndStore(key, fetcher).catch((err) =>
+        logger.warn({ err: (err as Error).message, key }, 'swr revalidation failed'),
+      );
+      return { entry: cached, fromCache: 'cache', stale: true };
     }
   }
-  const entry = await dedup(key, fetcher);
+  cacheEvents.inc({ layer: 'cache', event: 'miss' });
+  const entry = await fetchAndStore(key, fetcher);
   return { entry, fromCache: null, stale: false };
-}
-
-export async function shutdownCache(): Promise<void> {
-  if (redis) {
-    try {
-      await redis.quit();
-    } catch {
-      redis.disconnect();
-    }
-  }
-}
-
-export function cacheStats() {
-  return {
-    memory: lru
-      ? {
-          size: lru.size,
-          calculatedSize: lru.calculatedSize,
-          maxSize: config.cache.memory.maxBytes,
-        }
-      : null,
-    redis: redis ? { status: redis.status } : null,
-    inflight: inflight.size,
-  };
 }
