@@ -26,9 +26,16 @@ export interface AiSchemaAdapter {
 }
 
 let aiAdapter: AiSchemaAdapter | null = null;
-export function setAiSchemaAdapter(adapter: AiSchemaAdapter): void {
+
+/**
+ * AI schema 어댑터 등록. 시작 시 한 번 호출해 OpenAI/Anthropic/Custom 어댑터를 주입.
+ * `null` 전달 시 어댑터 초기화 (테스트/언마운트용).
+ */
+export function setAiSchemaAdapter(adapter: AiSchemaAdapter | null): void {
   aiAdapter = adapter;
 }
+
+/** 등록된 AI 어댑터 반환. 미등록 시 `null`. */
 export function getAiSchemaAdapter(): AiSchemaAdapter | null {
   return aiAdapter;
 }
@@ -51,9 +58,13 @@ export interface BillingAdapter {
 }
 
 let billingAdapter: BillingAdapter | null = null;
-export function setBillingAdapter(adapter: BillingAdapter): void {
+
+/** 빌링 어댑터 등록. 시작 시 한 번. `null` 로 초기화 가능. */
+export function setBillingAdapter(adapter: BillingAdapter | null): void {
   billingAdapter = adapter;
 }
+
+/** 등록된 빌링 어댑터 반환. 미등록 시 `null`. */
 export function getBillingAdapter(): BillingAdapter | null {
   return billingAdapter;
 }
@@ -74,9 +85,13 @@ export interface SearchConsoleAdapter {
 }
 
 let searchConsoleAdapter: SearchConsoleAdapter | null = null;
-export function setSearchConsoleAdapter(adapter: SearchConsoleAdapter): void {
+
+/** Search Console 어댑터 등록. 시작 시 한 번. `null` 로 초기화 가능. */
+export function setSearchConsoleAdapter(adapter: SearchConsoleAdapter | null): void {
   searchConsoleAdapter = adapter;
 }
+
+/** 등록된 Search Console 어댑터 반환. 미등록 시 `null`. */
 export function getSearchConsoleAdapter(): SearchConsoleAdapter | null {
   return searchConsoleAdapter;
 }

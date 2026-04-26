@@ -1,7 +1,7 @@
 {
-  "name": "@heejun/spa-seo-gateway-multi-tenant",
-  "version": "1.7.0",
-  "description": "Multi-tenant SaaS layer scaffold for spa-seo-gateway (option B)",
+  "name": "@heejun/spa-seo-gateway-anthropic",
+  "version": "1.0.0",
+  "description": "Anthropic Claude reference adapter for spa-seo-gateway — schema.org JSON-LD inference",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -20,35 +20,34 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@heejun/spa-seo-gateway-core": "workspace:*",
-    "fastify": "^5.8.5",
-    "zod": "^4.3.6"
+    "@anthropic-ai/sdk": "^0.90.0"
+  },
+  "peerDependencies": {
+    "@heejun/spa-seo-gateway-core": "^1.6.0"
   },
   "devDependencies": {
+    "@heejun/spa-seo-gateway-core": "workspace:*",
     "typescript": "^6.0.3"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/blue45f/spa-seo-gateway.git",
-    "directory": "packages/multi-tenant"
+    "directory": "packages/anthropic"
   },
   "bugs": {
     "url": "https://github.com/blue45f/spa-seo-gateway/issues"
   },
-  "homepage": "https://github.com/blue45f/spa-seo-gateway/tree/main/packages/multi-tenant#readme",
+  "homepage": "https://github.com/blue45f/spa-seo-gateway/tree/main/packages/anthropic#readme",
   "license": "MIT",
   "author": "heejun",
   "keywords": [
     "seo",
     "spa",
-    "prerender",
-    "headless",
-    "puppeteer",
-    "fastify",
-    "dynamic-rendering",
-    "react",
-    "vue",
-    "svelte"
+    "anthropic",
+    "claude",
+    "schema.org",
+    "json-ld",
+    "ai"
   ],
   "publishConfig": {
     "access": "public"

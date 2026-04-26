@@ -38,6 +38,15 @@ function pathFor(url: string, baselineDir: string): string {
   return resolve(baselineDir, `${safe}.png`);
 }
 
+/**
+ * URL 의 스크린샷을 캡처해 baseline 과 perceptual diff.
+ *
+ * - baseline 이 없으면 새로 저장 (`baselineCreated: true` 반환).
+ * - 기존 baseline 과 크기가 다르면 diff 계산 없이 -1 반환 (재캡처 안내용).
+ * - 같은 크기면 pixelmatch 로 픽셀 단위 차이 측정 후 `<safe-name>.diff.png` 저장.
+ *
+ * @returns baseline/diff 경로 + 픽셀/퍼센트 + 소요 시간
+ */
 export async function runVisualDiff(
   url: string,
   options: VisualDiffOptions = {},

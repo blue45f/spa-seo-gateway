@@ -2,6 +2,33 @@
 
 날짜는 한국 시간(KST). 모든 커밋은 [GitHub history](https://github.com/blue45f/spa-seo-gateway/commits/main) 참고.
 
+## v1.7.0 — 2026-04-27
+
+v1.6.0 의 백엔드 신기능들을 사용자 가시 영역으로 확장 — 어드민 UI 탭 + 단위 테스트 + Anthropic 레퍼런스 어댑터.
+
+### Added
+- **어드민 UI 신규 탭 3개**:
+  - `Visual Diff` — URL 입력 → 스크린샷 캡처 + baseline 비교 (mode/threshold/fullPage 조절)
+  - `AI Schema` — URL 본문 → schema.org JSON-LD 자동 추론 (어댑터 미주입 시 501 가이드)
+  - `Audit Log` — HMAC chain 기반 감사 이벤트 테이블 + 무결성 검증 버튼
+- **`@heejun/spa-seo-gateway-anthropic`** (신규 패키지): `AiSchemaAdapter` 의 Anthropic Claude 레퍼런스 구현. resume 프로젝트의 `AnthropicProvider` 패턴 참고.
+  - `createAnthropicSchemaAdapter({ apiKey, model, maxHtmlChars, maxSuggestions })`
+  - 기본 모델 `claude-opus-4-7`, ANTHROPIC_API_KEY 환경변수 자동 인식
+  - SYSTEM_PROMPT 가 confidence 0.5 미만 응답 자동 제외
+- **단위 테스트 +16건** (총 111건):
+  - `tests/ab-variants.test.ts` — selectVariant weight 분포, applyVariant HTML 변형
+  - `tests/adapters.test.ts` — AI/Billing/SearchConsole 어댑터 set/get round-trip
+  - `tests/audit-chain.test.ts` — recordAudit hash chain, verifyAuditChain 무결성
+- **JSDoc 보강**: `selectVariant`, `applyVariant`, `runVisualDiff`, `setAiSchemaAdapter` 등 public API 에 의미·반환·side-effect 명시.
+
+### Changed
+- `setAiSchemaAdapter` / `setBillingAdapter` / `setSearchConsoleAdapter` 가 `null` 인자 허용 — 테스트/언마운트에서 명시적 reset 가능.
+- README 의 핵심 특징 섹션에 v1.6.0 항목 4종 추가 (A/B variants, visual regression, BYO 어댑터, audit chain).
+
+### Internal
+- 신규 패키지 빌드 파이프라인에 추가 — pnpm workspace 가 자동으로 `@heejun/spa-seo-gateway-anthropic` 를 빌드 대상에 포함.
+- 모든 테스트 통과 (111/111), 8 패키지 빌드 green.
+
 ## v1.6.0 — 2026-04-27
 
 내부 시스템만으로 동작하는 고도화 — 외부 SaaS 의존 없이 게이트웨이 단독으로 A/B 테스트, 시각 회귀, 감사 로그 무결성 검증.

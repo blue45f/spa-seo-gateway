@@ -1,6 +1,6 @@
 # spa-seo-gateway
 
-[![npm](https://img.shields.io/npm/v/@heejun/spa-seo-gateway-core?label=%40heejun%2Fspa-seo-gateway-core)](https://www.npmjs.com/package/@heejun/spa-seo-gateway-core) [![tests](https://img.shields.io/badge/tests-95%20passing-brightgreen)](https://github.com/blue45f/spa-seo-gateway/tree/main/tests) [![license](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+[![npm](https://img.shields.io/npm/v/@heejun/spa-seo-gateway-core?label=%40heejun%2Fspa-seo-gateway-core)](https://www.npmjs.com/package/@heejun/spa-seo-gateway-core) [![tests](https://img.shields.io/badge/tests-111%20passing-brightgreen)](https://github.com/blue45f/spa-seo-gateway/tree/main/tests) [![license](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
 SPA(React/Vue/Svelte 등) 가 만드는 **동적 콘텐츠를 봇이 요청한 시점에 헤드리스 Chromium 으로 실시간 렌더링** 해 봇에게는 완성된 HTML, 사람에게는 원본 SPA 를 그대로 전달하는 **고성능·범용 다이내믹 렌더링 게이트웨이**. 캐시·SWR·자동 워밍은 부가 최적화 — 본질은 봇 접근 시점의 on-demand 렌더링입니다.
 
@@ -41,6 +41,10 @@ pnpm install && pnpm dev
 - **임베드 어드민 UI**: Alpine.js + Tailwind. 라우트/캐시/사이트/테넌트 GUI 관리
 - **봇 자동 감지**: `isbot` (1,000+ UA 패턴) + 모바일 뷰포트 자동 분기
 - **관측성**: Prometheus `/metrics` (host 라벨), `/health`, `/health/deep`
+- **A/B variant 테스트** (v1.6.0): 같은 URL 에 다른 title/description weight 비율 노출, `x-prerender-variant` + 인상 메트릭
+- **Visual regression** (v1.6.0): pixelmatch 기반 baseline diff — 외부 SaaS 없이 단독 회귀 감지
+- **BYO 어댑터** (v1.6.0): AI schema(Anthropic 레퍼런스 포함) / Stripe billing / Search Console 인터페이스
+- **Audit chain** (v1.6.0): SHA-256 + HMAC 서명 hash chain — 변조 즉시 검출 (`verifyAuditChain`)
 
 ---
 
@@ -49,12 +53,14 @@ pnpm install && pnpm dev
 ```
 spa-seo-gateway/
 ├── packages/
-│   ├── core/          @spa-seo-gateway/core         — 엔진 (HTTP 비의존, 14모듈)
-│   ├── admin-ui/      @spa-seo-gateway/admin-ui     — Fastify 플러그인 + Alpine SPA
-│   ├── multi-tenant/  @spa-seo-gateway/multi-tenant — saas 모드 구현
-│   └── cms/           @spa-seo-gateway/cms          — cms 모드 구현
+│   ├── core/          @heejun/spa-seo-gateway-core         — 엔진 (HTTP 비의존, 18+ 모듈)
+│   ├── admin-ui/      @heejun/spa-seo-gateway-admin-ui     — Fastify 플러그인 + Alpine SPA
+│   ├── multi-tenant/  @heejun/spa-seo-gateway-multi-tenant — saas 모드 구현
+│   ├── cms/           @heejun/spa-seo-gateway-cms          — cms 모드 구현
+│   ├── cli/           @heejun/spa-seo-gateway-cli          — init/doctor/render CLI
+│   └── anthropic/     @heejun/spa-seo-gateway-anthropic    — Claude AI schema 어댑터 (옵션)
 ├── apps/
-│   └── gateway/       @spa-seo-gateway/gateway      — 실행 가능한 단일 바이너리
+│   └── gateway/       실행 가능한 단일 바이너리
 └── docs/                                            — 운영/아키텍처 가이드
 ```
 

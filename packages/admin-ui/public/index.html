@@ -1103,6 +1103,157 @@ REDIS_URL=redis://localhost:6379</pre>
           </section>
 
           <!-- ============================================================ -->
+          <!-- VISUAL DIFF -->
+          <!-- ============================================================ -->
+          <section x-show="tab === 'visual'" class="space-y-4">
+            <div class="bg-purple-50 dark:bg-purple-950 dark:border-purple-900 border border-purple-200 rounded-lg p-4 text-sm">
+              <h3 class="font-semibold text-purple-900 dark:text-purple-200 mb-1">시각 회귀 (Visual Regression)</h3>
+              <p class="text-purple-800 dark:text-purple-300">
+                URL 의 스크린샷을 캡처해 로컬 baseline 과 picture diff. 첫 실행은 baseline 으로 저장,
+                이후 실행부터 픽셀 단위 차이를 측정. CSS 회귀·레이아웃 깨짐을 즉시 감지.
+              </p>
+            </div>
+            <div class="bg-white dark:bg-slate-900 dark:border-slate-800 rounded-lg shadow-sm border border-slate-200 p-5 space-y-3">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <label class="block">
+                  <span class="text-sm font-medium">URL</span>
+                  <input type="url" class="mt-1 w-full px-3 py-2 rounded border border-slate-300 dark:border-slate-700 dark:bg-slate-800 text-sm" placeholder="https://www.example.com/" x-model="visual.url">
+                </label>
+                <label class="block">
+                  <span class="text-sm font-medium">모드</span>
+                  <select class="mt-1 w-full px-3 py-2 rounded border border-slate-300 dark:border-slate-700 dark:bg-slate-800 text-sm" x-model="visual.mode">
+                    <option value="auto">auto — 없으면 baseline 저장</option>
+                    <option value="create">create — 새 baseline 강제 저장</option>
+                    <option value="compare">compare — 비교만</option>
+                  </select>
+                </label>
+                <label class="block">
+                  <span class="text-sm font-medium">threshold (0~1)</span>
+                  <input type="number" step="0.01" min="0" max="1" class="mt-1 w-full px-3 py-2 rounded border border-slate-300 dark:border-slate-700 dark:bg-slate-800 text-sm" x-model.number="visual.threshold">
+                </label>
+                <label class="block">
+                  <span class="text-sm font-medium">전체 페이지 캡처</span>
+                  <label class="mt-2 flex items-center gap-2 text-sm">
+                    <input type="checkbox" x-model="visual.fullPage"> fullPage
+                  </label>
+                </label>
+              </div>
+              <button class="px-4 py-2 rounded bg-slate-900 dark:bg-indigo-600 text-white text-sm font-medium hover:bg-slate-700" :disabled="visual.running" @click="runVisualDiff()" x-text="visual.running ? '캡처 중...' : '캡처 + 비교'"></button>
+              <div x-show="visual.result" class="mt-4 space-y-2 text-sm">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                  <div class="bg-slate-50 dark:bg-slate-800 rounded p-3"><div class="text-xs text-slate-500 dark:text-slate-400">diff %</div><div class="font-mono text-lg" x-text="visual.result?.diffPercent?.toFixed(3) + '%'"></div></div>
+                  <div class="bg-slate-50 dark:bg-slate-800 rounded p-3"><div class="text-xs text-slate-500 dark:text-slate-400">diff pixels</div><div class="font-mono text-lg" x-text="visual.result?.diffPixels"></div></div>
+                  <div class="bg-slate-50 dark:bg-slate-800 rounded p-3"><div class="text-xs text-slate-500 dark:text-slate-400">크기</div><div class="font-mono" x-text="visual.result?.width + '×' + visual.result?.height"></div></div>
+                  <div class="bg-slate-50 dark:bg-slate-800 rounded p-3"><div class="text-xs text-slate-500 dark:text-slate-400">소요</div><div class="font-mono" x-text="visual.result?.durationMs + 'ms'"></div></div>
+                </div>
+                <div x-show="visual.result?.baselineCreated" class="text-xs text-emerald-600 dark:text-emerald-400">✓ 새 baseline 저장됨</div>
+                <div class="text-xs text-slate-500 dark:text-slate-400">
+                  baseline path: <code x-text="visual.result?.baselinePath"></code>
+                </div>
+                <div x-show="visual.result?.diffPath" class="text-xs text-slate-500 dark:text-slate-400">
+                  diff path: <code x-text="visual.result?.diffPath"></code>
+                </div>
+              </div>
+              <div x-show="visual.error" class="mt-3 bg-red-50 border border-red-200 text-red-800 rounded px-3 py-2 text-sm" x-text="visual.error"></div>
+            </div>
+          </section>
+
+          <!-- ============================================================ -->
+          <!-- AI SCHEMA -->
+          <!-- ============================================================ -->
+          <section x-show="tab === 'ai'" class="space-y-4">
+            <div class="bg-emerald-50 dark:bg-emerald-950 dark:border-emerald-900 border border-emerald-200 rounded-lg p-4 text-sm">
+              <h3 class="font-semibold text-emerald-900 dark:text-emerald-200 mb-1">AI 기반 schema.org JSON-LD 추론</h3>
+              <p class="text-emerald-800 dark:text-emerald-300">
+                URL 본문을 LLM 에 보내 Article/Product/FAQPage/HowTo 등 적합한 schema.org 마크업을 자동 추론.
+                BYO 패턴 — 시작 시 <code class="bg-white dark:bg-slate-800 px-1 rounded">setAiSchemaAdapter()</code> 로
+                Anthropic/OpenAI/Custom 어댑터를 주입하세요.
+              </p>
+            </div>
+            <div class="bg-white dark:bg-slate-900 dark:border-slate-800 rounded-lg shadow-sm border border-slate-200 p-5 space-y-3">
+              <label class="block">
+                <span class="text-sm font-medium">URL</span>
+                <input type="url" class="mt-1 w-full px-3 py-2 rounded border border-slate-300 dark:border-slate-700 dark:bg-slate-800 text-sm" placeholder="https://www.example.com/blog/post" x-model="ai.url">
+              </label>
+              <button class="px-4 py-2 rounded bg-slate-900 dark:bg-indigo-600 text-white text-sm font-medium hover:bg-slate-700" :disabled="ai.running" @click="runAiSchema()" x-text="ai.running ? '추론 중...' : '추론 실행'"></button>
+              <template x-for="(s, i) in ai.suggestions" :key="i">
+                <div class="border border-slate-200 dark:border-slate-700 rounded p-3 text-sm">
+                  <div class="flex items-center gap-2 mb-2">
+                    <span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 text-xs font-medium" x-text="s.type"></span>
+                    <span class="text-xs text-slate-500 dark:text-slate-400">confidence:</span>
+                    <span class="font-mono text-xs" x-text="(s.confidence * 100).toFixed(0) + '%'"></span>
+                  </div>
+                  <div x-show="s.rationale" class="text-xs text-slate-600 dark:text-slate-300 italic mb-2" x-text="s.rationale"></div>
+                  <pre class="text-xs bg-slate-50 dark:bg-slate-800 p-2 rounded overflow-auto" x-text="JSON.stringify(s.jsonLd, null, 2)"></pre>
+                </div>
+              </template>
+              <div x-show="ai.error" class="mt-3 bg-red-50 border border-red-200 text-red-800 rounded px-3 py-2 text-sm" x-text="ai.error"></div>
+            </div>
+            <div class="bg-white dark:bg-slate-900 dark:border-slate-800 rounded-lg shadow-sm border border-slate-200 p-5 text-sm">
+              <h3 class="font-semibold mb-2">Anthropic 어댑터 빠른 설정</h3>
+              <pre class="text-xs bg-slate-50 dark:bg-slate-800 p-3 rounded overflow-auto">npm install @heejun/spa-seo-gateway-anthropic @anthropic-ai/sdk
+
+import { setAiSchemaAdapter } from '@heejun/spa-seo-gateway-core';
+import { createAnthropicSchemaAdapter } from '@heejun/spa-seo-gateway-anthropic';
+
+setAiSchemaAdapter(
+  createAnthropicSchemaAdapter({
+    apiKey: process.env.ANTHROPIC_API_KEY,
+    model: 'claude-opus-4-7',
+  }),
+);</pre>
+            </div>
+          </section>
+
+          <!-- ============================================================ -->
+          <!-- AUDIT LOG -->
+          <!-- ============================================================ -->
+          <section x-show="tab === 'audit'" class="space-y-4">
+            <div class="bg-amber-50 dark:bg-amber-950 dark:border-amber-900 border border-amber-200 rounded-lg p-4 text-sm">
+              <h3 class="font-semibold text-amber-900 dark:text-amber-200 mb-1">감사 로그 (HMAC chain)</h3>
+              <p class="text-amber-800 dark:text-amber-300">
+                모든 admin 액션은 SHA-256 hash chain + 옵션 HMAC 서명으로 기록됩니다.
+                <code class="bg-white dark:bg-slate-800 px-1 rounded">verifyAuditChain()</code> 으로 변조 즉시 검출.
+              </p>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <button class="px-3 py-1.5 rounded bg-slate-900 dark:bg-indigo-600 text-white text-sm font-medium hover:bg-slate-700" @click="loadAudit()">새로고침</button>
+              <button class="px-3 py-1.5 rounded bg-white dark:bg-slate-800 text-sm font-medium border border-slate-300 dark:border-slate-700 hover:bg-slate-50" @click="verifyAudit()">체인 검증</button>
+              <span x-show="audit.verified !== null" class="ml-auto text-sm" :class="audit.verified ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'">
+                <span x-text="audit.verified ? '✓ 무결성 OK' : '✗ 변조 감지! brokenAt=' + audit.brokenAt"></span>
+              </span>
+            </div>
+            <div class="bg-white dark:bg-slate-900 dark:border-slate-800 rounded-lg shadow-sm border border-slate-200 overflow-x-auto">
+              <table class="w-full text-sm">
+                <thead class="bg-slate-50 dark:bg-slate-800 text-xs uppercase text-slate-600 dark:text-slate-300">
+                  <tr>
+                    <th class="px-3 py-2 text-left">timestamp</th>
+                    <th class="px-3 py-2 text-left">actor</th>
+                    <th class="px-3 py-2 text-left">action</th>
+                    <th class="px-3 py-2 text-left">target</th>
+                    <th class="px-3 py-2 text-left">outcome</th>
+                    <th class="px-3 py-2 text-left">hash</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                  <template x-for="(e, i) in audit.events" :key="i">
+                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-800">
+                      <td class="px-3 py-2 font-mono text-xs whitespace-nowrap" x-text="e.ts?.slice(11, 19)"></td>
+                      <td class="px-3 py-2" x-text="e.actor"></td>
+                      <td class="px-3 py-2 font-mono text-xs" x-text="e.action"></td>
+                      <td class="px-3 py-2 truncate max-w-xs" x-text="e.target ?? '-'"></td>
+                      <td class="px-3 py-2"><span class="px-1.5 py-0.5 rounded text-xs" :class="e.outcome === 'ok' ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'" x-text="e.outcome"></span></td>
+                      <td class="px-3 py-2 font-mono text-[10px] text-slate-400" x-text="e.hash?.slice(0, 12) + '...'"></td>
+                    </tr>
+                  </template>
+                  <tr x-show="!audit.events?.length"><td colspan="6" class="px-3 py-8 text-center text-slate-500 dark:text-slate-400">기록된 감사 이벤트가 없습니다.</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div x-show="audit.error" class="bg-red-50 border border-red-200 text-red-800 rounded px-3 py-2 text-sm" x-text="audit.error"></div>
+          </section>
+
+          <!-- ============================================================ -->
           <!-- HELP -->
           <!-- ============================================================ -->
           <section x-show="tab === 'help'" class="space-y-4">
@@ -1174,6 +1325,9 @@ REDIS_URL=redis://localhost:6379</pre>
               'nav.test': '렌더 테스트', 'nav.test.sub': '단일 URL 즉시 렌더',
               'nav.metrics': '메트릭', 'nav.metrics.sub': 'Prometheus 시각화',
               'nav.lighthouse': 'Lighthouse', 'nav.lighthouse.sub': '페이지 점수 측정',
+              'nav.visual': '시각 회귀', 'nav.visual.sub': '스크린샷 diff',
+              'nav.ai': 'AI Schema', 'nav.ai.sub': 'JSON-LD 자동 추론',
+              'nav.audit': '감사 로그', 'nav.audit.sub': 'HMAC 체인 + 변조 검출',
               'nav.api': 'API', 'nav.api.sub': '엔드포인트 레퍼런스',
               'nav.library': '라이브러리', 'nav.library.sub': 'npm 패키지 사용',
               'nav.help': '도움말', 'nav.help.sub': 'FAQ · 트러블슈팅',
@@ -1197,6 +1351,9 @@ REDIS_URL=redis://localhost:6379</pre>
               'nav.test': 'Render Test', 'nav.test.sub': 'Render a single URL',
               'nav.metrics': 'Metrics', 'nav.metrics.sub': 'Prometheus viewer',
               'nav.lighthouse': 'Lighthouse', 'nav.lighthouse.sub': 'Page scoring',
+              'nav.visual': 'Visual Diff', 'nav.visual.sub': 'Screenshot regression',
+              'nav.ai': 'AI Schema', 'nav.ai.sub': 'JSON-LD inference',
+              'nav.audit': 'Audit Log', 'nav.audit.sub': 'HMAC chain + tamper check',
               'nav.api': 'API', 'nav.api.sub': 'Endpoint reference',
               'nav.library': 'Library', 'nav.library.sub': 'npm package usage',
               'nav.help': 'Help', 'nav.help.sub': 'FAQ · troubleshooting',
@@ -1213,6 +1370,9 @@ REDIS_URL=redis://localhost:6379</pre>
             },
           },
           lighthouse: { url: '', running: false, result: null, error: null },
+          visual: { url: '', mode: 'auto', threshold: 0.1, fullPage: false, running: false, result: null, error: null },
+          ai: { url: '', running: false, suggestions: [], error: null },
+          audit: { events: [], verified: null, brokenAt: null, error: null },
           routeFilter: '',
           tourSeen: localStorage.getItem('seo-admin-tour-seen') === '1',
           tourStep: 0,
@@ -1236,6 +1396,9 @@ REDIS_URL=redis://localhost:6379</pre>
               { id: 'test', icon: '🧪', label: t('nav.test'), subtitle: t('nav.test.sub') },
               { id: 'metrics', icon: '📈', label: t('nav.metrics'), subtitle: t('nav.metrics.sub') },
               { id: 'lighthouse', icon: '💡', label: t('nav.lighthouse'), subtitle: t('nav.lighthouse.sub') },
+              { id: 'visual', icon: '🖼️', label: t('nav.visual'), subtitle: t('nav.visual.sub') },
+              { id: 'ai', icon: '✨', label: t('nav.ai'), subtitle: t('nav.ai.sub') },
+              { id: 'audit', icon: '🔐', label: t('nav.audit'), subtitle: t('nav.audit.sub') },
               { id: 'api', icon: '🔌', label: t('nav.api'), subtitle: t('nav.api.sub'), public: true },
               { id: 'library', icon: '📦', label: t('nav.library'), subtitle: t('nav.library.sub'), public: true },
               { id: 'help', icon: '❓', label: t('nav.help'), subtitle: t('nav.help.sub'), public: true },
@@ -1431,6 +1594,11 @@ REDIS_URL=redis://localhost:6379</pre>
               { method: 'POST', path: '/admin/api/cache/clear', auth: 'admin', desc: '전체 캐시 초기화 (주의: 다음 요청부터 cold render)', example: 'curl -X POST -H "x-admin-token: $T" http://localhost:3000/admin/api/cache/clear' },
               { method: 'POST', path: '/admin/api/warm', auth: 'admin', desc: 'Sitemap 기반 사전 워밍', example: `curl -X POST -H "x-admin-token: $T" -H "content-type: application/json" \\\n  -d '{"sitemap":"https://www.example.com/sitemap.xml","max":500}' \\\n  http://localhost:3000/admin/api/warm` },
               { method: 'POST', path: '/admin/api/render-test', auth: 'admin', desc: '단일 URL 즉시 렌더 테스트 (캐시 우회)', example: `curl -X POST -H "x-admin-token: $T" -H "content-type: application/json" \\\n  -d '{"url":"https://www.example.com/","ua":"Googlebot/2.1"}' \\\n  http://localhost:3000/admin/api/render-test` },
+              { method: 'GET', path: '/admin/api/audit', auth: 'admin', desc: '최근 200건 감사 이벤트 (HMAC chain)', example: 'curl -H "x-admin-token: $T" http://localhost:3000/admin/api/audit' },
+              { method: 'GET', path: '/admin/api/audit/verify', auth: 'admin', desc: '감사 체인 무결성 검증 — 변조 시 brokenAt 인덱스 반환', example: 'curl -H "x-admin-token: $T" http://localhost:3000/admin/api/audit/verify' },
+              { method: 'POST', path: '/admin/api/visual-diff', auth: 'admin', desc: 'URL 스크린샷 → baseline 비교 (pixelmatch)', example: `curl -X POST -H "x-admin-token: $T" -H "content-type: application/json" \\\n  -d '{"url":"https://www.example.com/","mode":"auto","threshold":0.1}' \\\n  http://localhost:3000/admin/api/visual-diff` },
+              { method: 'POST', path: '/admin/api/ai/schema', auth: 'admin', desc: 'AI 어댑터로 schema.org JSON-LD 추론 (setAiSchemaAdapter 필요)', example: `curl -X POST -H "x-admin-token: $T" -H "content-type: application/json" \\\n  -d '{"url":"https://www.example.com/blog/x"}' \\\n  http://localhost:3000/admin/api/ai/schema` },
+              { method: 'POST', path: '/admin/api/lighthouse', auth: 'admin', desc: 'Lighthouse 점수 측정 (peer dep 필요)', example: `curl -X POST -H "x-admin-token: $T" -H "content-type: application/json" \\\n  -d '{"url":"https://www.example.com/"}' \\\n  http://localhost:3000/admin/api/lighthouse` },
             ];
 
             if (mode === 'cms') {
@@ -1521,6 +1689,50 @@ REDIS_URL=redis://localhost:6379</pre>
             finally { this.lighthouse.running = false; }
           },
 
+          async runVisualDiff() {
+            this.visual.running = true; this.visual.error = null; this.visual.result = null;
+            try {
+              const r = await this.api('POST', '/admin/api/visual-diff', {
+                url: this.visual.url,
+                mode: this.visual.mode,
+                threshold: this.visual.threshold,
+                fullPage: this.visual.fullPage,
+              });
+              this.visual.result = r.result;
+              this.toast(r.result?.baselineCreated ? 'baseline 저장됨' : `diff ${r.result?.diffPercent?.toFixed(2)}%`, 'success');
+            } catch (e) { this.visual.error = e.message; this.toast('시각 회귀 실패', 'error'); }
+            finally { this.visual.running = false; }
+          },
+
+          async runAiSchema() {
+            this.ai.running = true; this.ai.error = null; this.ai.suggestions = [];
+            try {
+              const r = await this.api('POST', '/admin/api/ai/schema', { url: this.ai.url });
+              this.ai.suggestions = r.suggestions || [];
+              if (!this.ai.suggestions.length) this.toast('추론된 schema 없음 — 본문이 짧거나 타입 불명확', 'warn');
+              else this.toast(`${this.ai.suggestions.length}개 schema 제안`, 'success');
+            } catch (e) { this.ai.error = e.message; this.toast('AI schema 실패 — 어댑터 설정 확인', 'error'); }
+            finally { this.ai.running = false; }
+          },
+
+          async loadAudit() {
+            this.audit.error = null;
+            try {
+              const r = await this.api('GET', '/admin/api/audit');
+              this.audit.events = r.events || [];
+            } catch (e) { this.audit.error = e.message; }
+          },
+
+          async verifyAudit() {
+            this.audit.error = null;
+            try {
+              const r = await this.api('GET', '/admin/api/audit/verify');
+              this.audit.verified = r.verified;
+              this.audit.brokenAt = r.brokenAt;
+              this.toast(r.verified ? '감사 체인 무결성 확인' : `변조 감지 (브로큰 인덱스 ${r.brokenAt})`, r.verified ? 'success' : 'error');
+            } catch (e) { this.audit.error = e.message; }
+          },
+
           async loadPublicInfo() {
             try { this.publicInfo = await this.api('GET', '/admin/api/public/info', null, { public: true }); }
             catch (e) { this.error = e.message; }
@@ -1533,6 +1745,7 @@ REDIS_URL=redis://localhost:6379</pre>
             location.hash = id;
             if (id === 'metrics' && this.token) this.loadMetrics();
             if (id === 'routes' && this.token && !this.routes.length) this.loadRoutes();
+            if (id === 'audit' && this.token) this.loadAudit();
           },
 
           async loadSiteInfo() {
