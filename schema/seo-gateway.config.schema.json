@@ -1,0 +1,404 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "server": {
+      "type": "object",
+      "properties": {
+        "host": {
+          "default": "0.0.0.0",
+          "type": "string"
+        },
+        "port": {
+          "default": 3000,
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": ["host", "port"],
+      "additionalProperties": false
+    },
+    "mode": {
+      "default": "render-only",
+      "type": "string",
+      "enum": ["render-only", "proxy"]
+    },
+    "originUrl": {
+      "type": "string",
+      "format": "uri"
+    },
+    "bot": {
+      "type": "object",
+      "properties": {
+        "forceRenderHeader": {
+          "default": "x-force-render",
+          "type": "string"
+        },
+        "bypassQueryParam": {
+          "default": "_no_render",
+          "type": "string"
+        },
+        "detectMobile": {
+          "default": true,
+          "type": "boolean"
+        }
+      },
+      "required": ["forceRenderHeader", "bypassQueryParam", "detectMobile"],
+      "additionalProperties": false
+    },
+    "renderer": {
+      "type": "object",
+      "properties": {
+        "poolMin": {
+          "default": 2,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "poolMax": {
+          "default": 8,
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "pageTimeoutMs": {
+          "default": 25000,
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "waitUntil": {
+          "default": "networkidle2",
+          "type": "string",
+          "enum": ["load", "domcontentloaded", "networkidle0", "networkidle2"]
+        },
+        "waitSelector": {
+          "type": "string"
+        },
+        "waitPrerenderReady": {
+          "default": false,
+          "type": "boolean"
+        },
+        "waitPrerenderReadyTimeoutMs": {
+          "default": 2000,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "maxRequestsPerBrowser": {
+          "default": 1000,
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "blockResourceTypes": {
+          "default": ["image", "media", "font"],
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "image",
+              "media",
+              "font",
+              "stylesheet",
+              "script",
+              "xhr",
+              "fetch",
+              "websocket",
+              "other"
+            ]
+          }
+        },
+        "blockUrlPatterns": {
+          "default": [
+            "google-analytics.com",
+            "googletagmanager.com",
+            "facebook.com/tr",
+            "doubleclick.net",
+            "segment.io",
+            "hotjar.com",
+            "mixpanel.com",
+            "fullstory.com",
+            "amplitude.com",
+            "connect.facebook.net"
+          ],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "qualityCheck": {
+          "default": true,
+          "type": "boolean"
+        },
+        "minTextLength": {
+          "default": 50,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "userAgentSuffix": {
+          "default": "spa-seo-gateway/1.0",
+          "type": "string"
+        },
+        "viewport": {
+          "type": "object",
+          "properties": {
+            "width": {
+              "default": 1280,
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991
+            },
+            "height": {
+              "default": 800,
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991
+            }
+          },
+          "required": ["width", "height"],
+          "additionalProperties": false
+        },
+        "mobileViewport": {
+          "type": "object",
+          "properties": {
+            "width": {
+              "default": 390,
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991
+            },
+            "height": {
+              "default": 844,
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991
+            }
+          },
+          "required": ["width", "height"],
+          "additionalProperties": false
+        },
+        "executablePath": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "poolMin",
+        "poolMax",
+        "pageTimeoutMs",
+        "waitUntil",
+        "waitPrerenderReady",
+        "waitPrerenderReadyTimeoutMs",
+        "maxRequestsPerBrowser",
+        "blockResourceTypes",
+        "blockUrlPatterns",
+        "qualityCheck",
+        "minTextLength",
+        "userAgentSuffix",
+        "viewport",
+        "mobileViewport"
+      ],
+      "additionalProperties": false
+    },
+    "cache": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "default": true,
+          "type": "boolean"
+        },
+        "memory": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "default": true,
+              "type": "boolean"
+            },
+            "maxItems": {
+              "default": 500,
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991
+            },
+            "maxBytes": {
+              "default": 104857600,
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991
+            },
+            "ttlMs": {
+              "default": 86400000,
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991
+            }
+          },
+          "required": ["enabled", "maxItems", "maxBytes", "ttlMs"],
+          "additionalProperties": false
+        },
+        "redis": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "default": false,
+              "type": "boolean"
+            },
+            "url": {
+              "type": "string"
+            },
+            "ttlSec": {
+              "default": 604800,
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991
+            },
+            "keyPrefix": {
+              "default": "spa-seo:",
+              "type": "string"
+            }
+          },
+          "required": ["enabled", "ttlSec", "keyPrefix"],
+          "additionalProperties": false
+        },
+        "swrWindowMs": {
+          "default": 3600000,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": ["enabled", "memory", "redis", "swrWindowMs"],
+      "additionalProperties": false
+    },
+    "rateLimit": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "default": true,
+          "type": "boolean"
+        },
+        "max": {
+          "default": 120,
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "timeWindow": {
+          "default": "1 minute",
+          "type": "string"
+        }
+      },
+      "required": ["enabled", "max", "timeWindow"],
+      "additionalProperties": false
+    },
+    "log": {
+      "type": "object",
+      "properties": {
+        "level": {
+          "default": "info",
+          "type": "string",
+          "enum": ["fatal", "error", "warn", "info", "debug", "trace"]
+        },
+        "pretty": {
+          "default": false,
+          "type": "boolean"
+        }
+      },
+      "required": ["level", "pretty"],
+      "additionalProperties": false
+    },
+    "allowedHosts": {
+      "default": [],
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "adminToken": {
+      "type": "string"
+    },
+    "routes": {
+      "default": [],
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "pattern": {
+            "type": "string",
+            "description": "URL pathname regex (e.g. \"^/products/\")"
+          },
+          "ignore": {
+            "type": "boolean"
+          },
+          "ttlMs": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "waitUntil": {
+            "type": "string",
+            "enum": ["load", "domcontentloaded", "networkidle0", "networkidle2"]
+          },
+          "waitSelector": {
+            "type": "string"
+          },
+          "waitMs": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "blockResourceTypes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "image",
+                "media",
+                "font",
+                "stylesheet",
+                "script",
+                "xhr",
+                "fetch",
+                "websocket",
+                "other"
+              ]
+            }
+          },
+          "viewport": {
+            "type": "object",
+            "properties": {
+              "width": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "height": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": ["width", "height"],
+            "additionalProperties": false
+          }
+        },
+        "required": ["pattern"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "server",
+    "mode",
+    "bot",
+    "renderer",
+    "cache",
+    "rateLimit",
+    "log",
+    "allowedHosts",
+    "routes"
+  ],
+  "additionalProperties": false
+}

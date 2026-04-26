@@ -77,6 +77,8 @@ const Schema = z.object({
         'amplitude.com',
         'connect.facebook.net',
       ]),
+    qualityCheck: z.coerce.boolean().default(true),
+    minTextLength: z.coerce.number().int().nonnegative().default(50),
     userAgentSuffix: z.string().default('spa-seo-gateway/1.0'),
     viewport: z.object({
       width: z.coerce.number().int().positive().default(1280),
@@ -134,6 +136,7 @@ const Schema = z.object({
   routes: z.array(RouteOverride).default([]),
 });
 
+export const ConfigSchema = Schema;
 export type Config = z.infer<typeof Schema>;
 
 const env = process.env;
@@ -159,6 +162,8 @@ function fromEnv(): Record<string, unknown> {
       maxRequestsPerBrowser: env.MAX_REQUESTS_PER_BROWSER,
       blockResourceTypes: env.BLOCK_RESOURCE_TYPES ? csv(env.BLOCK_RESOURCE_TYPES) : undefined,
       blockUrlPatterns: env.BLOCK_URL_PATTERNS ? csv(env.BLOCK_URL_PATTERNS) : undefined,
+      qualityCheck: env.QUALITY_CHECK,
+      minTextLength: env.MIN_TEXT_LENGTH,
       userAgentSuffix: env.USER_AGENT_SUFFIX,
       viewport: { width: env.VIEWPORT_WIDTH, height: env.VIEWPORT_HEIGHT },
       mobileViewport: { width: env.MOBILE_VIEWPORT_WIDTH, height: env.MOBILE_VIEWPORT_HEIGHT },

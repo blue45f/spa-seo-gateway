@@ -1,6 +1,6 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "_comment": "이 파일을 'seo-gateway.config.json' 으로 복사 (또는 GATEWAY_CONFIG_FILE=경로 지정) 하면 게이트웨이가 자동 로드합니다. env 변수가 동일 키를 갖는 경우 env 가 승리합니다.",
+  "$schema": "./schema/seo-gateway.config.schema.json",
+  "_comment": "이 파일을 'seo-gateway.config.json' 으로 복사 (또는 GATEWAY_CONFIG_FILE=경로 지정) 하면 게이트웨이가 자동 로드합니다. env 변수가 동일 키를 갖는 경우 env 가 승리합니다. $schema 가 있으면 VSCode/IDEA 에서 자동완성됩니다.",
 
   "originUrl": "https://www.example.com",
   "mode": "render-only",

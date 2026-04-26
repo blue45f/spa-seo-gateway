@@ -1,0 +1,5 @@
+#!/usr/bin/env sh
+# push 직전 빌드 + 단위 테스트 — 깨진 채로 origin 에 올라가는 것을 차단
+npx tsc -p tsconfig.json --noEmit
+npx tsc -p tsconfig.build.json --noEmit
+npx vitest run --reporter=dot

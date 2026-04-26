@@ -13,7 +13,7 @@ export const httpRequests = new Counter({
 export const renderDuration = new Histogram({
   name: 'gateway_render_duration_ms',
   help: 'Render duration in milliseconds',
-  labelNames: ['outcome'] as const,
+  labelNames: ['outcome', 'host'] as const,
   buckets: [50, 100, 250, 500, 1_000, 2_500, 5_000, 10_000, 20_000, 30_000],
   registers: [registry],
 });

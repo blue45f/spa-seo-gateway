@@ -2,10 +2,12 @@ import httpProxy from '@fastify/http-proxy';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { detectBot } from './bot.js';
 import { cacheClear, cacheDel, cacheStats, cacheSwr } from './cache.js';
+import { breakerStats } from './circuit-breaker.js';
 import { config, matchRoute } from './config.js';
 import { logger } from './logger.js';
 import { httpRequests, registry } from './metrics.js';
 import { browserPool } from './pool.js';
+import { warmFromSitemap } from './prerender-warmer.js';
 import { render } from './renderer.js';
 import { buildTargetUrl, cacheKey, isHostAllowed } from './url.js';
 
@@ -18,7 +20,25 @@ export async function registerRoutes(app: FastifyInstance): Promise<void> {
     uptime: process.uptime(),
     pool: browserPool.stats(),
     cache: cacheStats(),
+    breakers: breakerStats(),
   }));
+
+  app.get('/health/deep', async (_req, reply) => {
+    const probe = config.originUrl ?? 'https://example.com/';
+    try {
+      const t0 = Date.now();
+      const entry = await render({ url: probe, headers: { 'user-agent': 'Googlebot/2.1' } });
+      reply.send({
+        ok: true,
+        probe,
+        status: entry.status,
+        durationMs: Date.now() - t0,
+        bytes: Buffer.byteLength(entry.body, 'utf8'),
+      });
+    } catch (e) {
+      reply.code(503).send({ ok: false, probe, error: (e as Error).message });
+    }
+  });
 
   app.get('/metrics', async (_req, reply) => {
     reply.header('content-type', registry.contentType);
@@ -53,7 +73,23 @@ export async function registerRoutes(app: FastifyInstance): Promise<void> {
       origin: config.originUrl,
       pool: browserPool.stats(),
       cache: cacheStats(),
+      breakers: breakerStats(),
+      routes: config.routes.length,
     };
+  });
+
+  app.post('/admin/warm', async (req, reply) => {
+    if (!checkAdmin(req, reply)) return;
+    const body = (req.body ?? {}) as { sitemap?: string; max?: number; concurrency?: number };
+    if (!body.sitemap) {
+      reply.code(400);
+      return { ok: false, error: 'sitemap URL is required' };
+    }
+    const report = await warmFromSitemap(body.sitemap, {
+      max: body.max,
+      concurrency: body.concurrency,
+    });
+    return { ok: true, report };
   });
 
   if (config.mode === 'proxy' && config.originUrl) {

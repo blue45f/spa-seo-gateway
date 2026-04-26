@@ -1,3 +1,4 @@
+import { brotliCompressSync, brotliDecompressSync, constants as zlib } from 'node:zlib';
 import { createKeyv } from '@cacheable/memory';
 import { coalesceAsync } from '@cacheable/utils';
 import KeyvRedis from '@keyv/redis';
@@ -12,7 +13,33 @@ export type CacheEntry = {
   status: number;
   headers: Record<string, string>;
   createdAt: number;
+  ttlOverrideMs?: number;
 };
+
+type StoredEntry = Omit<CacheEntry, 'body'> & {
+  body: string;
+  encoding?: 'br';
+};
+
+const COMPRESS_THRESHOLD = 1024;
+
+function compressEntry(entry: CacheEntry): StoredEntry {
+  if (entry.body.length < COMPRESS_THRESHOLD) return { ...entry };
+  const buf = brotliCompressSync(Buffer.from(entry.body, 'utf8'), {
+    params: { [zlib.BROTLI_PARAM_QUALITY]: 4 },
+  });
+  return { ...entry, body: buf.toString('base64'), encoding: 'br' };
+}
+
+function decompressEntry(stored: StoredEntry): CacheEntry {
+  if (stored.encoding !== 'br') {
+    const { encoding: _e, ...rest } = stored;
+    return rest;
+  }
+  const decoded = brotliDecompressSync(Buffer.from(stored.body, 'base64')).toString('utf8');
+  const { encoding: _e, ...rest } = stored;
+  return { ...rest, body: decoded };
+}
 
 export type SwrResult = {
   entry: CacheEntry;
@@ -50,7 +77,8 @@ async function fetchAndStore(
 ): Promise<CacheEntry> {
   const result = await coalesceAsync(`render:${key}`, async () => {
     const entry = await fetcher();
-    await cache.set(key, entry, totalLifeMsOverride);
+    const effectiveTotal = entry.ttlOverrideMs ? entry.ttlOverrideMs + swrMs : totalLifeMsOverride;
+    await cache.set(key, compressEntry(entry), effectiveTotal);
     return entry;
   });
   if (!result) throw new Error('coalesce returned no value');
@@ -58,11 +86,12 @@ async function fetchAndStore(
 }
 
 export async function cacheGet(key: string): Promise<CacheEntry | undefined> {
-  return (await cache.get<CacheEntry>(key)) ?? undefined;
+  const stored = await cache.get<StoredEntry>(key);
+  return stored ? decompressEntry(stored) : undefined;
 }
 
 export async function cacheSet(key: string, entry: CacheEntry): Promise<void> {
-  await cache.set(key, entry);
+  await cache.set(key, compressEntry(entry));
 }
 
 export async function cacheDel(key: string): Promise<void> {
@@ -87,9 +116,10 @@ export async function cacheSwr(
   fetcher: () => Promise<CacheEntry>,
   customTtlMs?: number,
 ): Promise<SwrResult> {
-  const ttl = customTtlMs ?? ttlMs;
+  const stored = await cache.get<StoredEntry>(key);
+  const cached = stored ? decompressEntry(stored) : undefined;
+  const ttl = cached?.ttlOverrideMs ?? customTtlMs ?? ttlMs;
   const totalLife = ttl + swrMs;
-  const cached = await cache.get<CacheEntry>(key);
   if (cached) {
     const age = Date.now() - cached.createdAt;
     if (age < ttl) {

@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { lookup } from 'node:dns/promises';
 import normalizeUrlImport from 'normalize-url';
 import { config } from './config.js';
 
@@ -38,6 +39,55 @@ export function isHostAllowed(targetUrl: string): boolean {
   }
   if (config.allowedHosts.length === 0) return true;
   return config.allowedHosts.includes(u.host);
+}
+
+const PRIVATE_V4 = [
+  /^0\./,
+  /^10\./,
+  /^127\./,
+  /^169\.254\./,
+  /^172\.(1[6-9]|2\d|3[01])\./,
+  /^192\.168\./,
+  /^198\.1[89]\./,
+  /^203\.0\.113\./,
+  /^224\./,
+  /^240\./,
+  /^255\.255\.255\.255$/,
+];
+const PRIVATE_V6 = [/^::1$/, /^::$/, /^fc/i, /^fd/i, /^fe[89ab]/i];
+
+function isPrivateIp(addr: string): boolean {
+  if (addr.includes('.')) return PRIVATE_V4.some((re) => re.test(addr));
+  return PRIVATE_V6.some((re) => re.test(addr));
+}
+
+const SAFE_TTL_MS = 5 * 60_000;
+const safeCache = new Map<string, { ok: boolean; reason?: string; expiresAt: number }>();
+
+export async function isSafeTarget(targetUrl: string): Promise<{ ok: boolean; reason?: string }> {
+  let host: string;
+  try {
+    host = new URL(targetUrl).hostname;
+  } catch {
+    return { ok: false, reason: 'invalid url' };
+  }
+  if (host === 'localhost' || host === '127.0.0.1' || host === '::1') {
+    return { ok: false, reason: `loopback host: ${host}` };
+  }
+  const cached = safeCache.get(host);
+  if (cached && cached.expiresAt > Date.now()) {
+    return { ok: cached.ok, reason: cached.reason };
+  }
+  try {
+    const { address } = await lookup(host);
+    const verdict = isPrivateIp(address)
+      ? { ok: false, reason: `private address resolved: ${address}` }
+      : { ok: true as const };
+    safeCache.set(host, { ...verdict, expiresAt: Date.now() + SAFE_TTL_MS });
+    return verdict;
+  } catch (e) {
+    return { ok: false, reason: `dns lookup failed: ${(e as Error).message}` };
+  }
 }
 
 export function buildTargetUrl(req: {

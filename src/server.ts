@@ -42,19 +42,41 @@ async function main() {
 
   await registerRoutes(app);
 
+  let shuttingDown = false;
   const shutdown = async (signal: string) => {
-    logger.info({ signal }, 'shutting down');
+    if (shuttingDown) return;
+    shuttingDown = true;
+    logger.info({ signal }, 'graceful shutdown initiated');
+    const drainStart = Date.now();
+    const drainTimeoutMs = 30_000;
+
+    app.addHook('onRequest', (_req, reply, done) => {
+      if (shuttingDown) {
+        reply.header('connection', 'close').code(503).send({ error: 'shutting down' });
+        return;
+      }
+      done();
+    });
+
     try {
-      await app.close();
+      await Promise.race([app.close(), new Promise((res) => setTimeout(res, drainTimeoutMs))]);
+      logger.info({ ms: Date.now() - drainStart }, 'fastify drained');
     } catch (e) {
       logger.warn({ err: (e as Error).message }, 'fastify close error');
     }
     try {
       await browserPool.stop();
+      logger.info('browser pool stopped');
     } catch (e) {
       logger.warn({ err: (e as Error).message }, 'pool stop error');
     }
-    await shutdownCache();
+    try {
+      await shutdownCache();
+      logger.info('cache disconnected');
+    } catch (e) {
+      logger.warn({ err: (e as Error).message }, 'cache disconnect error');
+    }
+    logger.info({ totalMs: Date.now() - drainStart }, 'shutdown complete');
     process.exit(0);
   };
 

@@ -1,9 +1,12 @@
 import type { CacheEntry } from './cache.js';
+import { withBreaker } from './circuit-breaker.js';
 import { config, type RouteOverride } from './config.js';
 import { logger } from './logger.js';
 import { inflight, renderDuration, renderErrors } from './metrics.js';
 import { applyRequestInterception, optimizeHtml } from './optimize.js';
 import { browserPool } from './pool.js';
+import { assessQuality, shortTtlForStatus } from './quality.js';
+import { isSafeTarget } from './url.js';
 
 const FORWARD_HEADERS = new Set(['accept-language', 'cookie', 'authorization']);
 const TRANSIENT_REASONS = new Set(['crashed', 'pool-exhausted', 'network']);
@@ -21,9 +24,17 @@ export async function render(input: RenderInput): Promise<CacheEntry> {
   const started = Date.now();
   let lastError: unknown;
   try {
+    const safe = await isSafeTarget(input.url);
+    if (!safe.ok) {
+      renderErrors.inc({ reason: 'ssrf' });
+      throw new Error(`SSRF blocked: ${safe.reason}`);
+    }
+    const host = new URL(input.url).host;
+    const guarded = withBreaker(host, async (i: RenderInput) => renderOnce(i, 1, started));
+
     for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
       try {
-        return await renderOnce(input, attempt, started);
+        return attempt === 1 ? await guarded(input) : await renderOnce(input, attempt, started);
       } catch (err) {
         lastError = err;
         const reason = classifyError(err);
@@ -35,7 +46,7 @@ export async function render(input: RenderInput): Promise<CacheEntry> {
           );
           continue;
         }
-        renderDuration.observe({ outcome: 'error' }, Date.now() - started);
+        renderDuration.observe({ outcome: 'error', host: hostOf(input.url) }, Date.now() - started);
         logger.error(
           { err: (err as Error).message, url: input.url, reason, attempts: attempt },
           'render failed',
@@ -46,6 +57,14 @@ export async function render(input: RenderInput): Promise<CacheEntry> {
     throw lastError ?? new Error('render failed without error');
   } finally {
     inflight.dec();
+  }
+}
+
+function hostOf(url: string): string {
+  try {
+    return new URL(url).host;
+  } catch {
+    return 'unknown';
   }
 }
 
@@ -107,21 +126,44 @@ async function renderOnce(
     }
 
     const html = await page.content();
-    const optimized = optimizeHtml(html, { url: input.url, ensureBase: true });
+
+    let effectiveStatus = status;
+    let qualityReason: string | undefined;
+    if (config.renderer.qualityCheck && status < 400) {
+      const verdict = assessQuality(html, { minTextLength: config.renderer.minTextLength });
+      if (!verdict.ok) {
+        qualityReason = verdict.reason;
+        if (verdict.reason === 'soft-404') effectiveStatus = 404;
+        else if (verdict.reason === 'error-page') effectiveStatus = 503;
+        logger.warn(
+          { url: input.url, reason: verdict.reason, textLength: verdict.textLength },
+          'render quality below threshold',
+        );
+      }
+    }
+
+    const optimized = optimizeHtml(html, {
+      url: input.url,
+      ensureBase: true,
+      ensureCanonical: true,
+    });
 
     const headers: Record<string, string> = {
       'content-type': 'text/html; charset=utf-8',
       'x-prerendered': 'true',
-      'x-prerender-status': String(status),
+      'x-prerender-status': String(effectiveStatus),
       'x-prerender-viewport': isMobile ? 'mobile' : 'desktop',
     };
+    if (qualityReason) headers['x-prerender-quality'] = qualityReason;
     if (route) headers['x-prerender-route'] = route.pattern;
+    const shortTtl = shortTtlForStatus(effectiveStatus);
+    if (shortTtl != null) headers['x-prerender-short-ttl-ms'] = String(shortTtl);
     const canonical = respHeaders.link;
     if (canonical) headers.link = canonical;
 
-    return { body: optimized, status, headers, createdAt: Date.now() };
+    return { body: optimized, status: effectiveStatus, headers, createdAt: Date.now() };
   });
-  renderDuration.observe({ outcome: 'ok' }, Date.now() - started);
+  renderDuration.observe({ outcome: 'ok', host: hostOf(input.url) }, Date.now() - started);
   if (attempt > 1) {
     logger.info({ attempt, url: input.url }, 'render succeeded after retry');
   }
@@ -130,6 +172,8 @@ async function renderOnce(
 
 function classifyError(err: unknown): string {
   const msg = (err as Error)?.message ?? '';
+  if (msg.includes('SSRF')) return 'ssrf';
+  if (msg.includes('Breaker is open')) return 'circuit-open';
   if (msg.includes('Navigation timeout')) return 'timeout';
   if (msg.includes('net::ERR_')) return 'network';
   if (msg.includes('Target closed')) return 'crashed';
