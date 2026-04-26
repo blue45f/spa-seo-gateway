@@ -19,6 +19,11 @@ export {
   type RouteOverride,
 } from './config.js';
 export { startHotReload, stopHotReload } from './hot-reload.js';
+export {
+  clearLighthouseCache,
+  type LighthouseScores,
+  runLighthouse,
+} from './lighthouse.js';
 export { type Logger, logger } from './logger.js';
 export {
   browserPool as poolMetric,

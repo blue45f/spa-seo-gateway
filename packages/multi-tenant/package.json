@@ -1,6 +1,6 @@
 {
   "name": "@heejun/spa-seo-gateway-multi-tenant",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "Multi-tenant SaaS layer scaffold for spa-seo-gateway (option B)",
   "type": "module",
   "main": "./dist/index.js",

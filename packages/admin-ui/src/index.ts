@@ -15,6 +15,7 @@ import {
   type RouteOverride,
   recordAudit,
   render,
+  runLighthouse,
   setRoutes,
   warmFromSitemap,
 } from '@heejun/spa-seo-gateway-core';
@@ -33,18 +34,72 @@ export async function registerAdminUI(
 ): Promise<void> {
   const prefix = opts.prefix ?? '/admin/ui';
   const tokenHeader = (opts.tokenHeader ?? 'x-admin-token').toLowerCase();
+  const COOKIE_NAME = 'seo-admin';
+
+  function getCookie(req: FastifyRequest, name: string): string | undefined {
+    const c = req.headers.cookie;
+    if (!c) return undefined;
+    for (const part of c.split(';')) {
+      const idx = part.indexOf('=');
+      if (idx < 0) continue;
+      const k = part.slice(0, idx).trim();
+      if (k === name) return decodeURIComponent(part.slice(idx + 1).trim());
+    }
+    return undefined;
+  }
+
+  function isAuthed(req: FastifyRequest): boolean {
+    if (!config.adminToken) return false;
+    const fromHeader = req.headers[tokenHeader];
+    if (typeof fromHeader === 'string' && fromHeader === config.adminToken) return true;
+    return getCookie(req, COOKIE_NAME) === config.adminToken;
+  }
 
   const guard = (req: FastifyRequest, reply: FastifyReply): boolean => {
     if (!config.adminToken) {
       reply.code(404).send({ error: 'admin disabled (set ADMIN_TOKEN to enable)' });
       return false;
     }
-    if (req.headers[tokenHeader] !== config.adminToken) {
-      reply.code(401).send({ error: 'unauthorized — provide X-Admin-Token header' });
+    if (!isAuthed(req)) {
+      reply.code(401).send({ error: 'unauthorized — POST /admin/api/login or send X-Admin-Token' });
       return false;
     }
     return true;
   };
+
+  app.get('/admin/api/whoami', (req) => ({
+    ok: true,
+    authenticated: isAuthed(req),
+    adminEnabled: !!config.adminToken,
+  }));
+
+  app.post<{ Body: { token?: string } }>('/admin/api/login', (req, reply) => {
+    if (!config.adminToken) {
+      reply.code(404).send({ ok: false, error: 'admin disabled' });
+      return;
+    }
+    const token = (req.body?.token ?? '').trim();
+    if (token !== config.adminToken) {
+      reply.code(401).send({ ok: false, error: 'invalid token' });
+      return;
+    }
+    const isHttps = (req.headers['x-forwarded-proto'] ?? '').includes('https');
+    const cookieAttrs = [
+      `${COOKIE_NAME}=${encodeURIComponent(token)}`,
+      'HttpOnly',
+      'SameSite=Strict',
+      'Path=/',
+      'Max-Age=86400',
+    ];
+    if (isHttps) cookieAttrs.push('Secure');
+    reply.header('set-cookie', cookieAttrs.join('; ')).send({ ok: true });
+  });
+
+  app.post('/admin/api/logout', (_req, reply) => {
+    reply
+      .header('set-cookie', `${COOKIE_NAME}=; HttpOnly; SameSite=Strict; Path=/; Max-Age=0`)
+      .send({ ok: true });
+  });
 
   const publicRoot = resolve(__dirname, '../public');
   await app.register(staticPlugin, {
@@ -190,6 +245,33 @@ export async function registerAdminUI(
         };
       } catch (e) {
         reply.code(502).send({ ok: false, error: (e as Error).message });
+        return null;
+      }
+    },
+  );
+
+  app.post<{ Body: { url?: string; useCache?: boolean } }>(
+    '/admin/api/lighthouse',
+    async (req, reply) => {
+      if (!guard(req, reply)) return null;
+      const url = req.body?.url;
+      if (!url) {
+        reply.code(400).send({ ok: false, error: 'url required' });
+        return null;
+      }
+      try {
+        const result = await runLighthouse(url, { useCache: req.body?.useCache !== false });
+        recordAudit({ actor: 'admin', action: 'lighthouse.run', target: url, outcome: 'ok' });
+        return { ok: true, ...result };
+      } catch (e) {
+        recordAudit({
+          actor: 'admin',
+          action: 'lighthouse.run',
+          target: url,
+          outcome: 'error',
+          meta: { error: (e as Error).message },
+        });
+        reply.code(503).send({ ok: false, error: (e as Error).message });
         return null;
       }
     },

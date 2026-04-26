@@ -156,9 +156,9 @@
             <div class="font-mono text-slate-300" x-text="publicInfo?.mode ?? '...'"></div>
           </div>
           <div class="flex items-center gap-2">
-            <span class="w-2 h-2 rounded-full" :class="token ? 'bg-emerald-400' : 'bg-slate-500'"></span>
-            <span x-text="token ? '인증됨' : '미인증'"></span>
-            <button x-show="token" class="ml-auto text-slate-500 dark:text-slate-400 hover:text-slate-300" @click="logout()">logout</button>
+            <span class="w-2 h-2 rounded-full" :class="authed ? 'bg-emerald-400' : 'bg-slate-500'"></span>
+            <span x-text="authed ? t('auth.authenticated') : t('auth.unauthenticated')"></span>
+            <button x-show="authed" class="ml-auto text-slate-500 dark:text-slate-400 hover:text-slate-300" @click="logout()" x-text="t('auth.logout')"></button>
           </div>
           <a href="https://github.com/blue45f/spa-seo-gateway" target="_blank" class="text-slate-500 dark:text-slate-400 hover:text-slate-300 block">↗ GitHub</a>
           <button
@@ -166,7 +166,15 @@
             @click="toggleTheme()"
           >
             <span x-text="theme === 'dark' ? '☀️' : '🌙'"></span>
-            <span x-text="theme === 'dark' ? '라이트 모드' : '다크 모드'"></span>
+            <span x-text="theme === 'dark' ? t('theme.light') : t('theme.dark')"></span>
+          </button>
+          <button
+            class="w-full text-left text-slate-500 dark:text-slate-400 hover:text-slate-300 flex items-center gap-2"
+            @click="toggleLang()"
+            :title="lang === 'ko' ? 'Switch to English' : '한국어로 전환'"
+          >
+            <span>🌐</span>
+            <span x-text="lang === 'ko' ? 'English' : '한국어'"></span>
           </button>
         </div>
       </aside>
@@ -178,16 +186,17 @@
             <h1 class="font-semibold" x-text="currentNavItem()?.label"></h1>
             <p class="text-xs text-slate-500 dark:text-slate-400" x-text="currentNavItem()?.subtitle"></p>
           </div>
-          <div x-show="!token && requiresAuth(tab)" class="flex items-center gap-2">
+          <div x-show="!authed && requiresAuth(tab)" class="flex items-center gap-2">
             <input
               type="password"
-              placeholder="X-Admin-Token 입력"
-              class="px-3 py-1.5 rounded border border-slate-300 text-sm w-72"
+              :placeholder="t('auth.token-placeholder')"
+              class="px-3 py-1.5 rounded border border-slate-300 dark:border-slate-700 dark:bg-slate-800 text-sm w-72"
               x-model="tokenInput"
               @keydown.enter="login()"
             />
-            <button class="px-3 py-1.5 rounded bg-slate-900 text-white text-sm font-medium hover:bg-slate-700" @click="login()">로그인</button>
+            <button class="px-3 py-1.5 rounded bg-slate-900 text-white text-sm font-medium hover:bg-slate-700" @click="login()" x-text="t('auth.login')"></button>
           </div>
+          <button x-show="authed" class="px-3 py-1.5 text-sm rounded bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700" @click="logout()" x-text="t('auth.logout')"></button>
         </header>
 
         <main class="flex-1 p-6 max-w-7xl w-full mx-auto space-y-6">
@@ -996,6 +1005,81 @@ REDIS_URL=redis://localhost:6379</pre>
           </section>
 
           <!-- ============================================================ -->
+          <!-- LIGHTHOUSE -->
+          <!-- ============================================================ -->
+          <section x-show="tab === 'lighthouse'" class="space-y-4">
+            <div class="bg-blue-50 dark:bg-indigo-950 dark:border-indigo-900 border border-blue-200 rounded-lg p-4 text-sm">
+              <div class="flex items-start gap-3">
+                <div class="text-2xl">💡</div>
+                <div class="flex-1">
+                  <h3 class="font-semibold text-blue-900 dark:text-indigo-200 mb-1">Lighthouse — 페이지 점수 측정</h3>
+                  <p class="text-blue-800 dark:text-indigo-300 mb-2">
+                    Performance / Accessibility / Best Practices / SEO / PWA 5개 카테고리 점수를 측정합니다.
+                    chromium 으로 직접 실행하므로 실제 봇이 보는 페이지와 동일 조건. 측정엔 10–30초 소요.
+                  </p>
+                  <p class="text-blue-700 dark:text-indigo-400 text-xs">
+                    ℹ️ <code>lighthouse</code> 와 <code>chrome-launcher</code> 패키지가 설치되어 있어야 합니다.
+                    <code>pnpm add lighthouse chrome-launcher</code>. 결과는 24h 캐시.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="bg-white dark:bg-slate-900 dark:border-slate-800 rounded-lg shadow-sm border border-slate-200 p-5 space-y-4">
+              <div class="flex gap-2 flex-wrap">
+                <input
+                  class="flex-1 min-w-[20rem] px-3 py-2 border border-slate-200 dark:border-slate-700 dark:bg-slate-800 rounded text-sm"
+                  placeholder="https://www.example.com/"
+                  x-model="lighthouse.url"
+                />
+                <button
+                  class="px-4 py-2 rounded bg-slate-900 text-white text-sm hover:bg-slate-700"
+                  @click="runLighthouse()"
+                  :disabled="lighthouse.running || !lighthouse.url"
+                >
+                  <span x-show="!lighthouse.running" x-text="t('btn.measure')"></span>
+                  <span x-show="lighthouse.running" x-text="t('btn.running')"></span>
+                </button>
+              </div>
+              <div x-show="lighthouse.error" class="text-sm text-red-700 bg-red-50 dark:bg-red-950 border border-red-200 rounded p-3" x-text="lighthouse.error"></div>
+              <div x-show="lighthouse.result" class="space-y-3">
+                <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+                  <template x-for="cat in [
+                    { key: 'performance', label: 'Performance' },
+                    { key: 'accessibility', label: 'Accessibility' },
+                    { key: 'bestPractices', label: 'Best Practices' },
+                    { key: 'seo', label: 'SEO' },
+                    { key: 'pwa', label: 'PWA' },
+                  ]" :key="cat.key">
+                    <div class="bg-slate-50 dark:bg-slate-950 rounded p-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400" x-text="cat.label"></div>
+                      <div class="text-2xl font-bold mt-1" :class="lhScoreColor(lighthouse.result?.scores?.[cat.key])" x-text="lighthouse.result?.scores?.[cat.key] ?? '–'"></div>
+                    </div>
+                  </template>
+                </div>
+                <div class="text-xs text-slate-500 dark:text-slate-400">
+                  측정: <span x-text="lighthouse.result?.fetchedAt"></span> ·
+                  소요: <span x-text="lighthouse.result?.durationMs + ' ms'"></span> ·
+                  <a :href="lighthouse.result?.url" target="_blank" class="text-indigo-600 hover:underline" x-text="lighthouse.result?.url"></a>
+                </div>
+                <div x-show="lighthouse.result?.topAudits?.length">
+                  <h3 class="font-semibold text-sm mb-2">개선 후보 (점수 90 미만 — top 10)</h3>
+                  <table class="w-full text-sm">
+                    <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                      <template x-for="a in lighthouse.result?.topAudits ?? []" :key="a.id">
+                        <tr>
+                          <td class="py-1.5 font-mono text-xs" x-text="a.id"></td>
+                          <td class="py-1.5" x-text="a.title"></td>
+                          <td class="py-1.5 text-right font-semibold" :class="lhScoreColor(a.score)" x-text="a.score ?? '–'"></td>
+                        </tr>
+                      </template>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ============================================================ -->
           <!-- HELP -->
           <!-- ============================================================ -->
           <section x-show="tab === 'help'" class="space-y-4">
@@ -1040,8 +1124,10 @@ REDIS_URL=redis://localhost:6379</pre>
     <script>
       function adminApp() {
         return {
-          token: localStorage.getItem('seo-admin-token') || '',
+          token: '',
           tokenInput: '',
+          authed: false,
+          adminEnabled: true,
           tab: 'welcome',
           publicInfo: null,
           metricsTimer: null,
@@ -1054,19 +1140,82 @@ REDIS_URL=redis://localhost:6379</pre>
           cmdPaletteOpen: false,
           cmdQuery: '',
           shortcutsOpen: false,
+          lang: localStorage.getItem('seo-admin-lang') || (navigator.language?.startsWith('ko') ? 'ko' : 'en'),
+          i18n: {
+            ko: {
+              'nav.welcome': '소개', 'nav.welcome.sub': '게이트웨이 한눈에',
+              'nav.dashboard': '대시보드', 'nav.dashboard.sub': '현재 상태',
+              'nav.routes': '라우트', 'nav.routes.sub': 'URL 패턴 오버라이드',
+              'nav.cache': '캐시', 'nav.cache.sub': 'TTL/SWR + 무효화',
+              'nav.warm': '워밍', 'nav.warm.sub': 'Sitemap 사전 캐시',
+              'nav.test': '렌더 테스트', 'nav.test.sub': '단일 URL 즉시 렌더',
+              'nav.metrics': '메트릭', 'nav.metrics.sub': 'Prometheus 시각화',
+              'nav.lighthouse': 'Lighthouse', 'nav.lighthouse.sub': '페이지 점수 측정',
+              'nav.api': 'API', 'nav.api.sub': '엔드포인트 레퍼런스',
+              'nav.library': '라이브러리', 'nav.library.sub': 'npm 패키지 사용',
+              'nav.help': '도움말', 'nav.help.sub': 'FAQ · 트러블슈팅',
+              'auth.login': '로그인', 'auth.logout': 'logout',
+              'auth.token-placeholder': 'X-Admin-Token 입력',
+              'auth.authenticated': '인증됨', 'auth.unauthenticated': '미인증',
+              'theme.dark': '다크 모드', 'theme.light': '라이트 모드',
+              'btn.save-memory': '저장 (메모리)', 'btn.save-disk': '저장 + 디스크 영구화',
+              'btn.add': '+ 추가', 'btn.delete': '삭제', 'btn.run': '실행',
+              'btn.refresh': '새로고침', 'btn.start': '시작', 'btn.running': '실행 중...',
+              'btn.invalidate': 'URL 무효화', 'btn.clear-all': '전체 초기화',
+              'btn.measure': 'Lighthouse 측정',
+              'mode': '모드',
+            },
+            en: {
+              'nav.welcome': 'Welcome', 'nav.welcome.sub': 'Gateway overview',
+              'nav.dashboard': 'Dashboard', 'nav.dashboard.sub': 'Current state',
+              'nav.routes': 'Routes', 'nav.routes.sub': 'URL pattern overrides',
+              'nav.cache': 'Cache', 'nav.cache.sub': 'TTL/SWR + invalidation',
+              'nav.warm': 'Warm', 'nav.warm.sub': 'Sitemap pre-cache',
+              'nav.test': 'Render Test', 'nav.test.sub': 'Render a single URL',
+              'nav.metrics': 'Metrics', 'nav.metrics.sub': 'Prometheus viewer',
+              'nav.lighthouse': 'Lighthouse', 'nav.lighthouse.sub': 'Page scoring',
+              'nav.api': 'API', 'nav.api.sub': 'Endpoint reference',
+              'nav.library': 'Library', 'nav.library.sub': 'npm package usage',
+              'nav.help': 'Help', 'nav.help.sub': 'FAQ · troubleshooting',
+              'auth.login': 'Login', 'auth.logout': 'logout',
+              'auth.token-placeholder': 'X-Admin-Token',
+              'auth.authenticated': 'Authenticated', 'auth.unauthenticated': 'Not signed in',
+              'theme.dark': 'Dark mode', 'theme.light': 'Light mode',
+              'btn.save-memory': 'Save (memory)', 'btn.save-disk': 'Save + persist',
+              'btn.add': '+ Add', 'btn.delete': 'Delete', 'btn.run': 'Run',
+              'btn.refresh': 'Refresh', 'btn.start': 'Start', 'btn.running': 'Running...',
+              'btn.invalidate': 'Invalidate URL', 'btn.clear-all': 'Clear all',
+              'btn.measure': 'Measure',
+              'mode': 'mode',
+            },
+          },
+          lighthouse: { url: '', running: false, result: null, error: null },
 
-          navItems: [
-            { id: 'welcome', icon: '👋', label: '소개', subtitle: '게이트웨이 한눈에 보기', public: true },
-            { id: 'dashboard', icon: '📊', label: '대시보드', subtitle: '현재 상태와 circuit breaker' },
-            { id: 'routes', icon: '🛣️', label: '라우트', subtitle: 'URL 패턴별 동작 오버라이드' },
-            { id: 'cache', icon: '🗄️', label: '캐시', subtitle: 'TTL/SWR + 무효화' },
-            { id: 'warm', icon: '🔥', label: '워밍', subtitle: 'Sitemap 사전 캐시' },
-            { id: 'test', icon: '🧪', label: '렌더 테스트', subtitle: '단일 URL 즉시 렌더' },
-            { id: 'metrics', icon: '📈', label: '메트릭', subtitle: 'Prometheus 시각화' },
-            { id: 'api', icon: '🔌', label: 'API', subtitle: '엔드포인트 레퍼런스', public: true },
-            { id: 'library', icon: '📦', label: '라이브러리', subtitle: 'npm 패키지로 사용', public: true },
-            { id: 'help', icon: '❓', label: '도움말', subtitle: 'FAQ · 트러블슈팅', public: true },
-          ],
+          get navItems() {
+            const t = (k) => this.i18n[this.lang][k] ?? this.i18n.ko[k] ?? k;
+            return [
+              { id: 'welcome', icon: '👋', label: t('nav.welcome'), subtitle: t('nav.welcome.sub'), public: true },
+              { id: 'dashboard', icon: '📊', label: t('nav.dashboard'), subtitle: t('nav.dashboard.sub') },
+              { id: 'routes', icon: '🛣️', label: t('nav.routes'), subtitle: t('nav.routes.sub') },
+              { id: 'cache', icon: '🗄️', label: t('nav.cache'), subtitle: t('nav.cache.sub') },
+              { id: 'warm', icon: '🔥', label: t('nav.warm'), subtitle: t('nav.warm.sub') },
+              { id: 'test', icon: '🧪', label: t('nav.test'), subtitle: t('nav.test.sub') },
+              { id: 'metrics', icon: '📈', label: t('nav.metrics'), subtitle: t('nav.metrics.sub') },
+              { id: 'lighthouse', icon: '💡', label: t('nav.lighthouse'), subtitle: t('nav.lighthouse.sub') },
+              { id: 'api', icon: '🔌', label: t('nav.api'), subtitle: t('nav.api.sub'), public: true },
+              { id: 'library', icon: '📦', label: t('nav.library'), subtitle: t('nav.library.sub'), public: true },
+              { id: 'help', icon: '❓', label: t('nav.help'), subtitle: t('nav.help.sub'), public: true },
+            ];
+          },
+
+          t(key, fallback) {
+            return this.i18n[this.lang]?.[key] ?? this.i18n.ko[key] ?? fallback ?? key;
+          },
+
+          toggleLang() {
+            this.lang = this.lang === 'ko' ? 'en' : 'ko';
+            localStorage.setItem('seo-admin-lang', this.lang);
+          },
 
           error: '',
           site: null,
@@ -1166,6 +1315,13 @@ REDIS_URL=redis://localhost:6379</pre>
             document.querySelectorAll('.drag-over').forEach((el) => el.classList.remove('drag-over'));
           },
 
+          lhScoreColor(score) {
+            if (score == null) return 'text-slate-400';
+            if (score >= 90) return 'text-emerald-600 dark:text-emerald-400';
+            if (score >= 50) return 'text-amber-600 dark:text-amber-400';
+            return 'text-red-600 dark:text-red-400';
+          },
+
           filteredCmd() {
             const q = this.cmdQuery.toLowerCase().trim();
             if (!q) return this.navItems;
@@ -1238,8 +1394,14 @@ REDIS_URL=redis://localhost:6379</pre>
 
           async api(method, path, body, opts = {}) {
             const headers = { 'content-type': 'application/json' };
+            // 후방 호환: 헤더 토큰도 같이 보냄. 쿠키 인증을 우선시.
             if (this.token && !opts.public) headers['x-admin-token'] = this.token;
-            const res = await fetch(path, { method, headers, body: body ? JSON.stringify(body) : undefined });
+            const res = await fetch(path, {
+              method,
+              headers,
+              body: body ? JSON.stringify(body) : undefined,
+              credentials: 'same-origin',
+            });
             const data = await res.json().catch(() => ({}));
             if (!res.ok) throw new Error(data.error || `${res.status} ${res.statusText}`);
             return data;
@@ -1247,10 +1409,51 @@ REDIS_URL=redis://localhost:6379</pre>
 
           async init() {
             await this.loadPublicInfo();
+            await this.checkAuth();
             const hash = (location.hash || '').replace('#', '');
             if (hash && this.navItems.find((n) => n.id === hash)) this.tab = hash;
-            if (this.token) await this.loadSiteInfo();
+            if (this.authed) await this.loadSiteInfo();
             this.startMetricsTimer();
+          },
+
+          async checkAuth() {
+            try {
+              const r = await this.api('GET', '/admin/api/whoami', null, { public: true });
+              this.authed = !!r.authenticated;
+              this.adminEnabled = !!r.adminEnabled;
+              if (this.authed) this.token = 'authenticated';
+            } catch { this.authed = false; }
+          },
+
+          async login() {
+            const t = (this.tokenInput || '').trim();
+            if (!t) return;
+            try {
+              await this.api('POST', '/admin/api/login', { token: t }, { public: true });
+              this.tokenInput = '';
+              this.authed = true;
+              this.token = 'authenticated';
+              this.error = '';
+              this.toast(this.t('auth.authenticated','인증됨'), 'success');
+              await this.loadSiteInfo();
+            } catch (e) { this.error = e.message; this.authed = false; }
+          },
+
+          async logout() {
+            try { await this.api('POST', '/admin/api/logout', null, { public: true }); } catch {}
+            this.authed = false; this.token = '';
+            localStorage.removeItem('seo-admin-token');
+            this.tab = 'welcome';
+            this.toast('logged out', 'info');
+          },
+
+          async runLighthouse() {
+            this.lighthouse.running = true; this.lighthouse.error = null;
+            try {
+              const r = await this.api('POST', '/admin/api/lighthouse', { url: this.lighthouse.url });
+              this.lighthouse.result = r;
+            } catch (e) { this.lighthouse.error = e.message; }
+            finally { this.lighthouse.running = false; }
           },
 
           async loadPublicInfo() {
@@ -1258,18 +1461,7 @@ REDIS_URL=redis://localhost:6379</pre>
             catch (e) { this.error = e.message; }
           },
 
-          login() {
-            this.token = this.tokenInput.trim();
-            if (!this.token) return;
-            localStorage.setItem('seo-admin-token', this.token);
-            this.tokenInput = '';
-            this.error = '';
-            this.loadSiteInfo();
-          },
-          logout() {
-            this.token = '';
-            localStorage.removeItem('seo-admin-token');
-          },
+          // login / logout 은 위에 cookie 기반으로 정의됨
 
           goTab(id) {
             this.tab = id;

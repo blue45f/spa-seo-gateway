@@ -1,6 +1,6 @@
 {
   "name": "@heejun/spa-seo-gateway-cms",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "Multi-site CMS-style admin for spa-seo-gateway (option C, single-org with multiple sites)",
   "type": "module",
   "main": "./dist/index.js",
