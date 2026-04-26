@@ -124,26 +124,26 @@ Request → Bot Detect ✗
 
 ## 핵심 설계 결정
 
-### A. 컨텍스트 단위 격리 vs 페이지 재사용
+### A. 컨텍스트 단위 격리 (puppeteer-cluster CONCURRENCY_CONTEXT)
 
-**선택: 매 요청마다 새 BrowserContext + Page**
+**선택: 매 요청마다 새 `BrowserContext` (incognito) + Page**
 
-| | 페이지 재사용 (puppeteer-cluster 식)| 컨텍스트 단위 격리 (본 구현)|
-|--|--|--|
-| 속도 | 더 빠름 (~50ms 절약) | 약간 느림 |
-| 격리 | cookie/storage 잔존 위험 | 완전 격리 |
-| 메모리 | 천천히 증가 | 매번 정리 |
-| 디버깅 | 어려움 | 쉬움 |
+| | 페이지 재사용 (CONCURRENCY_PAGE) | 컨텍스트 격리 (CONCURRENCY_CONTEXT, 본 구현)| 브라우저 격리 (CONCURRENCY_BROWSER) |
+|--|--|--|--|
+| 속도 | 가장 빠름 | 빠름 (cluster 가 단일 브라우저 공유) | 느림 (매번 launch) |
+| 격리 | cookie/storage 잔존 | 완전 격리 | 완전 격리 |
+| 메모리 | 천천히 누적 | 작업 후 컨텍스트 close | 매번 회수 |
 
-SEO 렌더링에서는 격리가 더 중요. (이전 사용자의 인증 쿠키가 노출되는 사고 방지)
+SEO 렌더링에서는 격리가 중요 (이전 사용자의 인증 쿠키 노출 방지). CONTEXT 가 격리/속도/메모리의 최적 균형입니다.
 
-### B. 동시성 제어 — 슬롯 세마포어
+### B. 동시성 제어 — puppeteer-cluster
 
-`generic-pool` 같은 라이브러리는 페이지 1개 = 슬롯 1개. 그런데 Puppeteer 는 **브라우저 1개에 페이지 수십 개**가 가능합니다. 따라서:
+`puppeteer-cluster@0.25` 의 `Cluster.launch({ concurrency: CONCURRENCY_CONTEXT, maxConcurrency: POOL_MAX })`:
 
-- **풀 크기** = 동시 활성 브라우저 수 (1~N, 메모리 기준)
-- **슬롯 세마포어** = 동시 활성 페이지 수 (= `POOL_MAX`)
-- 라운드로빈으로 가장 한가한 브라우저에 페이지 부하 분산
+- **maxConcurrency** = 동시 활성 작업 상한
+- 초과 작업은 **cluster 내부 FIFO 큐**가 처리 → backpressure / OOM 방어
+- **timeout / taskerror 이벤트**로 hung worker 자동 회수
+- 게이트웨이는 한 줄로 호출: `browserPool.withPage(async (page) => { ... })`
 
 ### C. 2-tier 캐시 구조
 
@@ -237,6 +237,7 @@ Chromium 은 장시간 가동 시 메모리가 천천히 증가합니다. `MAX_R
 |--|--|--|
 | [`fastify`](https://fastify.dev) | HTTP 서버 | Express 대비 ~2배 처리량 |
 | [`puppeteer`](https://pptr.dev) | 헤드리스 Chromium | 사실상의 표준, 풍부한 API |
+| [`puppeteer-cluster`](https://github.com/thomasdondorf/puppeteer-cluster) | 동시성 풀 | CONCURRENCY_CONTEXT 모델, 검증된 큐/timeout/recovery |
 | [`isbot`](https://github.com/omrilotan/isbot) | 봇 탐지 | 1,000+ UA 패턴, 매주 업데이트 |
 | [`lru-cache`](https://github.com/isaacs/node-lru-cache) | 인메모리 캐시 | size/ttl 기반 LRU, allowStale |
 | [`ioredis`](https://github.com/redis/ioredis) | Redis 클라이언트 | 클러스터/센티넬 지원 |

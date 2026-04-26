@@ -1,16 +1,8 @@
-import puppeteer, { type Browser, type Page } from 'puppeteer';
+import puppeteer, { type Page } from 'puppeteer';
+import { Cluster, type TaskFunction } from 'puppeteer-cluster';
 import { config } from './config.js';
 import { logger } from './logger.js';
 import { browserPool as poolMetric } from './metrics.js';
-
-type Holder = {
-  id: number;
-  browser: Browser;
-  startedAt: number;
-  totalCount: number;
-  activeCount: number;
-  recycling: boolean;
-};
 
 const LAUNCH_ARGS = [
   '--no-sandbox',
@@ -36,180 +28,129 @@ const LAUNCH_ARGS = [
 ];
 
 class BrowserPool {
-  private holders: Holder[] = [];
-  private nextId = 1;
-  private maxConcurrent = config.renderer.poolMax;
-  private currentConcurrent = 0;
-  private waiters: Array<() => void> = [];
-  private starting: Promise<void> | null = null;
+  private cluster: Cluster | null = null;
+  private startedAt = 0;
+  private active = 0;
+  private totalServed = 0;
+  private recycleAt = 0;
+  private recycling = false;
   private stopped = false;
 
   async start(): Promise<void> {
-    if (this.starting) return this.starting;
-    this.starting = (async () => {
-      const min = Math.min(config.renderer.poolMin, config.renderer.poolMax);
-      const initial = Array.from({ length: min }, () => this.spawn());
-      await Promise.all(initial);
-      logger.info({ count: this.holders.length }, 'browser pool ready');
-      this.updateMetrics();
-    })();
-    return this.starting;
+    if (this.cluster) return;
+    this.cluster = await Cluster.launch({
+      puppeteer,
+      concurrency: Cluster.CONCURRENCY_CONTEXT,
+      maxConcurrency: config.renderer.poolMax,
+      timeout: config.renderer.pageTimeoutMs + 10_000,
+      workerCreationDelay: 50,
+      retryLimit: 0,
+      monitor: false,
+      puppeteerOptions: {
+        headless: true,
+        args: LAUNCH_ARGS,
+        executablePath: config.renderer.executablePath,
+        defaultViewport: config.renderer.viewport,
+        pipe: true,
+        timeout: 30_000,
+      },
+    });
+
+    this.cluster.on('taskerror', (err: Error) => {
+      logger.warn({ err: err.message }, 'cluster task error');
+    });
+
+    this.startedAt = Date.now();
+    this.recycleAt = config.renderer.maxRequestsPerBrowser;
+    poolMetric.set({ state: 'ready' }, 1);
+    logger.info(
+      { maxConcurrency: config.renderer.poolMax, recycleAt: this.recycleAt },
+      'browser pool ready (puppeteer-cluster CONCURRENCY_CONTEXT)',
+    );
   }
 
   async stop(): Promise<void> {
     this.stopped = true;
-    await Promise.all(
-      this.holders.map(async (h) => {
-        try {
-          await h.browser.close();
-        } catch (e) {
-          logger.warn({ err: (e as Error).message, id: h.id }, 'close failed');
-        }
-      }),
-    );
-    this.holders = [];
-    while (this.waiters.length) this.waiters.shift()?.();
+    const c = this.cluster;
+    this.cluster = null;
+    if (c) {
+      try {
+        await c.idle();
+        await c.close();
+      } catch (e) {
+        logger.warn({ err: (e as Error).message }, 'cluster close error');
+      }
+    }
+    poolMetric.set({ state: 'ready' }, 0);
   }
 
   async withPage<T>(fn: (page: Page) => Promise<T>): Promise<T> {
-    if (this.stopped) throw new Error('pool stopped');
-    await this.acquireSlot();
-    let holder: Holder | null = null;
-    let page: Page | null = null;
+    if (!this.cluster || this.stopped) throw new Error('pool not running');
+    this.active++;
+    this.totalServed++;
+    poolMetric.set({ state: 'active' }, this.active);
+    poolMetric.set({ state: 'served_total' }, this.totalServed);
+
+    if (this.totalServed >= this.recycleAt && !this.recycling) {
+      this.recycleAt = this.totalServed + config.renderer.maxRequestsPerBrowser;
+      this.recycling = true;
+      void this.recycle().finally(() => {
+        this.recycling = false;
+      });
+    }
+
     try {
-      holder = await this.pickHolder();
-      holder.activeCount++;
-      holder.totalCount++;
-      const ctx = await holder.browser.createBrowserContext();
-      page = await ctx.newPage();
-      try {
-        return await fn(page);
-      } finally {
-        try {
-          await page.close({ runBeforeUnload: false });
-        } catch {
-          /* page may already be closed */
-        }
-        try {
-          await ctx.close();
-        } catch {
-          /* context may already be closed */
-        }
-      }
+      const task: TaskFunction<undefined, T> = async ({ page }) => fn(page);
+      return (await this.cluster.execute(task)) as T;
     } finally {
-      if (holder) {
-        holder.activeCount--;
-        if (
-          holder.totalCount >= config.renderer.maxRequestsPerBrowser &&
-          holder.activeCount === 0 &&
-          !holder.recycling
-        ) {
-          this.recycle(holder).catch((err) =>
-            logger.warn({ err: err.message, id: holder!.id }, 'recycle failed'),
-          );
-        }
-      }
-      this.releaseSlot();
-      this.updateMetrics();
+      this.active--;
+      poolMetric.set({ state: 'active' }, this.active);
     }
   }
 
-  private async acquireSlot(): Promise<void> {
-    while (this.currentConcurrent >= this.maxConcurrent) {
-      await new Promise<void>((resolve) => this.waiters.push(resolve));
-    }
-    this.currentConcurrent++;
-  }
-
-  private releaseSlot(): void {
-    this.currentConcurrent--;
-    const next = this.waiters.shift();
-    if (next) next();
-  }
-
-  private async pickHolder(): Promise<Holder> {
-    let eligible = this.holders.filter((h) => h.browser.connected && !h.recycling);
-    if (eligible.length === 0) {
-      await this.spawn();
-      eligible = this.holders.filter((h) => h.browser.connected && !h.recycling);
-      if (eligible.length === 0) throw new Error('no browser available');
-    }
-    if (eligible.every((h) => h.activeCount > 0) && this.holders.length < config.renderer.poolMax) {
-      await this.spawn();
-      eligible = this.holders.filter((h) => h.browser.connected && !h.recycling);
-    }
-    eligible.sort((a, b) => a.activeCount - b.activeCount);
-    return eligible[0]!;
-  }
-
-  private async spawn(): Promise<Holder> {
-    const browser = await puppeteer.launch({
-      headless: true,
-      args: LAUNCH_ARGS,
-      executablePath: config.renderer.executablePath,
-      defaultViewport: config.renderer.viewport,
-      pipe: true,
-      timeout: 30_000,
-    });
-    const holder: Holder = {
-      id: this.nextId++,
-      browser,
-      startedAt: Date.now(),
-      totalCount: 0,
-      activeCount: 0,
-      recycling: false,
-    };
-    this.holders.push(holder);
-    browser.on('disconnected', () => {
-      logger.warn({ id: holder.id }, 'browser disconnected');
-      this.holders = this.holders.filter((h) => h !== holder);
-      this.updateMetrics();
-    });
-    logger.info({ id: holder.id, total: this.holders.length }, 'browser spawned');
-    this.updateMetrics();
-    return holder;
-  }
-
-  private async recycle(holder: Holder): Promise<void> {
-    holder.recycling = true;
-    logger.info({ id: holder.id, served: holder.totalCount }, 'recycling browser');
+  private async recycle(): Promise<void> {
+    if (!this.cluster || this.stopped) return;
+    const old = this.cluster;
+    logger.info({ served: this.totalServed }, 'recycling cluster (memory hygiene)');
     try {
-      await holder.browser.close();
+      const fresh = await Cluster.launch({
+        puppeteer,
+        concurrency: Cluster.CONCURRENCY_CONTEXT,
+        maxConcurrency: config.renderer.poolMax,
+        timeout: config.renderer.pageTimeoutMs + 10_000,
+        workerCreationDelay: 50,
+        retryLimit: 0,
+        monitor: false,
+        puppeteerOptions: {
+          headless: true,
+          args: LAUNCH_ARGS,
+          executablePath: config.renderer.executablePath,
+          defaultViewport: config.renderer.viewport,
+          pipe: true,
+          timeout: 30_000,
+        },
+      });
+      fresh.on('taskerror', (err: Error) => {
+        logger.warn({ err: err.message }, 'cluster task error');
+      });
+      this.cluster = fresh;
+      await old.idle();
+      await old.close();
+      logger.info('cluster recycle complete');
     } catch (e) {
-      logger.warn({ err: (e as Error).message }, 'browser close error');
+      logger.error({ err: (e as Error).message }, 'recycle failed; keeping old cluster');
     }
-    this.holders = this.holders.filter((h) => h !== holder);
-    if (this.holders.length < config.renderer.poolMin && !this.stopped) {
-      await this.spawn();
-    }
-  }
-
-  private updateMetrics(): void {
-    poolMetric.set({ state: 'total' }, this.holders.length);
-    poolMetric.set(
-      { state: 'active' },
-      this.holders.reduce((s, h) => s + h.activeCount, 0),
-    );
-    poolMetric.set(
-      { state: 'idle' },
-      this.holders.filter((h) => h.activeCount === 0 && !h.recycling).length,
-    );
-    poolMetric.set({ state: 'concurrent' }, this.currentConcurrent);
   }
 
   stats() {
     return {
-      holders: this.holders.map((h) => ({
-        id: h.id,
-        ageMs: Date.now() - h.startedAt,
-        totalCount: h.totalCount,
-        activeCount: h.activeCount,
-        recycling: h.recycling,
-        connected: h.browser.connected,
-      })),
-      currentConcurrent: this.currentConcurrent,
-      waiters: this.waiters.length,
-      maxConcurrent: this.maxConcurrent,
+      ready: this.cluster !== null && !this.stopped,
+      active: this.active,
+      totalServed: this.totalServed,
+      uptimeMs: this.startedAt ? Date.now() - this.startedAt : 0,
+      maxConcurrency: config.renderer.poolMax,
+      nextRecycleAt: this.recycleAt,
+      recycling: this.recycling,
     };
   }
 }

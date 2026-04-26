@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-본 게이트웨이는 **단일 인스턴스에서 수만 RPS** (캐시 hit 기준), **동시 렌더 N개 + 큐잉** (cold path 기준) 을 안정적으로 처리하도록 5중 방어선이 적용되어 있습니다. `puppeteer-cluster` 와 동일한 CONTEXT 모델을 직접 구현하면서, 캐시·SWR·dedup 까지 통합되어 있습니다.
+본 게이트웨이는 **단일 인스턴스에서 수만 RPS** (캐시 hit 기준), **동시 렌더 N개 + 큐잉** (cold path 기준) 을 안정적으로 처리하도록 5중 방어선이 적용되어 있습니다. 핵심 풀은 [`puppeteer-cluster`](https://github.com/thomasdondorf/puppeteer-cluster) 의 `CONCURRENCY_CONTEXT` 모델을 사용하며, 그 위에 캐시·SWR·dedup·자동 재시작이 통합돼 있습니다.
 
 ```
 요청 도착
@@ -65,40 +65,37 @@ p.finally(() => inflight.delete(key));
 
 이게 없으면 캐시 만료 직후 폭주에 백엔드가 N배로 부하 받습니다. (Prerender.io 도 이 패턴 사용)
 
-### 4. 브라우저 풀 + 슬롯 세마포어 — 백엔드 보호
+### 4. puppeteer-cluster (CONCURRENCY_CONTEXT) — 큐 + 동시성 제어
 
-```
-POOL_MIN ─── 사전 워밍 (cold start 0)
-POOL_MAX ─── 동시 활성 페이지 상한 (CPU/메모리 보호)
-```
+`Cluster.launch({ concurrency: Cluster.CONCURRENCY_CONTEXT, maxConcurrency: POOL_MAX })`
 
-- **세마포어**: `currentConcurrent < POOL_MAX` 일 때만 진입. 가득 차면 waiter 큐 (FIFO).
-- **라운드로빈 (least-active)**: 매 요청마다 가장 한가한 브라우저에 배정해 부하 분산.
-- **자동 확장**: 모든 브라우저가 바쁘고 풀이 `POOL_MAX` 미만이면 새 브라우저 spawn.
+- **maxConcurrency 큐**: 동시 작업 ≤ `POOL_MAX`. 초과분은 cluster 가 내부 FIFO 큐에 보관 → OOM 없이 backpressure
+- **컨텍스트 격리**: 매 작업마다 `browser.createBrowserContext()` 로 incognito 컨텍스트 생성. 작업 완료 시 자동 close. 쿠키/스토리지 누출 없음
+- **단일 브라우저 공유**: CONTEXT 모드는 1 브라우저 + N 컨텍스트. 브라우저 launch overhead 가 한 번만 발생해 cold-path 가 빠름
+- **timeout / taskerror 이벤트**: 작업 timeout / 실패 시 cluster 가 cleanup 후 다음 작업 진행
+
+게이트웨이 코드에서는 `withPage(fn)` 한 줄로 호출:
 
 ```ts
-private async acquireSlot(): Promise<void> {
-  while (this.currentConcurrent >= this.maxConcurrent) {
-    await new Promise<void>((resolve) => this.waiters.push(resolve));
-  }
-  this.currentConcurrent++;
-}
+return await browserPool.withPage(async (page) => {
+  await page.goto(url, { ... });
+  return await page.content();
+});
 ```
 
-waiter 큐 덕분에 **요청 폭주 시에도 OOM 없이 큐잉** (Fastify 가 backpressure 반영).
+cluster 가 워커 할당 / 컨텍스트 생성 / 큐잉 / 정리를 모두 담당합니다.
 
-### 5. 컨텍스트 단위 격리 + 자동 재시작
+### 5. 자동 재시작 (메모리 누수 방어)
 
-```
-요청 ─→ browser.createBrowserContext()  (incognito, 빈 쿠키/스토리지)
-     ─→ context.newPage()
-     ─→ render
-     ─→ context.close()                  (전체 정리, 메모리 회수)
-```
+cluster 자체에는 「N 작업 후 재시작」 기능이 없어 게이트웨이가 한 겹 더 감쌉니다:
 
-- 동시 요청들이 같은 브라우저를 공유해도 서로 안 보임
-- 브라우저당 처리량 N (`MAX_REQUESTS_PER_BROWSER`) 도달 시 자동 재시작 → 메모리 누수 방지
-- 이 방식은 [puppeteer-cluster의 `CONCURRENCY_CONTEXT`](https://github.com/thomasdondorf/puppeteer-cluster#concurrency-implementations) 와 동일
+- 작업 카운터 `totalServed` 가 `MAX_REQUESTS_PER_BROWSER` 에 도달하면
+- 새 cluster 를 launch (병렬 워밍)
+- swap (`this.cluster = fresh`)
+- 옛 cluster 는 `idle()` 후 `close()` — 진행 중 작업은 정상 완료
+- 이 동안 신규 작업은 새 cluster 로 흐름 → 다운타임 0
+
+장시간 운영 시 Chromium 의 미세한 메모리 누수가 누적되지 않습니다.
 
 ### + Retry — 일시적 장애 자동 복구
 
@@ -118,36 +115,26 @@ for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
 
 ---
 
-## puppeteer-cluster vs 본 구현
+## 풀 구현 — puppeteer-cluster 채택
 
-| 기능 | puppeteer-cluster | spa-seo-gateway (현재) |
-|--|--|--|
-| 동시성 모델 (CONTEXT) | ✅ | ✅ (동일) |
-| 슬롯 큐잉 | ✅ | ✅ |
-| 라운드로빈 워커 분산 | ✅ | ✅ (least-active) |
-| 자동 재시작 | ❌ (Optional) | ✅ (요청 N회 후) |
-| Retry on failure | ✅ | ✅ |
-| 캐시 통합 | ❌ | ✅ (Memory + Redis + SWR) |
-| Dedup | ❌ | ✅ (in-flight) |
-| Prometheus 메트릭 | ❌ | ✅ |
-| Puppeteer 24 호환 | ✅ (0.25.0+, 2025-11) | ✅ |
-| 마지막 업데이트 | 2025-11-13 | (본 프로젝트) |
-| 외부 의존성 | `debug` | `pino`(로깅) `prom-client`(메트릭) |
+| 기능 | 제공 주체 |
+|--|--|
+| 동시성 모델 (CONCURRENCY_CONTEXT) | puppeteer-cluster |
+| FIFO 큐 / backpressure | puppeteer-cluster |
+| 컨텍스트 단위 격리 | puppeteer-cluster |
+| 작업 timeout | puppeteer-cluster |
+| 자동 재시작 (memory hygiene) | 본 프로젝트 (cluster 위에 구현) |
+| Retry (transient classify) | 본 프로젝트 (`renderer.ts`) |
+| 캐시 / SWR / Dedup | 본 프로젝트 (`cache.ts`) |
+| Prometheus 메트릭 | 본 프로젝트 (`metrics.ts`) |
 
-**왜 직접 구현했나?**
-1. **캐시·SWR·dedup 과 한 사이클로 통합** — 중복 추상화 제거 (`cluster.queue` + `cache.swr` 두 단계가 아니라 한 단계)
-2. **격리 단위 = 요청** — 매 요청마다 BrowserContext 새로 만들고 끝나면 close. cluster 의 CONTEXT 모델과 동일하지만 metrics 와 직접 연결됨
-3. **현대 TS strict 환경에서 깔끔** — cluster 의 타입은 일부 어색
-4. **~250 LOC** — 코드 전체를 손에 쥘 수 있음
+**왜 puppeteer-cluster 인가?**
+- 큐 / 컨텍스트 / 워커 라이프사이클 같은 **검증된 패턴을 외부 라이브러리에 위임** → 자체 코드량 감소, 회귀 위험 감소
+- `puppeteer-cluster@0.25.0` (2025-11) 이 puppeteer 24 와 호환 보장 (peerDependencies)
+- 현대 TS 에서 타입도 무리 없이 사용 가능
+- 본 프로젝트가 추가하는 것은 **renderer / cache / metrics** 같은 도메인 로직만으로 충분
 
-**puppeteer-cluster 로 교체할 가치가 있는가?**
-
-다음 경우라면 yes:
-- 작업이 **렌더링 외 다른 종류** 도 포함 (스크래핑, 스크린샷 등) → cluster 의 task 추상화가 유용
-- **monitor 출력** 같은 cluster 만의 기능 사용 → 본 프로젝트는 Prometheus 로 대체
-- **유지보수 부담을 외부로 위임** 하고 싶다 → 일리 있음
-
-본 프로젝트의 use case (SEO 렌더 한 가지) 에서는 직접 구현이 더 응집도 있는 결과를 줍니다. 다만 한 줄로 puppeteer-cluster 를 채택할 수 있도록 `pool.ts` 가 `withPage(fn)` 한 가지 인터페이스로만 외부에 노출되어 있어 교체가 쉽습니다.
+`pool.ts` 는 외부에 `withPage(fn)` 단 하나만 노출하므로, 향후 cluster 를 자체 풀로 다시 갈아 끼우거나 다른 라이브러리로 바꾸는 것도 1파일 수정으로 가능합니다.
 
 ---
 
