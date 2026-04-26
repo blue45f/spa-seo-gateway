@@ -3,7 +3,16 @@ import cors from '@fastify/cors';
 import rateLimit from '@fastify/rate-limit';
 import { registerAdminUI } from '@heejun/spa-seo-gateway-admin-ui';
 import { FileSiteStore, registerCms } from '@heejun/spa-seo-gateway-cms';
-import { browserPool, config, logger, shutdownCache } from '@heejun/spa-seo-gateway-core';
+import {
+  browserPool,
+  config,
+  logger,
+  shutdownCache,
+  startHotReload,
+  startWarmCron,
+  stopHotReload,
+  stopWarmCron,
+} from '@heejun/spa-seo-gateway-core';
 import { FileTenantStore, registerMultiTenant } from '@heejun/spa-seo-gateway-multi-tenant';
 import Fastify from 'fastify';
 import { registerRoutes } from './routes.js';
@@ -77,6 +86,8 @@ async function main() {
     } catch (e) {
       logger.warn({ err: (e as Error).message }, 'fastify close error');
     }
+    stopHotReload();
+    stopWarmCron();
     try {
       await browserPool.stop();
       logger.info('browser pool stopped');
@@ -101,6 +112,8 @@ async function main() {
   process.on('unhandledRejection', (reason) => logger.error({ reason }, 'unhandled rejection'));
 
   await browserPool.start();
+  startHotReload();
+  startWarmCron();
 
   await app.listen({ host: config.server.host, port: config.server.port });
   logger.info(

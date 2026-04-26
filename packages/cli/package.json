@@ -1,0 +1,56 @@
+{
+  "name": "@heejun/spa-seo-gateway-cli",
+  "version": "1.0.0",
+  "description": "Interactive CLI for spa-seo-gateway — init, doctor, render",
+  "type": "module",
+  "main": "./dist/index.js",
+  "bin": {
+    "spa-seo-gateway": "./dist/index.js",
+    "ssg": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json && chmod +x dist/index.js",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@clack/prompts": "^1.2.0",
+    "picocolors": "^1.1.1"
+  },
+  "peerDependencies": {
+    "@heejun/spa-seo-gateway-core": "^1.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@heejun/spa-seo-gateway-core": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@heejun/spa-seo-gateway-core": "workspace:*",
+    "typescript": "^6.0.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/blue45f/spa-seo-gateway.git",
+    "directory": "packages/cli"
+  },
+  "bugs": {
+    "url": "https://github.com/blue45f/spa-seo-gateway/issues"
+  },
+  "homepage": "https://github.com/blue45f/spa-seo-gateway/tree/main/packages/cli#readme",
+  "license": "MIT",
+  "author": "heejun",
+  "keywords": [
+    "seo",
+    "spa",
+    "prerender",
+    "cli",
+    "init"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}

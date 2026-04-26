@@ -39,9 +39,19 @@ const CANONICAL_RE = /<link[^>]+rel=["']canonical["']/i;
 const OG_URL_RE = /<meta[^>]+property=["']og:url["']/i;
 const SCRIPT_RE =
   /<script\b(?![^>]*\btype=["']application\/(?:ld\+json|json)["'])[^>]*>[\s\S]*?<\/script>/gi;
+const IMG_RE = /<img\b[^>]*>/gi;
+const PICTURE_RE = /<picture\b[^>]*>[\s\S]*?<\/picture>/gi;
+const PRELOAD_RE = /<link\b[^>]*\brel=["']preload["'][^>]*>/gi;
+const PREFETCH_RE = /<link\b[^>]*\brel=["']prefetch["'][^>]*>/gi;
+const DATA_URI_IMG_RE = /\bsrc=["']data:image\/[^"']+["']/gi;
 
 function escapeAttr(s: string): string {
   return s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
+}
+
+function imgAlt(tag: string): string {
+  const m = tag.match(/\balt=["']([^"']*)["']/i);
+  return m?.[1] ?? '';
 }
 
 export type OptimizeOptions = {
@@ -49,6 +59,8 @@ export type OptimizeOptions = {
   stripScripts?: boolean;
   ensureBase?: boolean;
   ensureCanonical?: boolean;
+  /** 봇 응답에서 <img>/<picture> 제거. alt 만 남겨 인덱싱 가능하게. 기본 false. */
+  stripImages?: boolean;
 };
 
 export function optimizeHtml(html: string, opts: OptimizeOptions): string {
@@ -70,5 +82,18 @@ export function optimizeHtml(html: string, opts: OptimizeOptions): string {
   }
   out = out.replace(HEAD_RE, (_m, attrs) => `<head${attrs}>\n${meta.join('\n')}`);
   if (opts.stripScripts) out = out.replace(SCRIPT_RE, '');
+  if (opts.stripImages) {
+    // <picture> 통째로 제거 → <img> 도 제거 (alt 만 텍스트로 보존하면 검색엔진은 캡션만 본다)
+    out = out.replace(PICTURE_RE, '');
+    out = out.replace(IMG_RE, (tag) => {
+      const alt = imgAlt(tag).trim();
+      return alt ? `<span class="x-img-alt">${escapeAttr(alt)}</span>` : '';
+    });
+    // base64 srcset/data URI 가 남아있으면 통째 제거
+    out = out.replace(DATA_URI_IMG_RE, 'src=""');
+    // preload/prefetch 도 봇은 안 봄
+    out = out.replace(PRELOAD_RE, '');
+    out = out.replace(PREFETCH_RE, '');
+  }
   return out;
 }

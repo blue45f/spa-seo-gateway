@@ -18,6 +18,7 @@ import {
   detectBot,
   httpRequests,
   isSafeTarget,
+  isStaticAssetUrl,
   logger,
   type RouteOverride,
   render,
@@ -304,6 +305,10 @@ export async function registerCms(app: FastifyInstance, opts: RegisterOptions): 
       }
 
       const target = new URL(req.url, site.origin).toString();
+      if (config.renderer.skipStaticAssetUrls && isStaticAssetUrl(target)) {
+        reply.code(204).header('x-prerender-skip', 'static-asset').send();
+        return reply;
+      }
       const safe = await isSafeTarget(target);
       if (!safe.ok) {
         reply.code(403).send({ error: 'unsafe target', reason: safe.reason });

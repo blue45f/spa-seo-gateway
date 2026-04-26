@@ -79,8 +79,10 @@
             <div class="bg-gradient-to-br from-slate-900 to-indigo-900 text-white rounded-xl p-8 shadow-lg">
               <h2 class="text-3xl font-bold">SPA SEO Gateway</h2>
               <p class="mt-2 text-slate-300">
-                React/Vue/Svelte 같은 SPA 를 검색 봇이 인덱싱할 수 있도록,
-                헤드리스 Chromium 으로 사전 렌더링해 주는 고성능 다이내믹 렌더링 게이트웨이.
+                React/Vue/Svelte 가 만드는 <strong>동적 콘텐츠를 봇 요청 시점에</strong>
+                헤드리스 Chromium 으로 <strong>실시간 렌더링</strong> 해, 봇에겐 완성된 HTML,
+                사람에겐 원본 SPA 를 전달하는 게이트웨이.
+                캐시·SWR·자동 워밍은 처리량을 높이는 최적화일 뿐 — 본질은 on-demand 렌더링.
               </p>
               <div class="mt-6 grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
                 <div class="bg-white/10 rounded p-3">
@@ -105,9 +107,10 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-5">
                 <div class="text-2xl">🤖</div>
-                <h3 class="font-semibold mt-2">봇이 들어오면</h3>
+                <h3 class="font-semibold mt-2">봇이 들어오면 그 자리에서 렌더</h3>
                 <p class="text-sm text-slate-600 mt-1">
-                  isbot 의 1,000+ 패턴으로 봇을 자동 식별. Chromium 으로 SPA 를 완전히 렌더한 뒤 캐시에 보관하고 HTML 응답.
+                  isbot 의 1,000+ 패턴으로 봇 자동 식별 → 그 시점에 Chromium 으로 SPA 를 실행해 데이터 fetch / state 적용 / DOM 완성.
+                  최종 HTML 을 봇에게 응답하고 동시에 캐시에 보관.
                 </p>
               </div>
               <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-5">

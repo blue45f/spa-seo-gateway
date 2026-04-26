@@ -70,15 +70,42 @@ const Schema = z.object({
       .default([
         'google-analytics.com',
         'googletagmanager.com',
+        'analytics.google.com',
+        'googleadservices.com',
+        'googlesyndication.com',
         'facebook.com/tr',
+        'connect.facebook.net',
         'doubleclick.net',
+        'adservice.google',
         'segment.io',
+        'segment.com',
         'hotjar.com',
         'mixpanel.com',
         'fullstory.com',
         'amplitude.com',
-        'connect.facebook.net',
+        'mouseflow.com',
+        'optimizely.com',
+        'launchdarkly.com',
+        'sentry.io/api/',
+        'bugsnag.com',
+        'newrelic.com',
+        'datadoghq-browser-agent',
+        'twitter.com/i/jot',
+        'linkedin.com/li',
+        'tiktok.com/i18n',
+        'pinterest.com/v3',
+        'criteo.com',
+        'taboola.com',
+        'outbrain.com',
+        'intercom.io',
+        'drift.com',
+        'zendesk.com/embeddable',
+        'crisp.chat',
+        'fonts.gstatic.com',
+        'fonts.googleapis.com',
       ]),
+    skipStaticAssetUrls: z.coerce.boolean().default(true),
+    stripImagesFromOutput: z.coerce.boolean().default(false),
     qualityCheck: z.coerce.boolean().default(true),
     minTextLength: z.coerce.number().int().nonnegative().default(50),
     userAgentSuffix: z.string().default('spa-seo-gateway/1.0'),
@@ -136,6 +163,30 @@ const Schema = z.object({
   allowedHosts: z.array(z.string()).default([]),
   adminToken: z.string().optional(),
   routes: z.array(RouteOverride).default([]),
+  hotReload: z.coerce.boolean().default(false),
+  audit: z
+    .object({
+      file: z.string().optional(),
+      webhookUrl: z.string().url().optional(),
+    })
+    .optional()
+    .transform((v) => v ?? {}),
+  warmCron: z
+    .object({
+      enabled: z.coerce.boolean().default(false),
+      sitemap: z.string().optional(),
+      intervalMs: z.coerce
+        .number()
+        .int()
+        .positive()
+        .default(6 * 60 * 60 * 1000),
+      max: z.coerce.number().int().positive().default(500),
+      concurrency: z.coerce.number().int().positive().default(2),
+    })
+    .optional()
+    .transform(
+      (v) => v ?? { enabled: false, intervalMs: 6 * 60 * 60 * 1000, max: 500, concurrency: 2 },
+    ),
 });
 
 export const ConfigSchema = Schema;
@@ -166,6 +217,8 @@ function fromEnv(): Record<string, unknown> {
       maxRequestsPerBrowser: env.MAX_REQUESTS_PER_BROWSER,
       blockResourceTypes: env.BLOCK_RESOURCE_TYPES ? csv(env.BLOCK_RESOURCE_TYPES) : undefined,
       blockUrlPatterns: env.BLOCK_URL_PATTERNS ? csv(env.BLOCK_URL_PATTERNS) : undefined,
+      skipStaticAssetUrls: env.SKIP_STATIC_ASSET_URLS,
+      stripImagesFromOutput: env.STRIP_IMAGES_FROM_OUTPUT,
       qualityCheck: env.QUALITY_CHECK,
       minTextLength: env.MIN_TEXT_LENGTH,
       userAgentSuffix: env.USER_AGENT_SUFFIX,
@@ -197,6 +250,18 @@ function fromEnv(): Record<string, unknown> {
     log: { level: env.LOG_LEVEL, pretty: env.LOG_PRETTY },
     allowedHosts: csv(env.ALLOWED_HOSTS),
     adminToken: env.ADMIN_TOKEN,
+    hotReload: env.HOT_RELOAD,
+    audit: {
+      file: env.AUDIT_LOG_FILE,
+      webhookUrl: env.AUDIT_WEBHOOK_URL,
+    },
+    warmCron: {
+      enabled: env.WARM_CRON_ENABLED,
+      sitemap: env.WARM_CRON_SITEMAP,
+      intervalMs: env.WARM_CRON_INTERVAL_MS,
+      max: env.WARM_CRON_MAX,
+      concurrency: env.WARM_CRON_CONCURRENCY,
+    },
   };
 }
 

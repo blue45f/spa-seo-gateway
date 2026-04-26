@@ -2,7 +2,7 @@
 
 [![npm](https://img.shields.io/npm/v/@heejun/spa-seo-gateway-core?label=%40heejun%2Fspa-seo-gateway-core)](https://www.npmjs.com/package/@heejun/spa-seo-gateway-core) [![tests](https://img.shields.io/badge/tests-95%20passing-brightgreen)](https://github.com/blue45f/spa-seo-gateway/tree/main/tests) [![license](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
-SPA(React/Vue/Svelte 등) 를 봇이 인덱싱할 수 있도록 헤드리스 Chromium 으로 사전 렌더링해 봇에게는 완성된 HTML, 사람에게는 원본 SPA 를 전달하는 **고성능·범용 다이내믹 렌더링 게이트웨이**.
+SPA(React/Vue/Svelte 등) 가 만드는 **동적 콘텐츠를 봇이 요청한 시점에 헤드리스 Chromium 으로 실시간 렌더링** 해 봇에게는 완성된 HTML, 사람에게는 원본 SPA 를 그대로 전달하는 **고성능·범용 다이내믹 렌더링 게이트웨이**. 캐시·SWR·자동 워밍은 부가 최적화 — 본질은 봇 접근 시점의 on-demand 렌더링입니다.
 
 > Google [Dynamic Rendering 가이드](https://developers.google.com/search/docs/crawling-indexing/javascript/dynamic-rendering) 의 OSS 구현. Rendertron / Prerender.io 의 자리를 대체.
 

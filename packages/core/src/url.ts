@@ -90,6 +90,17 @@ export async function isSafeTarget(targetUrl: string): Promise<{ ok: boolean; re
   }
 }
 
+const STATIC_ASSET_RE =
+  /\.(jpg|jpeg|png|gif|webp|avif|svg|ico|bmp|tiff|woff|woff2|ttf|otf|eot|css|js|mjs|map|mp3|mp4|webm|ogg|wav|pdf|zip|gz|tar|rar|7z|xml|txt|json|csv|xlsx|docx|pptx)(\?|$)/i;
+
+export function isStaticAssetUrl(targetUrl: string): boolean {
+  try {
+    return STATIC_ASSET_RE.test(new URL(targetUrl).pathname);
+  } catch {
+    return false;
+  }
+}
+
 export function buildTargetUrl(req: {
   url: string;
   headers: Record<string, string | string[] | undefined>;

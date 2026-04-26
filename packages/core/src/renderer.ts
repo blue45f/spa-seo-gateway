@@ -146,6 +146,7 @@ async function renderOnce(
       url: input.url,
       ensureBase: true,
       ensureCanonical: true,
+      stripImages: config.renderer.stripImagesFromOutput,
     });
 
     const headers: Record<string, string> = {

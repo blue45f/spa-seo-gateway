@@ -1,3 +1,4 @@
+export { type AuditEvent, getRecentAudit, recordAudit } from './audit.js';
 export { type DetectionResult, detectBot } from './bot.js';
 export {
   type CacheEntry,
@@ -17,6 +18,7 @@ export {
   config,
   type RouteOverride,
 } from './config.js';
+export { startHotReload, stopHotReload } from './hot-reload.js';
 export { type Logger, logger } from './logger.js';
 export {
   browserPool as poolMetric,
@@ -50,5 +52,7 @@ export {
   cacheKey,
   isHostAllowed,
   isSafeTarget,
+  isStaticAssetUrl,
   normalize,
 } from './url.js';
+export { startWarmCron, stopWarmCron } from './warm-cron.js';

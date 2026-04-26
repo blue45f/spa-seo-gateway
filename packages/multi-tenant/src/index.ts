@@ -23,6 +23,7 @@ import {
   httpRequests,
   isHostAllowed,
   isSafeTarget,
+  isStaticAssetUrl,
   logger,
   type RouteOverride,
   render,
@@ -310,6 +311,10 @@ export async function registerMultiTenant(
           reply.code(403).send({ error: 'host outside tenant origin' });
           return reply;
         }
+      }
+      if (config.renderer.skipStaticAssetUrls && isStaticAssetUrl(target)) {
+        reply.code(204).header('x-prerender-skip', 'static-asset').send();
+        return reply;
       }
       const safe = await isSafeTarget(target);
       if (!safe.ok) {

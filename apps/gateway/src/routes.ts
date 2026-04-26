@@ -12,6 +12,7 @@ import {
   detectBot,
   httpRequests,
   isHostAllowed,
+  isStaticAssetUrl,
   logger,
   matchRoute,
   registry,
@@ -164,6 +165,12 @@ async function renderToReply(req: FastifyRequest, reply: FastifyReply): Promise<
 
   if (!isHostAllowed(target)) {
     reply.code(403).send({ error: 'host not allowed', target });
+    return;
+  }
+
+  if (config.renderer.skipStaticAssetUrls && isStaticAssetUrl(target)) {
+    httpRequests.inc({ route: 'static-skip', status: '204', kind: 'bot' });
+    reply.code(204).header('x-prerender-skip', 'static-asset').send();
     return;
   }
 

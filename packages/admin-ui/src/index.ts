@@ -8,10 +8,12 @@ import {
   cacheKey,
   cacheStats,
   config,
+  getRecentAudit,
   getRoutes,
   getSiteSummary,
   persistRoutesToFile,
   type RouteOverride,
+  recordAudit,
   render,
   setRoutes,
   warmFromSitemap,
@@ -94,14 +96,31 @@ export async function registerAdminUI(
       try {
         setRoutes(next);
       } catch (e) {
+        recordAudit({
+          actor: 'admin',
+          action: 'routes.update',
+          outcome: 'error',
+          meta: { error: (e as Error).message },
+        });
         reply.code(400).send({ ok: false, error: (e as Error).message });
         return;
       }
       let persisted: { ok: boolean; path: string; error?: string } | null = null;
       if (body.persist) persisted = await persistRoutesToFile();
+      recordAudit({
+        actor: 'admin',
+        action: 'routes.update',
+        outcome: 'ok',
+        meta: { count: next.length, persisted: !!body.persist },
+      });
       return { ok: true, routes: getRoutes(), persisted };
     },
   );
+
+  app.get('/admin/api/audit', (req, reply) => {
+    if (!guard(req, reply)) return;
+    return { ok: true, events: getRecentAudit(200) };
+  });
 
   app.post<{ Body: { url?: string } }>('/admin/api/cache/invalidate', async (req, reply) => {
     if (!guard(req, reply)) return;
@@ -112,12 +131,21 @@ export async function registerAdminUI(
     }
     const k = cacheKey(url);
     await cacheDel(k);
+    recordAudit({
+      actor: 'admin',
+      action: 'cache.invalidate',
+      target: url,
+      outcome: 'ok',
+      meta: { key: k },
+    });
     return { ok: true, key: k };
   });
 
   app.post('/admin/api/cache/clear', async (req, reply) => {
     if (!guard(req, reply)) return;
-    return { ok: true, cleared: await cacheClear() };
+    const cleared = await cacheClear();
+    recordAudit({ actor: 'admin', action: 'cache.clear', outcome: 'ok', meta: { cleared } });
+    return { ok: true, cleared };
   });
 
   app.post<{ Body: { sitemap?: string; max?: number; concurrency?: number } }>(
