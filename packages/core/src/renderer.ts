@@ -156,6 +156,7 @@ async function renderOnce(
       ensureCanonical: true,
       stripImages: config.renderer.stripImagesFromOutput,
       injectBreadcrumb: config.renderer.injectBreadcrumb,
+      schemaTemplate: route?.schemaTemplate,
     });
 
     const headers: Record<string, string> = {

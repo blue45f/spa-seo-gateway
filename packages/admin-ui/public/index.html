@@ -95,6 +95,29 @@
       </div>
     </div>
 
+    <!-- First-time Tour -->
+    <div
+      x-show="!tourSeen && tourStep >= 0 && tourStep < tourSteps.length"
+      x-cloak
+      class="fixed inset-0 z-[90] bg-black/60 flex items-center justify-center p-4"
+    >
+      <div class="bg-white dark:bg-slate-900 rounded-xl shadow-2xl max-w-md w-full p-6">
+        <div class="text-xs text-slate-500 dark:text-slate-400 mb-2">
+          <span x-text="tourStep + 1"></span> / <span x-text="tourSteps.length"></span>
+        </div>
+        <h3 class="font-bold text-lg mb-2" x-text="tourSteps[tourStep]?.title"></h3>
+        <p class="text-sm text-slate-700 dark:text-slate-200" x-text="tourSteps[tourStep]?.body"></p>
+        <div class="flex gap-2 mt-5">
+          <button class="text-sm text-slate-500 hover:text-slate-700 dark:hover:text-slate-300" @click="endTour()">건너뛰기</button>
+          <button
+            class="ml-auto px-4 py-2 rounded bg-slate-900 dark:bg-indigo-600 text-white text-sm hover:bg-slate-700"
+            @click="tourNext()"
+            x-text="tourStep < tourSteps.length - 1 ? '다음 →' : '시작하기'"
+          ></button>
+        </div>
+      </div>
+    </div>
+
     <!-- Shortcuts Modal -->
     <div
       x-show="shortcutsOpen"
@@ -1190,6 +1213,17 @@ REDIS_URL=redis://localhost:6379</pre>
             },
           },
           lighthouse: { url: '', running: false, result: null, error: null },
+          routeFilter: '',
+          tourSeen: localStorage.getItem('seo-admin-tour-seen') === '1',
+          tourStep: 0,
+          tourSteps: [
+            { tab: 'welcome', title: '환영합니다 👋', body: '여기는 게이트웨이의 한눈에 보기. 모드/origin/uptime 을 확인합니다.' },
+            { tab: 'routes', title: '라우트 오버라이드 🛣️', body: 'URL 패턴별로 캐시 TTL/wait/ignore 를 정합니다. 드래그로 순서 변경, ⌘S 로 저장.' },
+            { tab: 'cache', title: '캐시 관리 🗄️', body: '배포 후엔 전체 초기화, 특정 페이지만 수정했으면 URL 무효화.' },
+            { tab: 'warm', title: '사전 워밍 🔥', body: 'sitemap.xml 입력 → 미리 캐시 채워서 cold path 제거.' },
+            { tab: 'test', title: '렌더 테스트 🧪', body: '단일 URL 즉시 렌더로 디버깅. 봇 UA 카탈로그 클릭하면 자동으로 채워짐.' },
+            { tab: 'metrics', title: '실시간 메트릭 📈', body: '5초마다 갱신. cache hit ratio, 에러 분류 확인.' },
+          ],
 
           get navItems() {
             const t = (k) => this.i18n[this.lang][k] ?? this.i18n.ko[k] ?? k;
@@ -1315,6 +1349,35 @@ REDIS_URL=redis://localhost:6379</pre>
             document.querySelectorAll('.drag-over').forEach((el) => el.classList.remove('drag-over'));
           },
 
+          startTour() {
+            this.tourStep = 0;
+            this.tab = this.tourSteps[0].tab;
+          },
+          tourNext() {
+            this.tourStep++;
+            if (this.tourStep >= this.tourSteps.length) {
+              this.endTour();
+              return;
+            }
+            this.tab = this.tourSteps[this.tourStep].tab;
+            location.hash = this.tab;
+          },
+          endTour() {
+            this.tourSeen = true;
+            localStorage.setItem('seo-admin-tour-seen', '1');
+            this.tourStep = -1;
+          },
+
+          filteredRoutes() {
+            const q = this.routeFilter.toLowerCase().trim();
+            if (!q) return this.routes;
+            return this.routes.filter(
+              (r) =>
+                (r.pattern || '').toLowerCase().includes(q) ||
+                (r.waitSelector || '').toLowerCase().includes(q),
+            );
+          },
+
           lhScoreColor(score) {
             if (score == null) return 'text-slate-400';
             if (score >= 90) return 'text-emerald-600 dark:text-emerald-400';
@@ -1414,6 +1477,8 @@ REDIS_URL=redis://localhost:6379</pre>
             if (hash && this.navItems.find((n) => n.id === hash)) this.tab = hash;
             if (this.authed) await this.loadSiteInfo();
             this.startMetricsTimer();
+            // 첫 방문이면 투어 자동 시작
+            if (!this.tourSeen) setTimeout(() => this.startTour(), 800);
           },
 
           async checkAuth() {

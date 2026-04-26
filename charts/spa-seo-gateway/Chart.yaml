@@ -1,0 +1,19 @@
+apiVersion: v2
+name: spa-seo-gateway
+description: High-performance dynamic rendering gateway — bots get fully-rendered HTML in real time
+type: application
+version: 1.4.0
+appVersion: "1.4.0"
+home: https://github.com/blue45f/spa-seo-gateway
+sources:
+  - https://github.com/blue45f/spa-seo-gateway
+maintainers:
+  - name: heejun
+    email: blue45f@gmail.com
+keywords:
+  - seo
+  - spa
+  - prerender
+  - puppeteer
+  - dynamic-rendering
+icon: https://avatars.githubusercontent.com/u/0

@@ -37,6 +37,8 @@ const RouteOverride = z.object({
       height: z.coerce.number().int().positive(),
     })
     .optional(),
+  /** schema.org 템플릿 — 매칭된 라우트에 자동 JSON-LD 주입 */
+  schemaTemplate: z.enum(['Article', 'Product', 'FAQ', 'HowTo', 'WebSite']).optional(),
 });
 
 export type RouteOverride = z.infer<typeof RouteOverride>;

@@ -1,0 +1,150 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "spa-seo-gateway.fullname" . }}
+  labels:
+    {{- include "spa-seo-gateway.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "spa-seo-gateway.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "spa-seo-gateway.selectorLabels" . | nindent 8 }}
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      serviceAccountName: {{ include "spa-seo-gateway.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      terminationGracePeriodSeconds: 60
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: gateway
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 3000
+              protocol: TCP
+          env:
+            - name: GATEWAY_MODE
+              value: {{ .Values.gateway.mode | quote }}
+            {{- if .Values.gateway.originUrl }}
+            - name: ORIGIN_URL
+              value: {{ .Values.gateway.originUrl | quote }}
+            {{- end }}
+            - name: POOL_MIN
+              value: {{ .Values.gateway.poolMin | quote }}
+            - name: POOL_MAX
+              value: {{ .Values.gateway.poolMax | quote }}
+            - name: PAGE_TIMEOUT_MS
+              value: {{ .Values.gateway.pageTimeoutMs | quote }}
+            - name: WAIT_UNTIL
+              value: {{ .Values.gateway.waitUntil | quote }}
+            - name: BLOCK_RESOURCE_TYPES
+              value: {{ .Values.gateway.blockResourceTypes | quote }}
+            - name: HOT_RELOAD
+              value: {{ .Values.gateway.hotReload | quote }}
+            {{- if .Values.adminToken.existingSecret }}
+            - name: ADMIN_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.adminToken.existingSecret }}
+                  key: {{ .Values.adminToken.existingSecretKey }}
+            {{- else if .Values.adminToken.value }}
+            - name: ADMIN_TOKEN
+              value: {{ .Values.adminToken.value | quote }}
+            {{- end }}
+            - name: REDIS_CACHE_ENABLED
+              value: {{ .Values.cache.redis.enabled | quote }}
+            {{- if .Values.cache.redis.existingSecret }}
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.cache.redis.existingSecret }}
+                  key: {{ .Values.cache.redis.existingSecretKey }}
+            {{- else if .Values.cache.redis.url }}
+            - name: REDIS_URL
+              value: {{ .Values.cache.redis.url | quote }}
+            {{- end }}
+            - name: REDIS_CACHE_TTL_SEC
+              value: {{ .Values.cache.redis.ttlSec | quote }}
+            - name: MEMORY_CACHE_TTL_MS
+              value: {{ .Values.cache.memory.ttlMs | quote }}
+            - name: SWR_WINDOW_MS
+              value: {{ .Values.cache.swrWindowMs | quote }}
+            {{- if .Values.otel.endpoint }}
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: {{ .Values.otel.endpoint | quote }}
+            - name: OTEL_SERVICE_NAME
+              value: {{ .Values.otel.serviceName | quote }}
+            {{- end }}
+            {{- if .Values.audit.filePath }}
+            - name: AUDIT_LOG_FILE
+              value: {{ .Values.audit.filePath | quote }}
+            {{- end }}
+            {{- if .Values.audit.webhookUrl }}
+            - name: AUDIT_WEBHOOK_URL
+              value: {{ .Values.audit.webhookUrl | quote }}
+            {{- end }}
+            {{- if .Values.warmCron.enabled }}
+            - name: WARM_CRON_ENABLED
+              value: "true"
+            - name: WARM_CRON_SITEMAP
+              value: {{ .Values.warmCron.sitemap | quote }}
+            - name: WARM_CRON_INTERVAL_MS
+              value: {{ .Values.warmCron.intervalMs | quote }}
+            - name: WARM_CRON_MAX
+              value: {{ .Values.warmCron.max | quote }}
+            - name: WARM_CRON_CONCURRENCY
+              value: {{ .Values.warmCron.concurrency | quote }}
+            {{- end }}
+          livenessProbe:
+            {{- toYaml .Values.livenessProbe | nindent 12 }}
+          readinessProbe:
+            {{- toYaml .Values.readinessProbe | nindent 12 }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            {{- if .Values.dshm.enabled }}
+            - name: dshm
+              mountPath: /dev/shm
+            {{- end }}
+            {{- if .Values.persistence.enabled }}
+            - name: data
+              mountPath: {{ .Values.persistence.mountPath }}
+            {{- end }}
+      volumes:
+        {{- if .Values.dshm.enabled }}
+        - name: dshm
+          emptyDir:
+            medium: Memory
+            sizeLimit: {{ .Values.dshm.sizeLimit }}
+        {{- end }}
+        {{- if .Values.persistence.enabled }}
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ include "spa-seo-gateway.fullname" . }}-data
+        {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

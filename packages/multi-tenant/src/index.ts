@@ -163,6 +163,31 @@ declare module 'fastify' {
   }
 }
 
+// Per-tenant rate limit (분당) — plan 별 한도
+const PLAN_LIMITS: Record<Tenant['plan'], number> = {
+  free: 100,
+  pro: 1000,
+  enterprise: Number.POSITIVE_INFINITY,
+};
+const _rateCounters = new Map<string, { count: number; resetAt: number }>();
+const _rateWindowMs = 60_000;
+
+function _checkTenantRateLimit(tenant: Tenant): { ok: boolean; retryAfter: number; limit: number } {
+  const limit = PLAN_LIMITS[tenant.plan];
+  if (!Number.isFinite(limit)) return { ok: true, retryAfter: 0, limit };
+  const now = Date.now();
+  let entry = _rateCounters.get(tenant.id);
+  if (!entry || entry.resetAt < now) {
+    entry = { count: 0, resetAt: now + _rateWindowMs };
+    _rateCounters.set(tenant.id, entry);
+  }
+  if (entry.count >= limit) {
+    return { ok: false, retryAfter: Math.ceil((entry.resetAt - now) / 1000), limit };
+  }
+  entry.count++;
+  return { ok: true, retryAfter: 0, limit };
+}
+
 function compiledRoutes(t: Tenant): Array<RouteOverride & { regex: RegExp }> {
   return t.routes.map((r) => ({ ...r, regex: new RegExp(r.pattern) }));
 }
@@ -284,6 +309,15 @@ export async function registerMultiTenant(
       const tenant = req.tenant;
       if (!tenant) {
         reply.code(404).send({ error: 'unknown tenant — set Host/X-API-Key' });
+        return reply;
+      }
+      const rl = _checkTenantRateLimit(tenant);
+      if (!rl.ok) {
+        reply
+          .code(429)
+          .header('retry-after', String(rl.retryAfter))
+          .header('x-ratelimit-limit', String(rl.limit))
+          .send({ error: 'rate limit exceeded', retryAfter: rl.retryAfter, plan: tenant.plan });
         return reply;
       }
 

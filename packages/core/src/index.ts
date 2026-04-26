@@ -1,4 +1,4 @@
-export { type AuditEvent, getRecentAudit, recordAudit } from './audit.js';
+export { type AuditEvent, getRecentAudit, recordAudit, verifyAuditChain } from './audit.js';
 export { type DetectionResult, detectBot } from './bot.js';
 export {
   type CacheEntry,
@@ -18,6 +18,7 @@ export {
   config,
   type RouteOverride,
 } from './config.js';
+export { withDistributedLock } from './distributed-lock.js';
 export { startHotReload, stopHotReload } from './hot-reload.js';
 export {
   clearLighthouseCache,

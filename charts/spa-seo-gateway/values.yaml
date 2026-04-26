@@ -1,0 +1,142 @@
+# spa-seo-gateway Helm chart values
+
+replicaCount: 2
+
+image:
+  repository: ghcr.io/blue45f/spa-seo-gateway
+  tag: latest        # production 은 SHA 또는 semver pin 권장
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+
+# 운영 모드 — render-only / proxy / cms / saas
+gateway:
+  mode: render-only
+  originUrl: ""
+  poolMin: 2
+  poolMax: 8
+  pageTimeoutMs: 25000
+  waitUntil: networkidle2
+  blockResourceTypes: image,media,font
+  hotReload: false
+
+# Admin token — Secret 으로 주입 권장
+adminToken:
+  # 직접 값을 넣지 말고 existingSecret 권장
+  value: ""
+  existingSecret: ""    # values 에서: existingSecret: gateway-secrets / key: admin-token
+  existingSecretKey: admin-token
+
+# 캐시
+cache:
+  redis:
+    enabled: true
+    # url 도 Secret 권장
+    url: ""
+    existingSecret: ""
+    existingSecretKey: redis-url
+    ttlSec: 604800
+  memory:
+    ttlMs: 86400000
+  swrWindowMs: 3600000
+
+# 영구 저장 (cms / saas 모드용 — Site/Tenant store JSON)
+persistence:
+  enabled: true
+  size: 1Gi
+  storageClass: ""
+  accessMode: ReadWriteOnce
+  mountPath: /app/.data
+
+# Service
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 3000
+
+# Ingress
+ingress:
+  enabled: false
+  className: nginx
+  annotations: {}
+  hosts:
+    - host: seo.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+# Resources
+resources:
+  requests:
+    cpu: 500m
+    memory: 1Gi
+  limits:
+    cpu: "2"
+    memory: 2Gi
+
+# Pod
+nodeSelector: {}
+tolerations: []
+affinity: {}
+podAnnotations: {}
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+
+# Probes
+livenessProbe:
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 10
+  periodSeconds: 30
+readinessProbe:
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 5
+  periodSeconds: 10
+  timeoutSeconds: 5
+
+# Chromium 은 /dev/shm 을 많이 쓴다 — emptyDir.medium=Memory 로 늘림
+dshm:
+  enabled: true
+  sizeLimit: 1Gi
+
+# OpenTelemetry — endpoint 설정 시 활성
+otel:
+  endpoint: ""
+  serviceName: spa-seo-gateway
+
+# Audit log — file path or webhook
+audit:
+  filePath: ""             # 예: /app/.data/audit.log
+  webhookUrl: ""
+
+# Cron 워밍 (sitemap 정기 사전 렌더)
+warmCron:
+  enabled: false
+  sitemap: ""              # 예: https://www.example.com/sitemap.xml
+  intervalMs: 21600000     # 6h
+  max: 500
+  concurrency: 2
+
+# ServiceMonitor (Prometheus Operator 가 설치된 클러스터)
+serviceMonitor:
+  enabled: false
+  interval: 30s
+  scrapeTimeout: 10s
+  labels: {}
+
+# HorizontalPodAutoscaler
+autoscaling:
+  enabled: false
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
