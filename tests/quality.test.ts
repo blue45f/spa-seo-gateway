@@ -1,4 +1,4 @@
-import { assessQuality, shortTtlForStatus } from '@spa-seo-gateway/core';
+import { assessQuality, shortTtlForStatus } from '@heejun/spa-seo-gateway-core';
 import { describe, expect, it } from 'vitest';
 
 describe('assessQuality', () => {

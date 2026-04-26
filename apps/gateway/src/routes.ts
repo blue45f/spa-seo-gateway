@@ -17,7 +17,7 @@ import {
   registry,
   render,
   warmFromSitemap,
-} from '@spa-seo-gateway/core';
+} from '@heejun/spa-seo-gateway-core';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 
 const RESERVED_PREFIXES = ['/health', '/metrics', '/admin'] as const;

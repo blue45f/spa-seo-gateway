@@ -15,7 +15,7 @@ import {
   render,
   setRoutes,
   warmFromSitemap,
-} from '@spa-seo-gateway/core';
+} from '@heejun/spa-seo-gateway-core';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -53,6 +53,19 @@ export async function registerAdminUI(
   });
 
   app.get(`${prefix}`, (_req, reply) => reply.redirect(`${prefix}/`));
+
+  // Public info — Welcome 페이지에서 인증 없이 사용. 민감 정보 제외.
+  app.get('/admin/api/public/info', () => ({
+    ok: true,
+    mode: config.mode,
+    origin: config.originUrl ?? null,
+    multiContext: config.mode === 'saas' || config.mode === 'cms',
+    cache: cacheStats(),
+    site: getSiteSummary(),
+    nodeVersion: process.version,
+    uptimeSec: Math.floor(process.uptime()),
+    timestamp: new Date().toISOString(),
+  }));
 
   app.get('/admin/api/site', (req, reply) => {
     if (!guard(req, reply)) return;

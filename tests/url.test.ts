@@ -1,4 +1,4 @@
-import { cacheKey, normalize } from '@spa-seo-gateway/core';
+import { cacheKey, normalize } from '@heejun/spa-seo-gateway-core';
 import { describe, expect, it } from 'vitest';
 
 describe('normalize', () => {

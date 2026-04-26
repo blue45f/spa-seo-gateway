@@ -1,6 +1,6 @@
 {
-  "name": "@spa-seo-gateway/cms",
-  "version": "0.1.0-alpha",
+  "name": "@heejun/spa-seo-gateway-cms",
+  "version": "1.0.0",
   "description": "Multi-site CMS-style admin for spa-seo-gateway (option C, single-org with multiple sites)",
   "type": "module",
   "main": "./dist/index.js",
@@ -20,12 +20,38 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@spa-seo-gateway/admin-ui": "workspace:*",
-    "@spa-seo-gateway/core": "workspace:*",
+    "@heejun/spa-seo-gateway-admin-ui": "workspace:*",
+    "@heejun/spa-seo-gateway-core": "workspace:*",
     "fastify": "^5.8.5",
     "zod": "^4.3.6"
   },
   "devDependencies": {
     "typescript": "^6.0.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/blue45f/spa-seo-gateway.git",
+    "directory": "packages/cms"
+  },
+  "bugs": {
+    "url": "https://github.com/blue45f/spa-seo-gateway/issues"
+  },
+  "homepage": "https://github.com/blue45f/spa-seo-gateway/tree/main/packages/cms#readme",
+  "license": "MIT",
+  "author": "heejun",
+  "keywords": [
+    "seo",
+    "spa",
+    "prerender",
+    "headless",
+    "puppeteer",
+    "fastify",
+    "dynamic-rendering",
+    "react",
+    "vue",
+    "svelte"
+  ],
+  "publishConfig": {
+    "access": "public"
   }
 }

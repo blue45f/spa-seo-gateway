@@ -205,6 +205,64 @@ www.example.com {
 
 ⚠ 비추천. Puppeteer 는 콜드 스타트 6–10초. 대신 컨테이너 호스팅을 권장.
 
+### Vercel
+
+⚠️ **Vercel Functions 단독 배포는 비추천.** 이유:
+
+1. **Puppeteer 번들 크기**: chromium 이 ~250MB. `@sparticuz/chromium-min` 으로 ~30MB 까지 줄여도 Hobby 50MB 한도에 빠듯
+2. **콜드 스타트**: Function 재시작마다 chromium 다시 launch → 5–10초 지연
+3. **풀 / 캐시 휘발**: Function 인스턴스 사이에 브라우저 풀이나 메모리 캐시가 공유 안 됨 → Redis 필수, 그래도 풀의 효과는 0
+4. **타임아웃**: 무거운 SPA 는 최대 함수 실행 시간을 넘길 수 있음 (Pro 300s, Hobby 60s)
+
+**대안 1 — 하이브리드 (권장)**: Vercel 에는 SPA / 어드민 UI 만, 렌더 서비스는 별도 컨테이너 호스트.
+
+```
+┌──────────┐         ┌──────────────────┐         ┌────────────────┐
+│  사용자    │ ─────→ │ Vercel (Edge)    │ ─bot──→ │ spa-seo-gateway│
+│           │         │ + SPA + Edge MW  │         │ (Cloud Run/Fly)│
+└──────────┘         └──────────────────┘         └────────────────┘
+                              │ human
+                              ▼
+                          SPA origin
+```
+
+`middleware.ts` 에서 봇만 게이트웨이로 rewrite:
+
+```ts
+// middleware.ts (Vercel Edge)
+import { type NextRequest, NextResponse } from 'next/server';
+
+export const config = { matcher: '/((?!_next|api|favicon.ico).*)' };
+
+export function middleware(req: NextRequest) {
+  const ua = req.headers.get('user-agent') ?? '';
+  const isBot = /googlebot|bingbot|yeti|naverbot|facebookexternalhit/i.test(ua);
+  if (!isBot) return NextResponse.next();
+  const url = req.nextUrl.clone();
+  url.hostname = process.env.SEO_GATEWAY_HOST!; // Cloud Run 등 외부 호스트
+  return NextResponse.rewrite(url);
+}
+```
+
+`SEO_GATEWAY_HOST` 환경변수에 게이트웨이 도메인 설정. 게이트웨이는 Cloud Run / Fly.io / Railway 등 컨테이너 호스트에 띄움.
+
+**대안 2 — Vercel 에 직접 (실험적)**: Fluid Compute + `@sparticuz/chromium-min`
+
+Vercel 의 Fluid Compute 는 Function 인스턴스를 재사용하므로 Lambda 보다 풀 효과가 일부 있음. 하지만:
+- chromium-min 사용 필수
+- 풀 사이즈 1 (인스턴스당 1 브라우저만)
+- 캐시는 Redis (Upstash) 강제
+- 단순 사이트 + 트래픽 적음에 한해 검토 가능
+
+```ts
+// api/render.ts
+import puppeteer from 'puppeteer-core';
+import chromium from '@sparticuz/chromium-min';
+// ... core 의 render 호출 시 executablePath 를 chromium.executablePath() 로
+```
+
+**현실적 결론**: 게이트웨이 자체는 **Cloud Run / Fly.io / Railway / ECS** 같은 장기 실행 컨테이너 호스트가 최적. Vercel 은 SPA + 봇 분기 미들웨어 용도로 활용.
+
 ## 6. CI/CD
 
 `.github/workflows/ci.yml` 이 미리 셋업되어 있음:

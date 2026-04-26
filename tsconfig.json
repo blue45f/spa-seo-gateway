@@ -5,10 +5,10 @@
     "ignoreDeprecations": "6.0",
     "baseUrl": ".",
     "paths": {
-      "@spa-seo-gateway/core": ["packages/core/src/index.ts"],
-      "@spa-seo-gateway/admin-ui": ["packages/admin-ui/src/index.ts"],
-      "@spa-seo-gateway/multi-tenant": ["packages/multi-tenant/src/index.ts"],
-      "@spa-seo-gateway/cms": ["packages/cms/src/index.ts"]
+      "@heejun/spa-seo-gateway-core": ["packages/core/src/index.ts"],
+      "@heejun/spa-seo-gateway-admin-ui": ["packages/admin-ui/src/index.ts"],
+      "@heejun/spa-seo-gateway-multi-tenant": ["packages/multi-tenant/src/index.ts"],
+      "@heejun/spa-seo-gateway-cms": ["packages/cms/src/index.ts"]
     }
   },
   "include": [

@@ -1,5 +1,5 @@
 /**
- * @spa-seo-gateway/cms — option C (multi-site CMS)
+ * @heejun/spa-seo-gateway-cms — option C (multi-site CMS)
  *
  * 한 조직 내에서 여러 사이트를 GUI 로 관리. host 헤더로 사이트를 식별해
  * 각 사이트의 origin / routes / 캐시 네임스페이스를 적용한다. JSON 파일에
@@ -22,7 +22,7 @@ import {
   type RouteOverride,
   render,
   warmFromSitemap,
-} from '@spa-seo-gateway/core';
+} from '@heejun/spa-seo-gateway-core';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { z } from 'zod';
 

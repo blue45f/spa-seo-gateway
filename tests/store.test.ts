@@ -1,8 +1,12 @@
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { FileSiteStore, InMemorySiteStore, type Site } from '@spa-seo-gateway/cms';
-import { FileTenantStore, InMemoryTenantStore, type Tenant } from '@spa-seo-gateway/multi-tenant';
+import { FileSiteStore, InMemorySiteStore, type Site } from '@heejun/spa-seo-gateway-cms';
+import {
+  FileTenantStore,
+  InMemoryTenantStore,
+  type Tenant,
+} from '@heejun/spa-seo-gateway-multi-tenant';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 let tmpRoot: string;

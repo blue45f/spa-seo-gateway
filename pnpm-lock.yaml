@@ -53,16 +53,16 @@ importers:
       '@fastify/rate-limit':
         specifier: ^10.3.0
         version: 10.3.0
-      '@spa-seo-gateway/admin-ui':
+      '@heejun/spa-seo-gateway-admin-ui':
         specifier: workspace:*
         version: link:../../packages/admin-ui
-      '@spa-seo-gateway/cms':
+      '@heejun/spa-seo-gateway-cms':
         specifier: workspace:*
         version: link:../../packages/cms
-      '@spa-seo-gateway/core':
+      '@heejun/spa-seo-gateway-core':
         specifier: workspace:*
         version: link:../../packages/core
-      '@spa-seo-gateway/multi-tenant':
+      '@heejun/spa-seo-gateway-multi-tenant':
         specifier: workspace:*
         version: link:../../packages/multi-tenant
       fastify:
@@ -81,7 +81,7 @@ importers:
       '@fastify/static':
         specifier: ^9.1.3
         version: 9.1.3
-      '@spa-seo-gateway/core':
+      '@heejun/spa-seo-gateway-core':
         specifier: workspace:*
         version: link:../core
       fastify:
@@ -94,10 +94,10 @@ importers:
 
   packages/cms:
     dependencies:
-      '@spa-seo-gateway/admin-ui':
+      '@heejun/spa-seo-gateway-admin-ui':
         specifier: workspace:*
         version: link:../admin-ui
-      '@spa-seo-gateway/core':
+      '@heejun/spa-seo-gateway-core':
         specifier: workspace:*
         version: link:../core
       fastify:
@@ -171,7 +171,7 @@ importers:
 
   packages/multi-tenant:
     dependencies:
-      '@spa-seo-gateway/core':
+      '@heejun/spa-seo-gateway-core':
         specifier: workspace:*
         version: link:../core
       fastify:

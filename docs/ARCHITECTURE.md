@@ -5,10 +5,10 @@
 ```
 spa-seo-gateway/
 ├── packages/
-│   ├── core/          @spa-seo-gateway/core         — HTTP 비의존 엔진
-│   ├── admin-ui/      @spa-seo-gateway/admin-ui     — Fastify 플러그인 (옵션 A)
-│   ├── multi-tenant/  @spa-seo-gateway/multi-tenant — Fastify 플러그인 (옵션 B)
-│   └── cms/           @spa-seo-gateway/cms          — Fastify 플러그인 (옵션 C)
+│   ├── core/          @heejun/spa-seo-gateway-core         — HTTP 비의존 엔진
+│   ├── admin-ui/      @heejun/spa-seo-gateway-admin-ui     — Fastify 플러그인 (옵션 A)
+│   ├── multi-tenant/  @heejun/spa-seo-gateway-multi-tenant — Fastify 플러그인 (옵션 B)
+│   └── cms/           @heejun/spa-seo-gateway-cms          — Fastify 플러그인 (옵션 C)
 └── apps/
     └── gateway/       @spa-seo-gateway/gateway      — 실행 바이너리
                                                        (mode 별 플러그인 합성)
@@ -22,7 +22,7 @@ core ─→ admin-ui ─┐
    └─→ cms ─────────┘
 ```
 
-`core` 만 외부 npm 의존성을 가지고, 나머지 패키지는 core 와 fastify 만 의존. workspace 외부에서도 `npm i @spa-seo-gateway/core` 로 자체 게이트웨이를 만들 수 있는 구조.
+`core` 만 외부 npm 의존성을 가지고, 나머지 패키지는 core 와 fastify 만 의존. workspace 외부에서도 `npm i @heejun/spa-seo-gateway-core` 로 자체 게이트웨이를 만들 수 있는 구조.
 
 ## 전체 구조
 

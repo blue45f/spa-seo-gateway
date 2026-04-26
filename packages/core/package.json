@@ -1,5 +1,5 @@
 {
-  "name": "@spa-seo-gateway/core",
+  "name": "@heejun/spa-seo-gateway-core",
   "version": "1.0.0",
   "description": "Headless rendering engine, cache, pool, quality gate — framework-agnostic core for spa-seo-gateway",
   "type": "module",
@@ -40,5 +40,31 @@
   "devDependencies": {
     "@types/opossum": "^8.1.9",
     "typescript": "^6.0.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/blue45f/spa-seo-gateway.git",
+    "directory": "packages/core"
+  },
+  "bugs": {
+    "url": "https://github.com/blue45f/spa-seo-gateway/issues"
+  },
+  "homepage": "https://github.com/blue45f/spa-seo-gateway/tree/main/packages/core#readme",
+  "license": "MIT",
+  "author": "heejun",
+  "keywords": [
+    "seo",
+    "spa",
+    "prerender",
+    "headless",
+    "puppeteer",
+    "fastify",
+    "dynamic-rendering",
+    "react",
+    "vue",
+    "svelte"
+  ],
+  "publishConfig": {
+    "access": "public"
   }
 }

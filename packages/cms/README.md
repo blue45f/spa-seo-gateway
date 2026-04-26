@@ -1,4 +1,4 @@
-# @spa-seo-gateway/cms
+# @heejun/spa-seo-gateway-cms
 
 `cms` 모드 구현. 한 조직이 여러 사이트를 한 게이트웨이로 운영.
 
@@ -6,7 +6,7 @@
 
 ```ts
 import Fastify from 'fastify';
-import { registerCms, FileSiteStore } from '@spa-seo-gateway/cms';
+import { registerCms, FileSiteStore } from '@heejun/spa-seo-gateway-cms';
 
 const app = Fastify();
 const store = new FileSiteStore('./sites.json');

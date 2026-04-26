@@ -7,7 +7,7 @@ import {
   cacheSet,
   cacheStats,
   cacheSwr,
-} from '@spa-seo-gateway/core';
+} from '@heejun/spa-seo-gateway-core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 const tag = (s: string) => `test:${s}:${Math.random().toString(36).slice(2)}`;

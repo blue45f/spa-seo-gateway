@@ -11,7 +11,7 @@
  */
 import { writeFileSync } from 'node:fs';
 import { argv, exit, stdout } from 'node:process';
-import { browserPool, matchRoute, render } from '@spa-seo-gateway/core';
+import { browserPool, matchRoute, render } from '@heejun/spa-seo-gateway-core';
 
 const args = argv.slice(2);
 const flags = new Set<string>();

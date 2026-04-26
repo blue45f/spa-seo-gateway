@@ -16,10 +16,10 @@
     "@fastify/cors": "^11.2.0",
     "@fastify/http-proxy": "^11.4.4",
     "@fastify/rate-limit": "^10.3.0",
-    "@spa-seo-gateway/admin-ui": "workspace:*",
-    "@spa-seo-gateway/cms": "workspace:*",
-    "@spa-seo-gateway/core": "workspace:*",
-    "@spa-seo-gateway/multi-tenant": "workspace:*",
+    "@heejun/spa-seo-gateway-admin-ui": "workspace:*",
+    "@heejun/spa-seo-gateway-cms": "workspace:*",
+    "@heejun/spa-seo-gateway-core": "workspace:*",
+    "@heejun/spa-seo-gateway-multi-tenant": "workspace:*",
     "fastify": "^5.8.5"
   },
   "devDependencies": {

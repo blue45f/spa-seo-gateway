@@ -1,5 +1,5 @@
 {
-  "name": "@spa-seo-gateway/admin-ui",
+  "name": "@heejun/spa-seo-gateway-admin-ui",
   "version": "1.0.0",
   "description": "Embedded admin dashboard for spa-seo-gateway (Fastify plugin + static SPA)",
   "type": "module",
@@ -22,10 +22,36 @@
   },
   "dependencies": {
     "@fastify/static": "^9.1.3",
-    "@spa-seo-gateway/core": "workspace:*",
+    "@heejun/spa-seo-gateway-core": "workspace:*",
     "fastify": "^5.8.5"
   },
   "devDependencies": {
     "typescript": "^6.0.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/blue45f/spa-seo-gateway.git",
+    "directory": "packages/admin-ui"
+  },
+  "bugs": {
+    "url": "https://github.com/blue45f/spa-seo-gateway/issues"
+  },
+  "homepage": "https://github.com/blue45f/spa-seo-gateway/tree/main/packages/admin-ui#readme",
+  "license": "MIT",
+  "author": "heejun",
+  "keywords": [
+    "seo",
+    "spa",
+    "prerender",
+    "headless",
+    "puppeteer",
+    "fastify",
+    "dynamic-rendering",
+    "react",
+    "vue",
+    "svelte"
+  ],
+  "publishConfig": {
+    "access": "public"
   }
 }

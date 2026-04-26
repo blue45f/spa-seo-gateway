@@ -1,4 +1,4 @@
-import { breakerStats, isCircuitOpen, withBreaker } from '@spa-seo-gateway/core';
+import { breakerStats, isCircuitOpen, withBreaker } from '@heejun/spa-seo-gateway-core';
 import { describe, expect, it } from 'vitest';
 
 const uniq = (label: string) => `cb-${label}-${Math.random().toString(36).slice(2)}`;

@@ -6,9 +6,9 @@
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { registerAdminUI } from '@spa-seo-gateway/admin-ui';
-import { FileSiteStore, registerCms } from '@spa-seo-gateway/cms';
-import { FileTenantStore, registerMultiTenant } from '@spa-seo-gateway/multi-tenant';
+import { registerAdminUI } from '@heejun/spa-seo-gateway-admin-ui';
+import { FileSiteStore, registerCms } from '@heejun/spa-seo-gateway-cms';
+import { FileTenantStore, registerMultiTenant } from '@heejun/spa-seo-gateway-multi-tenant';
 import Fastify, { type FastifyInstance } from 'fastify';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 

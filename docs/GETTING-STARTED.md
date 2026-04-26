@@ -160,7 +160,7 @@ curl http://localhost:3000/metrics        # Prometheus exposition
 | 증상 | 원인 / 해결 |
 |--|--|
 | `chromium not found` | `npx puppeteer browsers install chromium` 또는 `PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium` |
-| `Cannot find module '@spa-seo-gateway/core'` | `pnpm run build` 한 번 실행 (vitest는 src 직접 참조하므로 보통은 불필요) |
+| `Cannot find module '@heejun/spa-seo-gateway-core'` | `pnpm run build` 한 번 실행 (vitest는 src 직접 참조하므로 보통은 불필요) |
 | 어드민 UI `404 admin disabled` | `ADMIN_TOKEN` 환경변수 미설정. .env 에 추가 후 재시작 |
 | 모든 요청에 `204` 응답 | `render-only` 모드 + 사람 UA. 봇 UA 로 다시 요청 또는 모드 변경 |
 | `Method 'OPTIONS' already declared` | @fastify/cors 와 충돌. 보통 자동 해소되며 발생 시 issue 제보 |

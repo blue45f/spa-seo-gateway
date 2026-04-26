@@ -1,4 +1,4 @@
-# @spa-seo-gateway/multi-tenant
+# @heejun/spa-seo-gateway-multi-tenant
 
 `saas` 모드 구현. 한 게이트웨이가 여러 외부 고객(테넌트) 의 SPA 를 동시에 SEO 렌더링.
 
@@ -6,7 +6,7 @@
 
 ```ts
 import Fastify from 'fastify';
-import { registerMultiTenant, FileTenantStore } from '@spa-seo-gateway/multi-tenant';
+import { registerMultiTenant, FileTenantStore } from '@heejun/spa-seo-gateway-multi-tenant';
 
 const app = Fastify();
 const store = new FileTenantStore('./tenants.json');

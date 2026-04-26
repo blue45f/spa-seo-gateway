@@ -1,8 +1,19 @@
 # spa-seo-gateway
 
+[![npm](https://img.shields.io/npm/v/@heejun/spa-seo-gateway-core?label=%40heejun%2Fspa-seo-gateway-core)](https://www.npmjs.com/package/@heejun/spa-seo-gateway-core) [![tests](https://img.shields.io/badge/tests-95%20passing-brightgreen)](https://github.com/blue45f/spa-seo-gateway/tree/main/tests) [![license](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+
 SPA(React/Vue/Svelte 등) 를 봇이 인덱싱할 수 있도록 헤드리스 Chromium 으로 사전 렌더링해 봇에게는 완성된 HTML, 사람에게는 원본 SPA 를 전달하는 **고성능·범용 다이내믹 렌더링 게이트웨이**.
 
 > Google [Dynamic Rendering 가이드](https://developers.google.com/search/docs/crawling-indexing/javascript/dynamic-rendering) 의 OSS 구현. Rendertron / Prerender.io 의 자리를 대체.
+
+```bash
+# npm 으로 라이브러리 설치
+pnpm add @heejun/spa-seo-gateway-core @heejun/spa-seo-gateway-admin-ui fastify
+
+# 또는 소스 클론으로 단일 바이너리 운영
+git clone https://github.com/blue45f/spa-seo-gateway && cd spa-seo-gateway
+pnpm install && pnpm dev
+```
 
 ---
 
@@ -81,12 +92,14 @@ open http://localhost:3000/admin/ui
 |--|--|--|
 | 시작 | [docs/GETTING-STARTED.md](docs/GETTING-STARTED.md) | 설치 → 첫 렌더 → 어드민 |
 | 설정 | [docs/CONFIGURATION.md](docs/CONFIGURATION.md) | 모든 env / config 파일 / route override |
+| **라이브러리** | **[docs/LIBRARY-USAGE.md](docs/LIBRARY-USAGE.md)** | **외부 프로젝트에서 npm 패키지로 사용 (6 시나리오)** |
 | 모드 | [docs/MULTI-TENANT.md](docs/MULTI-TENANT.md) | `saas` 모드 — 외부 고객 대상 SaaS |
 | 모드 | [docs/CMS-MODE.md](docs/CMS-MODE.md) | `cms` 모드 — 다중 사이트 운영 |
 | 아키텍처 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | 설계 결정과 trade-off |
 | 동시성 | [docs/CONCURRENCY.md](docs/CONCURRENCY.md) | 풀 / 큐 / dedup / SWR |
 | 운영 | [docs/USAGE.md](docs/USAGE.md) | Nginx / Caddy / CDN / K8s 연동 |
 | 성능 | [docs/BENCHMARKS.md](docs/BENCHMARKS.md) | 측정 시나리오와 기대 수치 |
+| 배포 | [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) | Docker / K8s / Cloudflare / Nginx |
 
 API 레벨 문서: [packages/core/README.md](packages/core/README.md), [packages/admin-ui/README.md](packages/admin-ui/README.md)
 

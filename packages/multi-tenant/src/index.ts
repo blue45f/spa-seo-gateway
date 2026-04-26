@@ -1,5 +1,5 @@
 /**
- * @spa-seo-gateway/multi-tenant — option B (SaaS layer)
+ * @heejun/spa-seo-gateway-multi-tenant — option B (SaaS layer)
  *
  * 한 인스턴스가 여러 테넌트(고객 사이트)를 동시에 서비스. 각 테넌트는
  * 자기 origin / routes / API key 를 가진다. 디스크 영구 저장 (JSON file).
@@ -26,7 +26,7 @@ import {
   logger,
   type RouteOverride,
   render,
-} from '@spa-seo-gateway/core';
+} from '@heejun/spa-seo-gateway-core';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { z } from 'zod';
 

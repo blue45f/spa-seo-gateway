@@ -1,4 +1,4 @@
-import { warmFromSitemap } from '@spa-seo-gateway/core';
+import { warmFromSitemap } from '@heejun/spa-seo-gateway-core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const URLSET = `<?xml version="1.0" encoding="UTF-8"?>

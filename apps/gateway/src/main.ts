@@ -1,10 +1,10 @@
 import compress from '@fastify/compress';
 import cors from '@fastify/cors';
 import rateLimit from '@fastify/rate-limit';
-import { registerAdminUI } from '@spa-seo-gateway/admin-ui';
-import { FileSiteStore, registerCms } from '@spa-seo-gateway/cms';
-import { browserPool, config, logger, shutdownCache } from '@spa-seo-gateway/core';
-import { FileTenantStore, registerMultiTenant } from '@spa-seo-gateway/multi-tenant';
+import { registerAdminUI } from '@heejun/spa-seo-gateway-admin-ui';
+import { FileSiteStore, registerCms } from '@heejun/spa-seo-gateway-cms';
+import { browserPool, config, logger, shutdownCache } from '@heejun/spa-seo-gateway-core';
+import { FileTenantStore, registerMultiTenant } from '@heejun/spa-seo-gateway-multi-tenant';
 import Fastify from 'fastify';
 import { registerRoutes } from './routes.js';
 

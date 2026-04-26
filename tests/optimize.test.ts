@@ -1,4 +1,4 @@
-import { optimizeHtml } from '@spa-seo-gateway/core';
+import { optimizeHtml } from '@heejun/spa-seo-gateway-core';
 import { describe, expect, it } from 'vitest';
 
 describe('optimizeHtml', () => {

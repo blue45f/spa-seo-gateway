@@ -1,6 +1,6 @@
-import { SiteSchema } from '@spa-seo-gateway/cms';
-import { ConfigSchema } from '@spa-seo-gateway/core';
-import { TenantSchema } from '@spa-seo-gateway/multi-tenant';
+import { SiteSchema } from '@heejun/spa-seo-gateway-cms';
+import { ConfigSchema } from '@heejun/spa-seo-gateway-core';
+import { TenantSchema } from '@heejun/spa-seo-gateway-multi-tenant';
 import { describe, expect, it } from 'vitest';
 
 describe('TenantSchema', () => {

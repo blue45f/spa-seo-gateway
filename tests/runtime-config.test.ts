@@ -1,7 +1,12 @@
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { getRoutes, matchRoute, persistRoutesToFile, setRoutes } from '@spa-seo-gateway/core';
+import {
+  getRoutes,
+  matchRoute,
+  persistRoutesToFile,
+  setRoutes,
+} from '@heejun/spa-seo-gateway-core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 let tmp: string;

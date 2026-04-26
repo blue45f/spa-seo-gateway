@@ -1,4 +1,4 @@
-# @spa-seo-gateway/admin-ui
+# @heejun/spa-seo-gateway-admin-ui
 
 임베드형 어드민 UI. **Fastify 플러그인** + **Alpine.js + Tailwind 단일 HTML** 로 구성. 외부 빌드 불필요.
 
@@ -6,7 +6,7 @@
 
 ```ts
 import Fastify from 'fastify';
-import { registerAdminUI } from '@spa-seo-gateway/admin-ui';
+import { registerAdminUI } from '@heejun/spa-seo-gateway-admin-ui';
 
 const app = Fastify();
 await registerAdminUI(app, {

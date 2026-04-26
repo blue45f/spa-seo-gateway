@@ -1,4 +1,4 @@
-import { buildTargetUrl, isHostAllowed } from '@spa-seo-gateway/core';
+import { buildTargetUrl, isHostAllowed } from '@heejun/spa-seo-gateway-core';
 import { describe, expect, it } from 'vitest';
 
 describe('buildTargetUrl', () => {
