@@ -1,5 +1,5 @@
+import { assessQuality, shortTtlForStatus } from '@spa-seo-gateway/core';
 import { describe, expect, it } from 'vitest';
-import { assessQuality, shortTtlForStatus } from '../src/quality.js';
 
 describe('assessQuality', () => {
   it('flags soft 404 by title', () => {

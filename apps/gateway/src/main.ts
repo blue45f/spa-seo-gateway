@@ -1,16 +1,14 @@
 import compress from '@fastify/compress';
 import cors from '@fastify/cors';
 import rateLimit from '@fastify/rate-limit';
+import { registerAdminUI } from '@spa-seo-gateway/admin-ui';
+import { browserPool, config, logger, shutdownCache } from '@spa-seo-gateway/core';
 import Fastify from 'fastify';
-import { shutdownCache } from './cache.js';
-import { config } from './config.js';
-import { registerRoutes } from './handlers.js';
-import { logger } from './logger.js';
-import { browserPool } from './pool.js';
+import { registerRoutes } from './routes.js';
 
 async function main() {
   const app = Fastify({
-    logger,
+    loggerInstance: logger,
     disableRequestLogging: false,
     trustProxy: true,
     bodyLimit: 4 * 1024 * 1024,
@@ -40,7 +38,10 @@ async function main() {
     });
   }
 
-  await registerRoutes(app);
+  await registerRoutes(app as unknown as Parameters<typeof registerRoutes>[0]);
+  await registerAdminUI(app as unknown as Parameters<typeof registerAdminUI>[0], {
+    prefix: '/admin/ui',
+  });
 
   let shuttingDown = false;
   const shutdown = async (signal: string) => {

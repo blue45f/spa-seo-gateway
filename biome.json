@@ -6,7 +6,17 @@
     "useIgnoreFile": true
   },
   "files": {
-    "includes": ["**", "!dist", "!node_modules", "!coverage", "!package-lock.json", "!*.md"]
+    "includes": [
+      "**",
+      "!**/dist",
+      "!**/node_modules",
+      "!coverage",
+      "!**/package-lock.json",
+      "!pnpm-lock.yaml",
+      "!**/*.md",
+      "!**/*.html",
+      "!schema"
+    ]
   },
   "formatter": {
     "enabled": true,

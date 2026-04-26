@@ -1,5 +1,5 @@
+import { detectBot } from '@spa-seo-gateway/core';
 import { describe, expect, it } from 'vitest';
-import { detectBot } from '../src/bot.js';
 
 describe('detectBot', () => {
   it('detects Googlebot', () => {

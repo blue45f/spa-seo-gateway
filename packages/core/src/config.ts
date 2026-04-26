@@ -250,18 +250,3 @@ if (config.mode === 'proxy' && !config.originUrl) {
   console.error('GATEWAY_MODE=proxy requires ORIGIN_URL');
   process.exit(1);
 }
-
-const compiledRoutes = config.routes.map((r) => ({ ...r, regex: new RegExp(r.pattern) }));
-
-export function matchRoute(targetUrl: string): RouteOverride | null {
-  try {
-    const u = new URL(targetUrl);
-    const path = u.pathname + u.search;
-    for (const r of compiledRoutes) {
-      if (r.regex.test(path)) return r;
-    }
-  } catch {
-    /* invalid URL — no match */
-  }
-  return null;
-}

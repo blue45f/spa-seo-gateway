@@ -2,16 +2,35 @@
 FROM node:24-slim AS deps
 WORKDIR /app
 ENV PUPPETEER_SKIP_DOWNLOAD=true
-COPY package*.json ./
-RUN --mount=type=cache,target=/root/.npm \
-    npm ci --omit=optional
+RUN corepack enable && corepack prepare pnpm@9.14.4 --activate
+COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
+COPY packages/core/package.json packages/core/
+COPY packages/admin-ui/package.json packages/admin-ui/
+COPY packages/multi-tenant/package.json packages/multi-tenant/
+COPY packages/cms/package.json packages/cms/
+COPY apps/gateway/package.json apps/gateway/
+RUN --mount=type=cache,target=/root/.local/share/pnpm/store \
+    pnpm install --frozen-lockfile --prod=false
 
 FROM node:24-slim AS build
 WORKDIR /app
 ENV PUPPETEER_SKIP_DOWNLOAD=true
+RUN corepack enable && corepack prepare pnpm@9.14.4 --activate
 COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/packages ./packages
+COPY --from=deps /app/apps ./apps
 COPY . .
-RUN npm run build
+RUN pnpm run build
+
+FROM node:24-slim AS prod-deps
+WORKDIR /app
+ENV PUPPETEER_SKIP_DOWNLOAD=true
+RUN corepack enable && corepack prepare pnpm@9.14.4 --activate
+COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
+COPY packages ./packages
+COPY apps ./apps
+RUN --mount=type=cache,target=/root/.local/share/pnpm/store \
+    pnpm install --frozen-lockfile --prod
 
 FROM node:24-slim AS runtime
 ENV NODE_ENV=production \
@@ -46,9 +65,14 @@ RUN apt-get update \
 
 WORKDIR /app
 
-COPY --from=deps  /app/node_modules ./node_modules
-COPY --from=build /app/dist         ./dist
-COPY package.json ./
+COPY --from=prod-deps /app/node_modules ./node_modules
+COPY --from=prod-deps /app/packages ./packages
+COPY --from=prod-deps /app/apps ./apps
+COPY --from=build /app/packages/core/dist        ./packages/core/dist
+COPY --from=build /app/packages/admin-ui/dist    ./packages/admin-ui/dist
+COPY --from=build /app/packages/admin-ui/public  ./packages/admin-ui/public
+COPY --from=build /app/apps/gateway/dist         ./apps/gateway/dist
+COPY package.json pnpm-workspace.yaml ./
 
 RUN useradd --create-home --shell /bin/bash app \
  && mkdir -p /home/app/.cache \
@@ -60,4 +84,4 @@ HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
   CMD wget -qO- http://127.0.0.1:3000/health >/dev/null || exit 1
 
 ENTRYPOINT ["/usr/bin/dumb-init","--"]
-CMD ["node","dist/server.js"]
+CMD ["node","apps/gateway/dist/main.js"]

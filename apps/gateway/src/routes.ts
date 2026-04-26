@@ -1,15 +1,24 @@
 import httpProxy from '@fastify/http-proxy';
+import {
+  breakerStats,
+  browserPool,
+  buildTargetUrl,
+  cacheClear,
+  cacheDel,
+  cacheKey,
+  cacheStats,
+  cacheSwr,
+  config,
+  detectBot,
+  httpRequests,
+  isHostAllowed,
+  logger,
+  matchRoute,
+  registry,
+  render,
+  warmFromSitemap,
+} from '@spa-seo-gateway/core';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
-import { detectBot } from './bot.js';
-import { cacheClear, cacheDel, cacheStats, cacheSwr } from './cache.js';
-import { breakerStats } from './circuit-breaker.js';
-import { config, matchRoute } from './config.js';
-import { logger } from './logger.js';
-import { httpRequests, registry } from './metrics.js';
-import { browserPool } from './pool.js';
-import { warmFromSitemap } from './prerender-warmer.js';
-import { render } from './renderer.js';
-import { buildTargetUrl, cacheKey, isHostAllowed } from './url.js';
 
 const RESERVED_PREFIXES = ['/health', '/metrics', '/admin'] as const;
 const isReserved = (url: string) => RESERVED_PREFIXES.some((p) => url.startsWith(p));
@@ -107,20 +116,24 @@ export async function registerRoutes(app: FastifyInstance): Promise<void> {
       },
     });
   } else {
-    app.all('/*', async (req, reply) => {
-      if (isReserved(req.url)) return null;
-      const detection = detectBot(
-        req.headers['user-agent'],
-        req.headers as Record<string, string | string[] | undefined>,
-        req.query as Record<string, unknown>,
-      );
-      if (!detection.isBot) {
-        httpRequests.inc({ route: 'root', status: 'pass', kind: 'human' });
-        reply.code(204).header('x-bypass-reason', detection.reason);
-        return null;
-      }
-      await renderToReply(req, reply);
-      return reply;
+    app.route({
+      method: ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE'],
+      url: '/*',
+      handler: async (req, reply) => {
+        if (isReserved(req.url)) return null;
+        const detection = detectBot(
+          req.headers['user-agent'],
+          req.headers as Record<string, string | string[] | undefined>,
+          req.query as Record<string, unknown>,
+        );
+        if (!detection.isBot) {
+          httpRequests.inc({ route: 'root', status: 'pass', kind: 'human' });
+          reply.code(204).header('x-bypass-reason', detection.reason);
+          return null;
+        }
+        await renderToReply(req, reply);
+        return reply;
+      },
     });
   }
 }

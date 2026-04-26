@@ -6,9 +6,9 @@
  */
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { ConfigSchema } from '@spa-seo-gateway/core';
+// @ts-expect-error — zod is a transitive dep of core; resolve via node module resolution
 import { z } from 'zod';
-
-import { ConfigSchema } from '../src/config.js';
 
 const schema = z.toJSONSchema(ConfigSchema, {
   target: 'draft-2020-12',

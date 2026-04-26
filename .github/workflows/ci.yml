@@ -14,22 +14,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-          cache: 'npm'
+          cache: 'pnpm'
       - name: Install
-        run: PUPPETEER_SKIP_DOWNLOAD=true npm ci --no-audit --no-fund
+        run: PUPPETEER_SKIP_DOWNLOAD=true pnpm install --frozen-lockfile
       - name: Lint
-        run: npm run lint
+        run: pnpm run lint
       - name: Typecheck
-        run: npm run typecheck
-      - name: Build
-        run: npm run build
+        run: pnpm run typecheck
+      - name: Build all packages
+        run: pnpm run build
       - name: Test
-        run: npm test
+        run: pnpm test
       - name: Generate config schema
-        run: npx tsx scripts/generate-schema.ts
+        run: pnpm run schema:gen
 
   docker:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'

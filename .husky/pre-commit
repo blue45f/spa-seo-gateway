@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 # 1) staged 파일에 한해 Biome lint+format (자동 수정 + 재스테이지)
-npx lint-staged
+pnpm exec lint-staged
 
 # 2) 전체 타입체크 — 한 파일 변경이 다른 파일 타입을 깨뜨릴 수 있으므로
-npx tsc -p tsconfig.json --noEmit
+pnpm run typecheck

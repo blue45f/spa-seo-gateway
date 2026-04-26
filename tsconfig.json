@@ -1,23 +1,23 @@
 {
+  "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "target": "ES2022",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "lib": ["ES2022"],
-    "types": ["node"],
-    "typeRoots": ["./node_modules/@types"],
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true,
     "noEmit": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    "isolatedModules": true
+    "ignoreDeprecations": "6.0",
+    "baseUrl": ".",
+    "paths": {
+      "@spa-seo-gateway/core": ["packages/core/src/index.ts"],
+      "@spa-seo-gateway/admin-ui": ["packages/admin-ui/src/index.ts"],
+      "@spa-seo-gateway/multi-tenant": ["packages/multi-tenant/src/index.ts"],
+      "@spa-seo-gateway/cms": ["packages/cms/src/index.ts"]
+    }
   },
-  "include": ["src/**/*.ts", "benchmarks/**/*.ts"],
-  "exclude": ["node_modules", "dist"]
+  "include": [
+    "packages/*/src/**/*.ts",
+    "apps/*/src/**/*.ts",
+    "apps/*/scripts/**/*.ts",
+    "tests/**/*.ts",
+    "scripts/**/*.ts",
+    "benchmarks/**/*.ts"
+  ],
+  "exclude": ["node_modules", "**/dist"]
 }

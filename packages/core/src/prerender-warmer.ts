@@ -1,8 +1,8 @@
 import { XMLParser } from 'fast-xml-parser';
 import { cacheSwr } from './cache.js';
-import { matchRoute } from './config.js';
 import { logger } from './logger.js';
 import { render } from './renderer.js';
+import { matchRoute } from './runtime-config.js';
 import { cacheKey, isHostAllowed } from './url.js';
 
 type SitemapNode = { loc?: string; lastmod?: string };

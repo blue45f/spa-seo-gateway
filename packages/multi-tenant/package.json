@@ -1,0 +1,30 @@
+{
+  "name": "@spa-seo-gateway/multi-tenant",
+  "version": "0.1.0-alpha",
+  "description": "Multi-tenant SaaS layer scaffold for spa-seo-gateway (option B)",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@spa-seo-gateway/core": "workspace:*",
+    "fastify": "^5.8.5",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.3"
+  }
+}

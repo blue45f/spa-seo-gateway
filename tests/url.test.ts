@@ -1,5 +1,5 @@
+import { cacheKey, normalize } from '@spa-seo-gateway/core';
 import { describe, expect, it } from 'vitest';
-import { cacheKey, normalize } from '../src/url.js';
 
 describe('normalize', () => {
   it('removes tracking parameters', () => {

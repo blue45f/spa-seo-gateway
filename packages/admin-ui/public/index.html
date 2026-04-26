@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="ko" x-data="adminApp()" x-init="init()">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>spa-seo-gateway · admin</title>
+    <link rel="icon" href="data:," />
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js" defer></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      [x-cloak] { display: none !important; }
+      body { font-family: ui-sans-serif, -apple-system, system-ui, sans-serif; }
+      pre { white-space: pre-wrap; word-break: break-word; }
+    </style>
+  </head>
+  <body class="bg-slate-50 text-slate-900 min-h-screen">
+    <header class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
+      <div>
+        <h1 class="text-xl font-semibold">spa-seo-gateway</h1>
+        <p class="text-xs text-slate-400 mt-0.5">embedded admin · option A</p>
+      </div>
+      <div class="flex items-center gap-3 text-sm">
+        <input
+          type="password"
+          placeholder="X-Admin-Token"
+          class="px-3 py-1.5 rounded bg-slate-800 text-white placeholder-slate-500 border border-slate-700"
+          x-model="token"
+          @keydown.enter="loadAll()"
+        />
+        <button
+          class="px-3 py-1.5 rounded bg-emerald-500 hover:bg-emerald-400 font-medium"
+          @click="loadAll()"
+        >
+          연결
+        </button>
+      </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-6 py-6 space-y-6" x-cloak>
+      <div x-show="error" class="bg-red-50 border border-red-200 text-red-800 rounded px-4 py-3" x-text="error"></div>
+
+      <nav class="flex gap-2 border-b border-slate-200">
+        <template x-for="t in tabs">
+          <button
+            class="px-4 py-2 text-sm font-medium border-b-2 -mb-px"
+            :class="tab === t.id ? 'border-slate-900 text-slate-900' : 'border-transparent text-slate-500 hover:text-slate-800'"
+            @click="tab = t.id"
+            x-text="t.label"
+          ></button>
+        </template>
+      </nav>
+
+      <!-- Dashboard -->
+      <section x-show="tab === 'dashboard'" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <template x-for="card in dashboardCards()">
+          <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-5">
+            <div class="text-xs uppercase tracking-wider text-slate-500" x-text="card.label"></div>
+            <div class="mt-2 text-2xl font-semibold" x-text="card.value"></div>
+            <div class="mt-1 text-sm text-slate-500" x-text="card.detail"></div>
+          </div>
+        </template>
+
+        <div class="md:col-span-3 bg-white rounded-lg shadow-sm border border-slate-200 p-5">
+          <h2 class="font-semibold mb-3">Circuit breakers</h2>
+          <div x-show="!Object.keys(site?.breakers ?? {}).length" class="text-sm text-slate-500">
+            아직 활동한 host 가 없습니다.
+          </div>
+          <table x-show="Object.keys(site?.breakers ?? {}).length" class="w-full text-sm">
+            <thead class="text-slate-500">
+              <tr>
+                <th class="text-left py-2">host</th>
+                <th class="text-left py-2">state</th>
+                <th class="text-left py-2">stats</th>
+              </tr>
+            </thead>
+            <tbody>
+              <template x-for="[host, info] in Object.entries(site?.breakers ?? {})" :key="host">
+                <tr class="border-t border-slate-100">
+                  <td class="py-2 font-mono" x-text="host"></td>
+                  <td class="py-2">
+                    <span
+                      class="px-2 py-0.5 rounded text-xs font-medium"
+                      :class="info.opened ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700'"
+                      x-text="info.opened ? 'OPEN' : 'CLOSED'"
+                    ></span>
+                  </td>
+                  <td class="py-2 text-xs text-slate-600 font-mono" x-text="JSON.stringify(info.stats).slice(0, 100)"></td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Routes editor -->
+      <section x-show="tab === 'routes'" class="bg-white rounded-lg shadow-sm border border-slate-200 p-5 space-y-4">
+        <div class="flex items-center justify-between">
+          <h2 class="font-semibold">Route overrides</h2>
+          <div class="flex gap-2">
+            <button class="px-3 py-1.5 text-sm rounded bg-slate-100 hover:bg-slate-200" @click="addRoute()">+ 추가</button>
+            <button
+              class="px-3 py-1.5 text-sm rounded bg-emerald-500 text-white hover:bg-emerald-400"
+              @click="saveRoutes(false)"
+            >
+              저장 (메모리)
+            </button>
+            <button
+              class="px-3 py-1.5 text-sm rounded bg-emerald-700 text-white hover:bg-emerald-600"
+              @click="saveRoutes(true)"
+              title="seo-gateway.config.json 으로 영구 저장"
+            >
+              저장 + 디스크 영구화
+            </button>
+          </div>
+        </div>
+
+        <div class="text-xs text-slate-500">
+          <code>pattern</code> 은 URL 의 <code>pathname + search</code> 에 적용되는 정규식입니다. 빈 라우트는 자동 무시됩니다.
+        </div>
+
+        <table class="w-full text-sm">
+          <thead class="text-slate-500">
+            <tr>
+              <th class="text-left py-2">pattern (regex)</th>
+              <th class="text-left py-2">ttl (ms)</th>
+              <th class="text-left py-2">waitUntil</th>
+              <th class="text-left py-2">selector</th>
+              <th class="text-left py-2">waitMs</th>
+              <th class="text-left py-2">ignore</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <template x-for="(r, i) in routes" :key="i">
+              <tr class="border-t border-slate-100">
+                <td class="py-1.5"><input class="w-full font-mono px-2 py-1 border border-slate-200 rounded" x-model="r.pattern" /></td>
+                <td class="py-1.5"><input type="number" class="w-28 px-2 py-1 border border-slate-200 rounded" x-model.number="r.ttlMs" /></td>
+                <td class="py-1.5">
+                  <select class="px-2 py-1 border border-slate-200 rounded" x-model="r.waitUntil">
+                    <option value="">(default)</option>
+                    <option>load</option>
+                    <option>domcontentloaded</option>
+                    <option>networkidle0</option>
+                    <option>networkidle2</option>
+                  </select>
+                </td>
+                <td class="py-1.5"><input class="w-full font-mono px-2 py-1 border border-slate-200 rounded" x-model="r.waitSelector" /></td>
+                <td class="py-1.5"><input type="number" class="w-20 px-2 py-1 border border-slate-200 rounded" x-model.number="r.waitMs" /></td>
+                <td class="py-1.5 text-center"><input type="checkbox" x-model="r.ignore" /></td>
+                <td class="py-1.5 text-right"><button class="text-red-600 hover:underline" @click="routes.splice(i,1)">삭제</button></td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Cache -->
+      <section x-show="tab === 'cache'" class="bg-white rounded-lg shadow-sm border border-slate-200 p-5 space-y-4">
+        <h2 class="font-semibold">Cache</h2>
+        <pre class="text-xs bg-slate-50 p-3 rounded border border-slate-200" x-text="JSON.stringify(site?.cache, null, 2)"></pre>
+        <div class="flex gap-2 items-center">
+          <input type="text" class="flex-1 px-3 py-2 border border-slate-200 rounded" placeholder="https://www.example.com/path" x-model="invalidateUrl" />
+          <button class="px-3 py-2 text-sm rounded bg-amber-500 text-white hover:bg-amber-400" @click="invalidate()">URL 무효화</button>
+          <button class="px-3 py-2 text-sm rounded bg-red-500 text-white hover:bg-red-400" @click="confirmClear()">전체 초기화</button>
+        </div>
+        <div x-show="lastCacheResult" class="text-sm text-slate-700 bg-slate-50 p-2 rounded" x-text="lastCacheResult"></div>
+      </section>
+
+      <!-- Warm -->
+      <section x-show="tab === 'warm'" class="bg-white rounded-lg shadow-sm border border-slate-200 p-5 space-y-4">
+        <h2 class="font-semibold">Sitemap pre-warm</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+          <input class="md:col-span-3 px-3 py-2 border border-slate-200 rounded" placeholder="https://www.example.com/sitemap.xml" x-model="warm.sitemap" />
+          <input type="number" class="px-3 py-2 border border-slate-200 rounded" placeholder="max URLs (1000)" x-model.number="warm.max" />
+          <input type="number" class="px-3 py-2 border border-slate-200 rounded" placeholder="concurrency (4)" x-model.number="warm.concurrency" />
+          <button class="px-3 py-2 rounded bg-emerald-500 text-white hover:bg-emerald-400" @click="runWarm()" :disabled="warm.running">
+            <span x-show="!warm.running">시작</span>
+            <span x-show="warm.running">실행 중...</span>
+          </button>
+        </div>
+        <pre x-show="warm.result" class="text-xs bg-slate-50 p-3 rounded border border-slate-200" x-text="JSON.stringify(warm.result, null, 2)"></pre>
+      </section>
+
+      <!-- Render test -->
+      <section x-show="tab === 'test'" class="bg-white rounded-lg shadow-sm border border-slate-200 p-5 space-y-4">
+        <h2 class="font-semibold">Render test</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+          <input class="md:col-span-2 px-3 py-2 border border-slate-200 rounded" placeholder="대상 URL" x-model="renderTest.url" />
+          <input class="px-3 py-2 border border-slate-200 rounded" placeholder="UA (기본 Googlebot)" x-model="renderTest.ua" />
+        </div>
+        <button class="px-3 py-2 rounded bg-slate-900 text-white hover:bg-slate-700" @click="runRenderTest()" :disabled="renderTest.running">
+          <span x-show="!renderTest.running">렌더 실행</span>
+          <span x-show="renderTest.running">렌더 중...</span>
+        </button>
+        <div x-show="renderTest.result" class="space-y-2">
+          <div class="text-sm flex gap-4">
+            <span>status: <strong x-text="renderTest.result?.status"></strong></span>
+            <span>duration: <strong x-text="renderTest.result?.durationMs + ' ms'"></strong></span>
+            <span>bytes: <strong x-text="renderTest.result?.bytes"></strong></span>
+          </div>
+          <pre class="text-xs bg-slate-50 p-3 rounded border border-slate-200 max-h-96 overflow-auto" x-text="renderTest.result?.bodyPreview"></pre>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      function adminApp() {
+        return {
+          token: localStorage.getItem('seo-admin-token') || '',
+          tab: 'dashboard',
+          tabs: [
+            { id: 'dashboard', label: '대시보드' },
+            { id: 'routes', label: '라우트' },
+            { id: 'cache', label: '캐시' },
+            { id: 'warm', label: '워밍' },
+            { id: 'test', label: '렌더 테스트' },
+          ],
+          error: '',
+          site: null,
+          routes: [],
+          invalidateUrl: '',
+          lastCacheResult: '',
+          warm: { sitemap: '', max: 1000, concurrency: 4, running: false, result: null },
+          renderTest: { url: '', ua: '', running: false, result: null },
+
+          async api(method, path, body) {
+            const res = await fetch(path, {
+              method,
+              headers: {
+                'content-type': 'application/json',
+                'x-admin-token': this.token,
+              },
+              body: body ? JSON.stringify(body) : undefined,
+            });
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok) throw new Error(data.error || `${res.status} ${res.statusText}`);
+            return data;
+          },
+
+          async init() {
+            if (this.token) await this.loadAll();
+          },
+
+          async loadAll() {
+            this.error = '';
+            try {
+              localStorage.setItem('seo-admin-token', this.token);
+              const [siteRes, routesRes] = await Promise.all([
+                this.api('GET', '/admin/api/site'),
+                this.api('GET', '/admin/api/routes'),
+              ]);
+              this.site = siteRes;
+              this.routes = (routesRes.routes || []).map((r) => ({
+                pattern: r.pattern || '',
+                ttlMs: r.ttlMs ?? null,
+                waitUntil: r.waitUntil ?? '',
+                waitSelector: r.waitSelector ?? '',
+                waitMs: r.waitMs ?? null,
+                ignore: r.ignore ?? false,
+              }));
+            } catch (e) {
+              this.error = e.message;
+            }
+          },
+
+          dashboardCards() {
+            const s = this.site;
+            if (!s) return [];
+            return [
+              {
+                label: 'mode',
+                value: s.mode,
+                detail: s.origin || '(origin 미설정)',
+              },
+              {
+                label: 'routes',
+                value: s.site?.routes ?? 0,
+                detail: '런타임 활성',
+              },
+              {
+                label: 'cache',
+                value: `${Math.floor((s.cache?.ttlMs ?? 0) / 60_000)}m TTL`,
+                detail: `${s.cache?.swrMs ? Math.floor(s.cache.swrMs / 60_000) : 0}m SWR · redis ${s.cache?.redisEnabled ? 'ON' : 'OFF'}`,
+              },
+            ];
+          },
+
+          addRoute() {
+            this.routes.push({ pattern: '', ttlMs: null, waitUntil: '', waitSelector: '', waitMs: null, ignore: false });
+          },
+
+          async saveRoutes(persist) {
+            this.error = '';
+            try {
+              const cleaned = this.routes
+                .filter((r) => r.pattern)
+                .map((r) => ({
+                  pattern: r.pattern,
+                  ...(r.ttlMs ? { ttlMs: Number(r.ttlMs) } : {}),
+                  ...(r.waitUntil ? { waitUntil: r.waitUntil } : {}),
+                  ...(r.waitSelector ? { waitSelector: r.waitSelector } : {}),
+                  ...(r.waitMs ? { waitMs: Number(r.waitMs) } : {}),
+                  ...(r.ignore ? { ignore: true } : {}),
+                }));
+              await this.api('PUT', '/admin/api/routes', { routes: cleaned, persist });
+              alert(persist ? '저장 + 디스크 영구화 완료' : '메모리 저장 완료');
+            } catch (e) {
+              this.error = e.message;
+            }
+          },
+
+          async invalidate() {
+            this.lastCacheResult = '';
+            try {
+              const data = await this.api('POST', '/admin/api/cache/invalidate', { url: this.invalidateUrl });
+              this.lastCacheResult = `삭제됨: key=${data.key}`;
+            } catch (e) {
+              this.error = e.message;
+            }
+          },
+
+          async confirmClear() {
+            if (!confirm('캐시 전체를 삭제할까요?')) return;
+            try {
+              await this.api('POST', '/admin/api/cache/clear', {});
+              this.lastCacheResult = '캐시 전체 삭제됨';
+            } catch (e) {
+              this.error = e.message;
+            }
+          },
+
+          async runWarm() {
+            this.warm.running = true;
+            this.warm.result = null;
+            try {
+              const data = await this.api('POST', '/admin/api/warm', {
+                sitemap: this.warm.sitemap,
+                max: this.warm.max,
+                concurrency: this.warm.concurrency,
+              });
+              this.warm.result = data.report;
+            } catch (e) {
+              this.error = e.message;
+            } finally {
+              this.warm.running = false;
+            }
+          },
+
+          async runRenderTest() {
+            this.renderTest.running = true;
+            this.renderTest.result = null;
+            try {
+              this.renderTest.result = await this.api('POST', '/admin/api/render-test', {
+                url: this.renderTest.url,
+                ua: this.renderTest.ua || undefined,
+              });
+            } catch (e) {
+              this.error = e.message;
+            } finally {
+              this.renderTest.running = false;
+            }
+          },
+        };
+      }
+    </script>
+  </body>
+</html>

@@ -1,5 +1,5 @@
+import { optimizeHtml } from '@spa-seo-gateway/core';
 import { describe, expect, it } from 'vitest';
-import { optimizeHtml } from '../src/optimize.js';
 
 describe('optimizeHtml', () => {
   it('inserts prerender meta tags into head', () => {

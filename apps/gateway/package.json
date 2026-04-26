@@ -1,0 +1,27 @@
+{
+  "name": "@spa-seo-gateway/gateway",
+  "version": "1.0.0",
+  "description": "Runnable SEO gateway — composes core + admin-ui (single-tenant)",
+  "type": "module",
+  "main": "./dist/main.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "clean": "rm -rf dist",
+    "dev": "tsx watch src/main.ts",
+    "start": "node dist/main.js",
+    "check": "tsx scripts/check.ts"
+  },
+  "dependencies": {
+    "@fastify/compress": "^8.3.1",
+    "@fastify/cors": "^11.2.0",
+    "@fastify/http-proxy": "^11.4.4",
+    "@fastify/rate-limit": "^10.3.0",
+    "@spa-seo-gateway/admin-ui": "workspace:*",
+    "@spa-seo-gateway/core": "workspace:*",
+    "fastify": "^5.8.5"
+  },
+  "devDependencies": {
+    "tsx": "^4.21.0",
+    "typescript": "^6.0.3"
+  }
+}

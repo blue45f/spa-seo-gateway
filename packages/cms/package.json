@@ -1,0 +1,31 @@
+{
+  "name": "@spa-seo-gateway/cms",
+  "version": "0.1.0-alpha",
+  "description": "Multi-site CMS-style admin for spa-seo-gateway (option C, single-org with multiple sites)",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@spa-seo-gateway/admin-ui": "workspace:*",
+    "@spa-seo-gateway/core": "workspace:*",
+    "fastify": "^5.8.5",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.3"
+  }
+}
