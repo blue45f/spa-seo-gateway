@@ -16,7 +16,7 @@ afterEach(() => {
 });
 
 describe('Sidebar', () => {
-  it('renders all 14 nav items', () => {
+  it('renders all base nav items (no mode gates active)', () => {
     renderWithRouter(<Sidebar />);
     expect(screen.getByText('소개')).toBeInTheDocument();
     expect(screen.getByText('대시보드')).toBeInTheDocument();
@@ -24,6 +24,21 @@ describe('Sidebar', () => {
     expect(screen.getByText('시각 회귀')).toBeInTheDocument();
     expect(screen.getByText('AI Schema')).toBeInTheDocument();
     expect(screen.getByText('감사 로그')).toBeInTheDocument();
+    // mode-gated items hidden when mode unknown
+    expect(screen.queryByText('사이트 관리')).not.toBeInTheDocument();
+    expect(screen.queryByText('테넌트 관리')).not.toBeInTheDocument();
+  });
+
+  it('renders Sites tab only in cms mode', () => {
+    renderWithRouter(<Sidebar publicMode="cms" />);
+    expect(screen.getByText('사이트 관리')).toBeInTheDocument();
+    expect(screen.queryByText('테넌트 관리')).not.toBeInTheDocument();
+  });
+
+  it('renders Tenants tab only in saas mode', () => {
+    renderWithRouter(<Sidebar publicMode="saas" />);
+    expect(screen.getByText('테넌트 관리')).toBeInTheDocument();
+    expect(screen.queryByText('사이트 관리')).not.toBeInTheDocument();
   });
 
   it('shows public badge for public tabs only', () => {

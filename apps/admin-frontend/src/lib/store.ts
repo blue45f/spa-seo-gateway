@@ -3,7 +3,7 @@
  */
 import { create } from 'zustand';
 import { translate } from './i18n';
-import type { Lang, Theme, ToastItem, ToastKind } from './types';
+import type { Lang, PublicInfo, Theme, ToastItem, ToastKind } from './types';
 
 const TOUR_KEY = 'seo-admin-tour-seen';
 const THEME_KEY = 'seo-admin-theme';
@@ -43,11 +43,13 @@ type State = {
   tourStep: number;
   toasts: ToastItem[];
   globalError: string;
+  publicInfo: PublicInfo | null;
 };
 
 type Actions = {
   setAuthed(v: boolean): void;
   setAdminEnabled(v: boolean): void;
+  setPublicInfo(info: PublicInfo | null): void;
   toggleTheme(): void;
   toggleLang(): void;
   toggleSidebar(): void;
@@ -79,12 +81,16 @@ export const useStore = create<State & Actions>((set, get) => ({
   tourStep: 0,
   toasts: [],
   globalError: '',
+  publicInfo: null,
 
   setAuthed(v) {
     set({ authed: v });
   },
   setAdminEnabled(v) {
     set({ adminEnabled: v });
+  },
+  setPublicInfo(info) {
+    set({ publicInfo: info });
   },
 
   toggleTheme() {

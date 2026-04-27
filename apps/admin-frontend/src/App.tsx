@@ -18,6 +18,8 @@ import { Lighthouse } from './pages/Lighthouse';
 import { Metrics } from './pages/Metrics';
 import { RenderTest } from './pages/RenderTest';
 import { RoutesPage } from './pages/Routes';
+import { Sites } from './pages/Sites';
+import { Tenants } from './pages/Tenants';
 import { VisualDiff } from './pages/VisualDiff';
 import { Warm } from './pages/Warm';
 import { Welcome } from './pages/Welcome';
@@ -100,6 +102,8 @@ export function App() {
           <Route path="visual" element={<VisualDiff />} />
           <Route path="ai" element={<AiSchema />} />
           <Route path="audit" element={<AuditLog />} />
+          <Route path="sites" element={<Sites />} />
+          <Route path="tenants" element={<Tenants />} />
           <Route path="api" element={<ApiExplorer />} />
           <Route path="library" element={<Library />} />
           <Route path="help" element={<Help />} />

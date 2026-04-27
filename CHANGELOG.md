@@ -2,6 +2,37 @@
 
 날짜는 한국 시간(KST). 모든 커밋은 [GitHub history](https://github.com/blue45f/spa-seo-gateway/commits/main) 참고.
 
+## v1.9.0 — 2026-04-27
+
+CMS / SaaS 모드 전용 GUI 추가 — 단일 사이트 관리에 한정되어 있던 admin UI 가 다중 사이트 / 다중 테넌트도 직접 관리 가능.
+
+### Added
+- **Sites 탭** (CMS 모드 전용) — `/admin/ui/sites`:
+  - 사이트 목록, +추가/편집/삭제 모달 폼 (id/name/origin/webhook/enabled)
+  - 행별 [URL 무효화] / [Sitemap 워밍] / [편집] / [삭제] 액션
+  - 백엔드 endpoint: `/admin/api/sites` (GET/POST), `/admin/api/sites/:id` (DELETE), `/admin/api/sites/:id/cache/invalidate`, `/admin/api/sites/:id/warm`
+- **Tenants 탭** (SaaS 모드 전용) — `/admin/ui/tenants`:
+  - 테넌트 목록, +추가/편집/삭제 모달 폼 (id/name/origin/apiKey/plan/enabled)
+  - **API key 자동 생성** (`crypto.getRandomValues`, `tk_live_<40 hex>`) + 수동 [생성] 버튼
+  - 마스킹 표시 + [복사] 버튼 → 클립보드, plan pill (free/pro/enterprise 색상 구분)
+- **Mode-conditional nav 시스템** — `nav.ts` 의 `modes?: GatewayMode[]` 필드로 사이드바 / router / cmd palette 가 `publicInfo.mode` 기준 자동 필터.
+  - cms 모드 → Sites 만, saas 모드 → Tenants 만 노출. render-only / proxy 모드에선 둘 다 숨김.
+- **`Modal` 공용 컴포넌트**: Sites/Tenants form 공유, ESC + backdrop 닫기, size variant.
+- **store.publicInfo**: zustand 로 publicInfo 글로벌화. Layout 이 한 번 fetch 후 모든 컴포넌트가 read.
+
+### Tests
+- 신규 18건 (frontend 117 / server 159 = **276 통과**):
+  - `lib/nav`: 7건 — 16탭 카운트, modes 필드, visibleForMode 분기, mode-filter i18n
+  - `pages/Sites`: 4건 — 목록/+추가/저장 POST/삭제 confirm
+  - `pages/Tenants`: 5건 — `generateApiKey` 형식/유일성, 마스킹, 자동/재생성, 저장 POST
+  - `components/Sidebar`: 2건 — mode-conditional 렌더
+
+### Fixed
+- **CMS / multi-tenant 가 admin-ui 쿠키를 받지 않던 문제**: 두 패키지의 `guardAdmin` 이 `x-admin-token` 헤더만 검사해 admin UI 의 쿠키 로그인 후 사이트/테넌트 CRUD 가 401. 이제 `seo-admin` httpOnly 쿠키도 동등하게 허용. 헤더 토큰은 legacy 호환으로 유지.
+
+### Bumps
+- core / admin-ui / multi-tenant / cms → 1.9.0
+
 ## v1.8.1 — 2026-04-27
 
 ### Fixed

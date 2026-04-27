@@ -129,3 +129,52 @@ export type ToastItem = {
 
 export type Lang = 'ko' | 'en';
 export type Theme = 'light' | 'dark';
+
+// ─────────── CMS / SaaS shared route entry (subset of core's RouteOverride) ───────────
+export type ScopedRoute = {
+  pattern: string;
+  ttlMs?: number;
+  waitUntil?: 'load' | 'domcontentloaded' | 'networkidle0' | 'networkidle2';
+  waitSelector?: string;
+  waitMs?: number;
+  ignore?: boolean;
+};
+
+// ─────────── CMS — Site ───────────
+export type Site = {
+  id: string;
+  name: string;
+  origin: string;
+  routes: ScopedRoute[];
+  enabled: boolean;
+  webhooks?: { onRender?: string; onError?: string };
+  createdAt?: number;
+};
+
+export type CmsStats = {
+  ok: true;
+  count: number;
+  enabled: number;
+  cache: CacheStats;
+};
+
+// ─────────── SaaS — Tenant ───────────
+export type TenantPlan = 'free' | 'pro' | 'enterprise';
+
+export type Tenant = {
+  id: string;
+  name: string;
+  origin: string;
+  apiKey: string;
+  routes: ScopedRoute[];
+  plan: TenantPlan;
+  enabled: boolean;
+  createdAt?: number;
+};
+
+export type MultiTenantStats = {
+  ok: true;
+  count: number;
+  byPlan: Record<TenantPlan, number>;
+  enabled: number;
+};

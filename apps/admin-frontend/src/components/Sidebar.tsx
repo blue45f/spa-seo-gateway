@@ -1,10 +1,10 @@
 import { Link, useLocation } from 'react-router-dom';
 import { api } from '../lib/api';
-import { type NavItem, navItemsForLang } from '../lib/nav';
+import { type GatewayMode, type NavItem, navItemsForLang } from '../lib/nav';
 import { useStore } from '../lib/store';
 
 type SidebarProps = {
-  publicMode?: string;
+  publicMode?: GatewayMode;
 };
 
 export function Sidebar({ publicMode }: SidebarProps) {
@@ -18,7 +18,10 @@ export function Sidebar({ publicMode }: SidebarProps) {
   const setAuthed = useStore((s) => s.setAuthed);
   const pushToast = useStore((s) => s.pushToast);
 
-  const items: Array<NavItem & { label: string; subtitle: string }> = navItemsForLang(lang);
+  const items: Array<NavItem & { label: string; subtitle: string }> = navItemsForLang(
+    lang,
+    publicMode,
+  );
   const location = useLocation();
 
   function isActive(path: string) {

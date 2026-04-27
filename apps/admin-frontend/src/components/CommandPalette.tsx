@@ -7,6 +7,7 @@ export function CommandPalette() {
   const open = useStore((s) => s.cmdPaletteOpen);
   const close = useStore((s) => s.closeCmd);
   const lang = useStore((s) => s.lang);
+  const mode = useStore((s) => s.publicInfo?.mode);
   const t = useStore((s) => s.t);
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
@@ -15,7 +16,7 @@ export function CommandPalette() {
     if (open) setQuery('');
   }, [open]);
 
-  const items = useMemo(() => navItemsForLang(lang), [lang]);
+  const items = useMemo(() => navItemsForLang(lang, mode), [lang, mode]);
   const filtered = useMemo(() => {
     const q = query.toLowerCase().trim();
     if (!q) return items;

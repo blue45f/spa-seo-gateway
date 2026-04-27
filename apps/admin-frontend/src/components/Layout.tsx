@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { api } from '../lib/api';
 import { useStore } from '../lib/store';
@@ -8,7 +8,8 @@ import { MobileMenu } from './MobileMenu';
 import { Sidebar } from './Sidebar';
 
 export function Layout() {
-  const [publicInfo, setPublicInfo] = useState<PublicInfo | null>(null);
+  const publicInfo = useStore((s) => s.publicInfo);
+  const setPublicInfo = useStore((s) => s.setPublicInfo);
   const setSidebarOpen = useStore((s) => s.setSidebarOpen);
   const location = useLocation();
 
@@ -31,7 +32,7 @@ export function Layout() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [setPublicInfo]);
 
   return (
     <div
@@ -44,7 +45,7 @@ export function Layout() {
       }}
     >
       <MobileMenu />
-      <Sidebar publicMode={publicInfo?.mode} />
+      <Sidebar publicMode={publicInfo?.mode ?? undefined} />
       <div className="flex-1 flex flex-col min-w-0 md:ml-0 ml-0">
         <Header />
         <main className="flex-1 p-6 max-w-7xl w-full mx-auto space-y-6">

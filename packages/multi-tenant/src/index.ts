@@ -234,12 +234,27 @@ export async function registerMultiTenant(
       reply.code(404).send({ error: 'admin disabled' });
       return false;
     }
-    if (req.headers['x-admin-token'] !== adminToken) {
-      reply.code(401).send({ error: 'unauthorized' });
-      return false;
-    }
-    return true;
+    // 헤더 토큰 (legacy) 또는 admin-ui 가 발급한 `seo-admin` httpOnly 쿠키 둘 다 허용.
+    const headerToken = req.headers['x-admin-token'];
+    if (headerToken === adminToken) return true;
+    const cookieToken = readCookie(req, 'seo-admin');
+    if (cookieToken === adminToken) return true;
+    reply.code(401).send({ error: 'unauthorized' });
+    return false;
   };
+
+  function readCookie(req: FastifyRequest, name: string): string | undefined {
+    const c = req.headers.cookie;
+    if (!c) return undefined;
+    for (const part of c.split(';')) {
+      const idx = part.indexOf('=');
+      if (idx < 0) continue;
+      if (part.slice(0, idx).trim() === name) {
+        return decodeURIComponent(part.slice(idx + 1).trim());
+      }
+    }
+    return undefined;
+  }
 
   // ── tenant CRUD ─────────────────────────────────────────────────────
   app.get('/admin/api/tenants', async (req, reply) => {
