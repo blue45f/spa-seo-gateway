@@ -2,6 +2,22 @@
 
 날짜는 한국 시간(KST). 모든 커밋은 [GitHub history](https://github.com/blue45f/spa-seo-gateway/commits/main) 참고.
 
+## v1.8.1 — 2026-04-27
+
+### Fixed
+- **SPA fallback 500 → 200**: `staticPlugin` 의 `decorateReply: false` 와 `reply.sendFile` 호출이 충돌해 `/admin/ui/<deep-link>` 직접 접근 시 500 이 발생. `readFile` 로 직접 본문을 응답하도록 변경.
+
+### Added
+- **SPA hosting 통합 테스트 11건** (`tests/admin-ui-spa.test.ts`):
+  - public/ 빌드 산출물 존재 검증, index.html 의 React root + asset 경로 패턴 검사
+  - `/admin/ui` 리다이렉트, `/admin/ui/` 200 + HTML, deep-link SPA fallback (4종 경로)
+  - hashed JS/CSS 자산 200 + 정확한 content-type, 존재하지 않는 자산은 404
+  - `/admin/api/public/info` 인증 없이 동작, `/admin/api/whoami` 미인증 보고
+- 실제 게이트웨이 부팅 + curl 검증 완료: 로그인 쿠키, `/admin/api/site`, `/admin/api/audit/verify` 모두 정상.
+
+### Internal
+- 159 server + 99 frontend = **258 테스트 통과**, 10 패키지 빌드 green.
+
 ## v1.8.0 — 2026-04-27
 
 🎉 **메이저 아키텍처 변경**: Admin UI 를 Alpine.js + Tailwind CDN 단일 HTML 에서 Vite + React 19 + TypeScript 기반 정식 SPA 로 전면 재작성. 백엔드(Fastify 플러그인) 와 프론트엔드가 패키지 수준에서 분리됨.

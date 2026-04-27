@@ -1,6 +1,6 @@
 {
   "name": "@heejun/spa-seo-gateway-admin-ui",
-  "version": "1.8.0",
+  "version": "1.8.1",
   "description": "Embedded admin dashboard for spa-seo-gateway (Fastify plugin serving Vite + React SPA)",
   "type": "module",
   "main": "./dist/index.js",

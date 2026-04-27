@@ -1,3 +1,4 @@
+import { readFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import staticPlugin from '@fastify/static';
@@ -121,14 +122,20 @@ export async function registerAdminUI(
   app.get(`${prefix}`, (_req, reply) => reply.redirect(`${prefix}/`));
 
   // SPA fallback — staticPlugin 의 wildcard 가 비활성화되어 있어 자산/index.html 외에는 직접 처리.
-  app.get(`${prefix}/*`, (req, reply) => {
+  // decorateReply: false 라 reply.sendFile 미사용 → 파일을 직접 읽어 본문으로 응답.
+  const indexHtmlPath = resolve(publicRoot, 'index.html');
+  app.get(`${prefix}/*`, async (req, reply) => {
     const url = req.url;
-    // 자산 파일 (확장자 있음) 인데 매칭 안 됨 → 진짜 404
     if (/\.[a-z0-9]{2,5}(\?|$)/.test(url)) {
       reply.code(404).send({ error: 'not found' });
       return;
     }
-    reply.type('text/html').sendFile('index.html', publicRoot);
+    try {
+      const html = await readFile(indexHtmlPath, 'utf8');
+      reply.type('text/html; charset=utf-8').send(html);
+    } catch (e) {
+      reply.code(500).send({ error: `admin SPA not built: ${(e as Error).message}` });
+    }
   });
 
   // Public info — Welcome 페이지에서 인증 없이 사용. 민감 정보 제외.
