@@ -197,9 +197,26 @@ curl -X POST https://gateway.example.com/admin/api/multi-tenant/cache/clear \
 - **Origin 강제**: 들어온 URL 이 테넌트의 origin host 와 다르면 403 (cross-tenant 노출 방지)
 - **API key**: 캐시 무효화 외에는 사용처 없음. 빌링용 식별자는 별도 시스템에서
 
+## 어드민 UI 통합 (v1.9+)
+
+게이트웨이를 `saas` 모드로 띄우면 `/admin/ui` 사이드바에 **Tenants** 탭이 자동으로 노출됩니다 (`publicInfo.mode === 'saas'` 일 때만).
+
+**Tenants 탭 (`/admin/ui/tenants`)** 에서 가능한 작업:
+- **테넌트 목록**: id / name / origin / plan (free·pro·enterprise pill) / API key (마스킹 + [복사]) / enabled
+- **+ 추가**: 모달이 `crypto.getRandomValues` 로 안전한 API key (`tk_live_<40 hex>`) 자동 발급. id/name/origin/plan/enabled 만 채우면 됨. [생성] 버튼으로 키 재발급 가능
+- **편집 / 삭제**: 행별 액션. 삭제는 confirm 으로 보호되며 테넌트 캐시 네임스페이스도 정리
+- **마스터 admin 인증**: admin-ui 쿠키 (`POST /admin/api/login` 으로 발급되는 `seo-admin` httpOnly 쿠키) 또는 `x-admin-token` 헤더 모두 허용
+
+테넌트 자기 자신의 캐시 무효화는 별도로 (운영 모드에서 외부 고객이 사용):
+```bash
+curl -X POST -H "x-api-key: tk_live_..." -H "content-type: application/json" \
+  -d '{"url":"https://www.acme.com/posts/1"}' \
+  http://localhost:3000/api/cache/invalidate
+```
+
 ## 한계 & 향후 마일스톤
 
 - DB 어댑터 미제공 (현재는 JSON 파일). Postgres/Drizzle 어댑터는 PR 환영
 - 빌링/사용량 측정 없음 (Stripe 통합은 별도 SDK 권장)
-- 로그인 UI 없음 (apiKey 기반만). per-tenant 어드민 UI 는 옵션 C(`cms`) 와 통합 예정
 - 테넌트별 quota / 동시성 분리 없음 (모든 테넌트가 같은 풀 공유)
+- 테넌트별 routes 인라인 편집 GUI 미제공 — `/admin/api/tenants` POST 로 배열 통째 수정 (다음 마일스톤)

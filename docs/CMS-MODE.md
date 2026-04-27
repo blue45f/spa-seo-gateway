@@ -161,16 +161,26 @@ server {
 
 ---
 
-## 어드민 UI 통합 (현재 제약)
+## 어드민 UI 통합 (v1.9+)
 
-`/admin/ui` 의 어드민 UI 는 단일 사이트 관리용입니다 (옵션 A 디자인). `cms` 모드에서도 사용 가능하지만 기본 사이트 컨텍스트 내에서만 동작. 사이트 셀렉터는 다음 마일스톤에서 추가될 예정.
+게이트웨이를 `cms` 모드로 띄우면 `/admin/ui` 의 사이드바에 **Sites** 탭이 자동으로 노출됩니다 (`publicInfo.mode === 'cms'` 일 때만). 더 이상 curl 로만 사이트를 관리할 필요 없음.
 
-지금은 사이트별 운영을 위해서:
-- **사이트 추가/조회/삭제**: 위의 curl 명령어 (또는 Postman / HTTPie)
-- **각 사이트의 라우트 편집**: 위의 `/admin/api/sites` POST 로 routes 배열 통째로 수정
-- **사이트별 캐시 무효화**: `/admin/api/sites/:id/cache/invalidate`
+**Sites 탭 (`/admin/ui/sites`)** 에서 가능한 작업:
+- **사이트 목록**: id / name / origin / routes count / enabled 한 화면에서 확인
+- **+ 추가**: 모달 폼에 id (소문자/숫자/-/_), name, origin URL, webhook (선택), enabled 입력 → 저장
+- **편집 / 삭제**: 행별 액션. 삭제는 confirm 으로 보호되며 캐시 네임스페이스도 자동 정리
+- **URL 무효화**: 행 액션에서 단일 URL 입력 → `POST /admin/api/sites/:id/cache/invalidate`
+- **Sitemap 워밍**: 행 [Sitemap 워밍] 클릭 → `POST /admin/api/sites/:id/warm` (max 500)
 
-향후 어드민 UI 가 사이트 셀렉터를 지원하면 GUI 로 모두 가능해질 예정.
+라우트 편집은 v1.9 시점에서는 여전히 `/admin/api/sites` POST 로 routes 배열을 통째로 수정 (사이트별 routes 인라인 편집 GUI 는 다음 마일스톤). curl 로 routes 만 갱신하려면:
+
+```bash
+curl -X POST -H "x-admin-token: $T" -H "content-type: application/json" \
+  -d '{"id":"docs","name":"Docs","origin":"https://docs.example.com","routes":[{"pattern":"^/$","ttlMs":3600000}],"enabled":true}' \
+  http://localhost:3000/admin/api/sites
+```
+
+> **인증 메모**: admin UI 의 쿠키 로그인 (`POST /admin/api/login` 이 `seo-admin` httpOnly 쿠키 발급) 으로 모든 `/admin/api/sites/*` 도 호출 가능. 헤더 `x-admin-token` 도 legacy 호환으로 유지.
 
 ---
 
