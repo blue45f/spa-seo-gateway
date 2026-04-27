@@ -1,4 +1,5 @@
 import { type FormEvent, useCallback, useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { AuthGate } from '../components/AuthGate';
 import { Modal } from '../components/Modal';
 import { api, ApiError } from '../lib/api';
@@ -149,7 +150,14 @@ function TenantsBody() {
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {tenants.map((tn) => (
                 <tr key={tn.id} className="hover:bg-slate-50 dark:hover:bg-slate-800">
-                  <td className="px-3 py-2 font-mono text-xs">{tn.id}</td>
+                  <td className="px-3 py-2 font-mono text-xs">
+                    <Link
+                      to={`/tenants/${encodeURIComponent(tn.id)}`}
+                      className="text-indigo-600 hover:underline"
+                    >
+                      {tn.id}
+                    </Link>
+                  </td>
                   <td className="px-3 py-2">{tn.name}</td>
                   <td className="px-3 py-2 truncate max-w-xs">
                     <a

@@ -1,4 +1,5 @@
 import { type FormEvent, useCallback, useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { AuthGate } from '../components/AuthGate';
 import { Modal } from '../components/Modal';
 import { api, ApiError } from '../lib/api';
@@ -141,7 +142,14 @@ function SitesBody() {
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {sites.map((s) => (
                 <tr key={s.id} className="hover:bg-slate-50 dark:hover:bg-slate-800">
-                  <td className="px-3 py-2 font-mono text-xs">{s.id}</td>
+                  <td className="px-3 py-2 font-mono text-xs">
+                    <Link
+                      to={`/sites/${encodeURIComponent(s.id)}`}
+                      className="text-indigo-600 hover:underline"
+                    >
+                      {s.id}
+                    </Link>
+                  </td>
                   <td className="px-3 py-2">{s.name}</td>
                   <td className="px-3 py-2 truncate max-w-xs">
                     <a
@@ -153,7 +161,15 @@ function SitesBody() {
                       {s.origin}
                     </a>
                   </td>
-                  <td className="px-3 py-2 text-right font-mono text-xs">{s.routes.length}</td>
+                  <td className="px-3 py-2 text-right font-mono text-xs">
+                    <Link
+                      to={`/sites/${encodeURIComponent(s.id)}`}
+                      className="text-indigo-600 hover:underline"
+                      title={t('sites.detail.routes')}
+                    >
+                      {s.routes.length}
+                    </Link>
+                  </td>
                   <td className="px-3 py-2 text-center">
                     <span
                       className={`px-1.5 py-0.5 rounded text-xs ${s.enabled ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-300'}`}

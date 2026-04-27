@@ -2,6 +2,33 @@
 
 날짜는 한국 시간(KST). 모든 커밋은 [GitHub history](https://github.com/blue45f/spa-seo-gateway/commits/main) 참고.
 
+## v1.10.0 — 2026-04-27
+
+per-site / per-tenant 상세 + routes 인라인 편집 GUI 추가. Sites/Tenants 목록의 ID 를 클릭하면 상세 페이지로 이동, 메타데이터 + routes 한 화면에서 편집/저장.
+
+### Added
+- **`/admin/ui/sites/:id`** (CMS) — `pages/SiteDetail.tsx`:
+  - 메타데이터 (name/origin/webhook/enabled) 인라인 편집
+  - 사이트별 routes 추가/삭제/드래그 리오더/필터/셀 단위 편집
+  - ⌘/Ctrl + S 저장, [목록으로] 링크
+- **`/admin/ui/tenants/:id`** (SaaS) — `pages/TenantDetail.tsx`:
+  - 메타데이터 (name/origin/plan/enabled) 인라인 편집
+  - **API key 회전 버튼** — confirm 후 `crypto.getRandomValues` 로 새 키 발급 + 토스트 안내 (저장 전엔 미적용)
+  - [복사] 버튼 (clipboard) + 마스킹 없이 전체 표시 (관리자 화면이므로)
+  - 테넌트별 routes 인라인 편집
+- **`components/RoutesEditor.tsx`** — 글로벌 Routes / SiteDetail / TenantDetail 가 공유하는 controlled component. 드래그 리오더, 필터, 추가/삭제/셀 편집을 한 곳에서 정의.
+- Sites/Tenants 목록의 ID 컬럼이 상세 페이지로 이동하는 라우터 링크.
+- 7건 신규 테스트 (`SiteDetail` 3건, `TenantDetail` 4건) — load/notFound/save POST/apiKey rotation.
+
+### Changed
+- 기존 `pages/Routes.tsx` 의 routes 테이블 인라인 코드를 `RoutesEditor` 호출로 교체. 동작/단축키/UX 동일.
+
+### Tests
+- 159 server + 124 frontend = **283 passing** (이전 276 + 7).
+
+### Bumps
+- admin-ui → 1.10.0 (frontend SPA + plugin 변경)
+
 ## v1.9.0 — 2026-04-27
 
 CMS / SaaS 모드 전용 GUI 추가 — 단일 사이트 관리에 한정되어 있던 admin UI 가 다중 사이트 / 다중 테넌트도 직접 관리 가능.

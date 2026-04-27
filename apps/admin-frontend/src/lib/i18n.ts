@@ -207,6 +207,10 @@ const ko: Strings = {
   'sites.form.save': '저장',
   'sites.delete.confirm': '정말 사이트를 삭제할까요? 영구적이며 캐시도 함께 정리됩니다.',
   'sites.invalidate.prompt': '무효화할 URL 을 입력하세요',
+  'sites.detail.metadata': '메타데이터',
+  'sites.detail.routes': '라우트 오버라이드 (사이트별)',
+  'sites.detail.notFound': '존재하지 않는 사이트입니다.',
+  'sites.detail.back': '← 목록으로',
 
   // Tenants (SaaS)
   'tenants.title': '테넌트 관리 — SaaS 모드',
@@ -233,6 +237,12 @@ const ko: Strings = {
   'tenants.delete.confirm': '정말 테넌트를 삭제할까요? 영구적이며 캐시도 함께 정리됩니다.',
   'tenants.copy': '복사',
   'tenants.copied': '클립보드에 복사됨',
+  'tenants.detail.metadata': '메타데이터',
+  'tenants.detail.routes': '라우트 오버라이드 (테넌트별)',
+  'tenants.detail.notFound': '존재하지 않는 테넌트입니다.',
+  'tenants.detail.back': '← 목록으로',
+  'tenants.detail.rotate': 'API key 회전',
+  'tenants.detail.rotate.confirm': 'API key 를 새로 발급할까요? 이전 키는 즉시 무효화됩니다.',
 
   // Help
   'help.title': '도움말 — 자주 묻는 질문',
@@ -452,6 +462,10 @@ const en: Strings = {
   'sites.delete.confirm':
     'Delete this site? The action is permanent and clears its cache namespace.',
   'sites.invalidate.prompt': 'URL to invalidate',
+  'sites.detail.metadata': 'Metadata',
+  'sites.detail.routes': 'Route overrides (per-site)',
+  'sites.detail.notFound': 'Site not found.',
+  'sites.detail.back': '← Back to list',
 
   // Tenants (SaaS)
   'tenants.title': 'Tenants — SaaS mode',
@@ -480,6 +494,13 @@ const en: Strings = {
     'Delete this tenant? The action is permanent and clears its cache namespace.',
   'tenants.copy': 'Copy',
   'tenants.copied': 'Copied to clipboard',
+  'tenants.detail.metadata': 'Metadata',
+  'tenants.detail.routes': 'Route overrides (per-tenant)',
+  'tenants.detail.notFound': 'Tenant not found.',
+  'tenants.detail.back': '← Back to list',
+  'tenants.detail.rotate': 'Rotate API key',
+  'tenants.detail.rotate.confirm':
+    'Issue a new API key? The previous key is invalidated immediately.',
 
   // Help
   'help.title': 'Help — frequently asked questions',
