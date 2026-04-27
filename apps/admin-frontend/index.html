@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>spa-seo-gateway · admin</title>
+    <link rel="icon" href="data:," />
+    <script>
+      // FOUC 방지 — paint 전에 다크 클래스 복원
+      try {
+        const saved = localStorage.getItem('seo-admin-theme');
+        if (saved === 'dark' || (saved === null && matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.documentElement.classList.add('dark');
+        }
+      } catch {}
+    </script>
+  </head>
+  <body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 min-h-screen">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

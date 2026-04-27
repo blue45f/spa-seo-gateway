@@ -2,6 +2,40 @@
 
 날짜는 한국 시간(KST). 모든 커밋은 [GitHub history](https://github.com/blue45f/spa-seo-gateway/commits/main) 참고.
 
+## v1.8.0 — 2026-04-27
+
+🎉 **메이저 아키텍처 변경**: Admin UI 를 Alpine.js + Tailwind CDN 단일 HTML 에서 Vite + React 19 + TypeScript 기반 정식 SPA 로 전면 재작성. 백엔드(Fastify 플러그인) 와 프론트엔드가 패키지 수준에서 분리됨.
+
+### Added
+- **`apps/admin-frontend`** (신규 워크스페이스): Vite 8 + React 19 + Tailwind v4 + react-router 7 + Zustand 5 기반 admin SPA. `pnpm --filter @spa-seo-gateway/admin-frontend run dev` 로 별도 dev server 가능.
+- **vitest + @testing-library/react 99건** 신규 프론트엔드 테스트:
+  - `lib/`: api · i18n · metrics parser · format · store · nav (44건)
+  - `components/`: Sidebar · CommandPalette · ToastContainer · AuthGate (16건)
+  - `pages/`: Welcome · Dashboard · Routes · Cache · Warm · RenderTest · Metrics · Lighthouse · VisualDiff · AiSchema · AuditLog · ApiExplorer · Library · Help (39건)
+- **모든 14개 탭 100% 포팅** — 디테일 누락 없이 동등 기능:
+  - 사이드바 + 14탭 라우팅, command palette (⌘/Ctrl+K), shortcuts modal (?), 첫 방문 투어
+  - 다크모드 (FOUC 방지 inline script + class strategy), KO/EN i18n
+  - 쿠키 기반 인증 + AuthGate 컴포넌트, 글로벌 토스트 시스템
+  - 라우트 드래그 리오더, ⌘S 저장, 라우트 필터
+  - Prometheus 메트릭 파싱 + 5초 자동 갱신, p50/p95/p99 히스토그램
+  - Visual diff baseline 모드 (auto/create/compare), AI schema (Anthropic + OpenAI 양쪽 가이드), audit chain 검증
+
+### Changed
+- **`packages/admin-ui`** 는 Fastify 플러그인 + 빌드된 SPA 호스팅 역할로 슬림화 — Alpine.js 단일 HTML 제거.
+- 빌드 파이프라인: `admin-ui` 의 build 가 `admin-frontend` 의 Vite build 를 먼저 실행, 산출물을 `packages/admin-ui/public/` 로 자동 배치 (npm publish 그대로 호환).
+- `BrowserRouter basename` 을 런타임에 자동 감지 — 게이트웨이 임베드 (`/admin/ui`) 와 정적 데모 (`/`) 모두 지원.
+- `apps/demo` 의 build script 가 새 Vite 산출물을 복사하고 base 경로를 재작성 + 알림 배너 주입.
+- 루트 `pnpm test` 가 server tests 와 frontend tests 둘 다 실행하도록 갱신.
+- staticPlugin 의 wildcard 를 비활성화하고 명시적 SPA fallback 라우트로 `/admin/ui/<path>` 직접 접근에서도 client router 가 해석 가능.
+
+### Internal
+- 10 패키지 빌드 green · server 148/148 · frontend 99/99 = **총 247 테스트 통과**.
+- React 19, Vite 8, Tailwind v4, vitest 4.1, react-router 7 — 모두 최신 안정 버전.
+
+### Migration
+- 기존 `@heejun/spa-seo-gateway-admin-ui` 사용자: 변경 없음 — `registerAdminUI(app)` API 그대로. 내부 구현만 React SPA 로 교체됨.
+- 정적 자산 경로가 hash-suffixed 로 바뀜 (`/admin/ui/assets/index-<hash>.js`) — CSP / proxy 설정 시 `/admin/ui/assets/*` 허용 필요.
+
 ## v1.7.2 — 2026-04-27
 
 OpenAI-compatible 어댑터 패키지 추가 — Anthropic 자매. resume 프로젝트의 multi-provider 패턴 참고.

@@ -1,7 +1,7 @@
 {
   "name": "@heejun/spa-seo-gateway-admin-ui",
-  "version": "1.7.2",
-  "description": "Embedded admin dashboard for spa-seo-gateway (Fastify plugin + static SPA)",
+  "version": "1.8.0",
+  "description": "Embedded admin dashboard for spa-seo-gateway (Fastify plugin serving Vite + React SPA)",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -17,8 +17,8 @@
     "README.md"
   ],
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
-    "clean": "rm -rf dist"
+    "build": "pnpm --filter @spa-seo-gateway/admin-frontend run build && tsc -p tsconfig.build.json",
+    "clean": "rm -rf dist public/assets public/index.html"
   },
   "dependencies": {
     "@fastify/static": "^9.1.3",

@@ -105,15 +105,31 @@ export async function registerAdminUI(
       .send({ ok: true });
   });
 
+  // packages/admin-ui/public 에는 apps/admin-frontend 의 Vite build 산출물이 들어 있다.
+  // (개발 시는 admin-frontend/ 에서 `pnpm dev` 실행, build 시 Vite outDir 가 여기를 가리킴.)
+  // wildcard: false 로 두고 SPA fallback 을 직접 제어 — client-side router 가 /admin/ui/<path>
+  // 직접 접근에서도 동작하도록 index.html 을 반환.
   const publicRoot = resolve(__dirname, '../public');
   await app.register(staticPlugin, {
     root: publicRoot,
     prefix: `${prefix}/`,
     decorateReply: false,
     cacheControl: false,
+    wildcard: false,
   });
 
   app.get(`${prefix}`, (_req, reply) => reply.redirect(`${prefix}/`));
+
+  // SPA fallback — staticPlugin 의 wildcard 가 비활성화되어 있어 자산/index.html 외에는 직접 처리.
+  app.get(`${prefix}/*`, (req, reply) => {
+    const url = req.url;
+    // 자산 파일 (확장자 있음) 인데 매칭 안 됨 → 진짜 404
+    if (/\.[a-z0-9]{2,5}(\?|$)/.test(url)) {
+      reply.code(404).send({ error: 'not found' });
+      return;
+    }
+    reply.type('text/html').sendFile('index.html', publicRoot);
+  });
 
   // Public info — Welcome 페이지에서 인증 없이 사용. 민감 정보 제외.
   app.get('/admin/api/public/info', () => ({

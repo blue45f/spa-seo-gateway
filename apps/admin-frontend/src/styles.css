@@ -1,0 +1,57 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: ui-sans-serif, -apple-system, system-ui, sans-serif;
+}
+
+@layer utilities {
+  [x-cloak] { display: none !important; }
+  pre { white-space: pre-wrap; word-break: break-word; }
+}
+
+/* Sidebar nav active state */
+.nav-item {
+  transition: all 120ms;
+}
+.nav-item.active {
+  background: rgb(15 23 42);
+  color: white;
+}
+.dark .nav-item.active {
+  background: rgb(99 102 241);
+}
+
+/* Toast animations */
+.toast-enter {
+  animation: slide-in 200ms ease-out;
+}
+.toast-exit {
+  animation: slide-out 200ms ease-in forwards;
+}
+@keyframes slide-in {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+@keyframes slide-out {
+  to { transform: translateY(20px); opacity: 0; }
+}
+
+/* Drag-reorder feedback */
+.drag-row.dragging {
+  opacity: 0.4;
+}
+.drag-row.drag-over {
+  border-top: 2px solid rgb(99 102 241);
+}
+
+/* Mobile sidebar slide */
+@media (max-width: 768px) {
+  aside.collapsed {
+    transform: translateX(-100%);
+  }
+  aside {
+    transition: transform 200ms;
+  }
+}

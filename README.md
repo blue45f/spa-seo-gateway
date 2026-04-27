@@ -1,6 +1,6 @@
 # spa-seo-gateway
 
-[![npm](https://img.shields.io/npm/v/@heejun/spa-seo-gateway-core?label=%40heejun%2Fspa-seo-gateway-core)](https://www.npmjs.com/package/@heejun/spa-seo-gateway-core) [![tests](https://img.shields.io/badge/tests-148%20passing-brightgreen)](https://github.com/blue45f/spa-seo-gateway/tree/main/tests) [![license](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+[![npm](https://img.shields.io/npm/v/@heejun/spa-seo-gateway-core?label=%40heejun%2Fspa-seo-gateway-core)](https://www.npmjs.com/package/@heejun/spa-seo-gateway-core) [![tests](https://img.shields.io/badge/tests-247%20passing-brightgreen)](https://github.com/blue45f/spa-seo-gateway/tree/main/tests) [![license](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
 SPA(React/Vue/Svelte 등) 가 만드는 **동적 콘텐츠를 봇이 요청한 시점에 헤드리스 Chromium 으로 실시간 렌더링** 해 봇에게는 완성된 HTML, 사람에게는 원본 SPA 를 그대로 전달하는 **고성능·범용 다이내믹 렌더링 게이트웨이**. 캐시·SWR·자동 워밍은 부가 최적화 — 본질은 봇 접근 시점의 on-demand 렌더링입니다.
 
@@ -61,7 +61,9 @@ spa-seo-gateway/
 │   ├── anthropic/     @heejun/spa-seo-gateway-anthropic    — Claude AI schema 어댑터 (옵션)
 │   └── openai/        @heejun/spa-seo-gateway-openai       — OpenAI/Groq/Ollama 어댑터 (옵션)
 ├── apps/
-│   └── gateway/       실행 가능한 단일 바이너리
+│   ├── gateway/       실행 가능한 단일 바이너리
+│   ├── admin-frontend Vite + React 19 + Tailwind v4 admin SPA — admin-ui 가 빌드 산출물을 서빙
+│   └── demo/          Vercel 데모용 정적 빌드 (admin-frontend 의 SPA + 배너)
 └── docs/                                            — 운영/아키텍처 가이드
 ```
 

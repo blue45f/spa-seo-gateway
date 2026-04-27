@@ -1,0 +1,30 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+    "noEmit": true,
+    "ignoreDeprecations": "6.0",
+    "types": ["vitest/globals"],
+    "useDefineForClassFields": true,
+    "allowImportingTsExtensions": true,
+    "erasableSyntaxOnly": false,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "baseUrl": ".",
+    "paths": {
+      "@heejun/spa-seo-gateway-core": ["../../packages/core/src/index.ts"]
+    }
+  },
+  "include": ["src"]
+}

@@ -15,7 +15,7 @@
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "format": "biome format --write .",
-    "test": "vitest run",
+    "test": "vitest run && pnpm --filter @spa-seo-gateway/admin-frontend run test",
     "schema:gen": "tsx scripts/generate-schema.ts",
     "check": "pnpm --filter @spa-seo-gateway/gateway run check --",
     "bench:smoke": "tsx benchmarks/smoke.ts",
