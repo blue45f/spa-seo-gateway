@@ -23,6 +23,7 @@ export type LighthouseScores = {
 
 const cache = new Map<string, { scores: LighthouseScores; expiresAt: number }>();
 const TTL_MS = 24 * 60 * 60 * 1000;
+const CACHE_MAX = 256;
 
 export async function runLighthouse(
   url: string,
@@ -93,6 +94,10 @@ export async function runLighthouse(
       topAudits,
       fetchedAt: new Date().toISOString(),
     };
+    if (cache.size >= CACHE_MAX) {
+      const oldest = cache.keys().next().value;
+      if (oldest !== undefined) cache.delete(oldest);
+    }
     cache.set(url, { scores, expiresAt: Date.now() + TTL_MS });
     return scores;
   } catch (e) {

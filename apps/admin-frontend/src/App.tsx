@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { lazy, useEffect } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import { CommandPalette } from './components/CommandPalette';
 import { Layout } from './components/Layout';
@@ -7,24 +7,39 @@ import { ToastContainer } from './components/ToastContainer';
 import { Tour } from './components/Tour';
 import { api } from './lib/api';
 import { useStore } from './lib/store';
-import { AiSchema } from './pages/AiSchema';
-import { ApiExplorer } from './pages/ApiExplorer';
-import { AuditLog } from './pages/AuditLog';
-import { Cache } from './pages/Cache';
+// Eager: 자주 들어오는 페이지 + 초기 진입점 (Welcome/Dashboard/Routes).
 import { Dashboard } from './pages/Dashboard';
-import { Help } from './pages/Help';
-import { Library } from './pages/Library';
-import { Lighthouse } from './pages/Lighthouse';
-import { Metrics } from './pages/Metrics';
-import { RenderTest } from './pages/RenderTest';
 import { RoutesPage } from './pages/Routes';
-import { SiteDetail } from './pages/SiteDetail';
-import { Sites } from './pages/Sites';
-import { TenantDetail } from './pages/TenantDetail';
-import { Tenants } from './pages/Tenants';
-import { VisualDiff } from './pages/VisualDiff';
-import { Warm } from './pages/Warm';
 import { Welcome } from './pages/Welcome';
+
+// Lazy: 보조/저빈도 페이지 — 초기 번들에서 분리.
+const AiSchema = lazy(() => import('./pages/AiSchema').then((m) => ({ default: m.AiSchema })));
+const ApiExplorer = lazy(() =>
+  import('./pages/ApiExplorer').then((m) => ({ default: m.ApiExplorer })),
+);
+const AuditLog = lazy(() => import('./pages/AuditLog').then((m) => ({ default: m.AuditLog })));
+const Cache = lazy(() => import('./pages/Cache').then((m) => ({ default: m.Cache })));
+const Help = lazy(() => import('./pages/Help').then((m) => ({ default: m.Help })));
+const Library = lazy(() => import('./pages/Library').then((m) => ({ default: m.Library })));
+const Lighthouse = lazy(() =>
+  import('./pages/Lighthouse').then((m) => ({ default: m.Lighthouse })),
+);
+const Metrics = lazy(() => import('./pages/Metrics').then((m) => ({ default: m.Metrics })));
+const RenderTest = lazy(() =>
+  import('./pages/RenderTest').then((m) => ({ default: m.RenderTest })),
+);
+const SiteDetail = lazy(() =>
+  import('./pages/SiteDetail').then((m) => ({ default: m.SiteDetail })),
+);
+const Sites = lazy(() => import('./pages/Sites').then((m) => ({ default: m.Sites })));
+const TenantDetail = lazy(() =>
+  import('./pages/TenantDetail').then((m) => ({ default: m.TenantDetail })),
+);
+const Tenants = lazy(() => import('./pages/Tenants').then((m) => ({ default: m.Tenants })));
+const VisualDiff = lazy(() =>
+  import('./pages/VisualDiff').then((m) => ({ default: m.VisualDiff })),
+);
+const Warm = lazy(() => import('./pages/Warm').then((m) => ({ default: m.Warm })));
 
 export function App() {
   const setAuthed = useStore((s) => s.setAuthed);

@@ -7,6 +7,7 @@ import { setRoutes } from './runtime-config.js';
 
 let active: ReturnType<typeof watch> | null = null;
 let debounceTimer: NodeJS.Timeout | null = null;
+let sighupHandler: (() => void) | null = null;
 
 function configFilePath(): string {
   return process.env.GATEWAY_CONFIG_FILE ?? resolve(process.cwd(), 'seo-gateway.config.json');
@@ -51,6 +52,9 @@ export function startHotReload(): void {
     logger.info('hot reload disabled (set HOT_RELOAD=true to enable)');
     return;
   }
+  // Idempotent: if start was already called, do not double-subscribe. Avoids
+  // a leak of SIGHUP listeners + duplicate reload calls per file change.
+  if (active || sighupHandler) return;
   const file = configFilePath();
   if (!existsSync(file)) {
     logger.info({ file }, 'hot reload: config file not present (will start when created)');
@@ -60,10 +64,11 @@ export function startHotReload(): void {
       if (debounceTimer) clearTimeout(debounceTimer);
       debounceTimer = setTimeout(reloadOnce, 200);
     });
-    process.on('SIGHUP', () => {
+    sighupHandler = () => {
       logger.info('SIGHUP — manual reload');
       reloadOnce();
-    });
+    };
+    process.on('SIGHUP', sighupHandler);
     logger.info({ file }, 'hot reload watching config file');
   } catch (e) {
     logger.warn({ err: (e as Error).message }, 'hot reload setup failed');
@@ -74,4 +79,9 @@ export function stopHotReload(): void {
   active?.close();
   active = null;
   if (debounceTimer) clearTimeout(debounceTimer);
+  debounceTimer = null;
+  if (sighupHandler) {
+    process.off('SIGHUP', sighupHandler);
+    sighupHandler = null;
+  }
 }

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { AuthGate } from '../components/AuthGate';
+import { CardGridSkeleton } from '../components/Skeleton';
 import { api, ApiError } from '../lib/api';
 import { useStore } from '../lib/store';
 import type { SiteInfo } from '../lib/types';
@@ -36,7 +37,16 @@ function DashboardBody() {
     void load();
   }, [load]);
 
-  if (!info) return <p className="text-sm text-slate-500">{loading ? 'loading...' : t('dashboard.empty')}</p>;
+  if (!info) {
+    if (loading) {
+      return (
+        <section className="space-y-4" data-testid="page-dashboard-loading">
+          <CardGridSkeleton count={3} />
+        </section>
+      );
+    }
+    return <p className="text-sm text-slate-500">{t('dashboard.empty')}</p>;
+  }
 
   return (
     <section className="space-y-4" data-testid="page-dashboard">

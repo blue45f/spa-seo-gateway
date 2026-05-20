@@ -9,6 +9,8 @@
   },
   "scripts": {
     "build": "pnpm -r --filter='./packages/*' --filter='./apps/*' run build",
+    "storybook": "pnpm --filter @spa-seo-gateway/admin-frontend run storybook",
+    "build-storybook": "pnpm --filter @spa-seo-gateway/admin-frontend run build-storybook",
     "dev": "pnpm --filter @spa-seo-gateway/gateway run dev",
     "start": "pnpm --filter @spa-seo-gateway/gateway run start",
     "typecheck": "tsc -p tsconfig.json",
@@ -24,17 +26,18 @@
     "prepare": "husky"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.4.13",
+    "@biomejs/biome": "^2.4.15",
     "@types/autocannon": "^7.12.7",
-    "@types/node": "^25.6.0",
-    "@vercel/node": "^5.0.0",
+    "@types/node": "^25.9.1",
+    "@vercel/node": "^5.8.3",
+    "@vitest/coverage-v8": "^4.1.7",
     "autocannon": "^8.0.0",
     "fastify": "^5.8.5",
     "husky": "^9.1.7",
-    "lint-staged": "^16.4.0",
-    "tsx": "^4.21.0",
+    "lint-staged": "^17.0.5",
+    "tsx": "^4.22.3",
     "typescript": "^6.0.3",
-    "vitest": "^4.1.5"
+    "vitest": "^4.1.7"
   },
   "lint-staged": {
     "*.{ts,js,json}": "biome check --write --no-errors-on-unmatched"

@@ -21,6 +21,7 @@ export function ToastContainer() {
       {toasts.map((t) => (
         <div
           key={t.id}
+          role={t.kind === 'error' ? 'alert' : 'status'}
           className={`toast-enter ${KIND_BG[t.kind] ?? 'bg-slate-700'} text-white text-sm rounded-lg px-4 py-2 shadow-lg flex items-center gap-2 min-w-[220px]`}
         >
           <span aria-hidden="true">{t.icon}</span>
@@ -28,7 +29,7 @@ export function ToastContainer() {
           <button
             type="button"
             onClick={() => removeToast(t.id)}
-            className="opacity-70 hover:opacity-100"
+            className="opacity-70 hover:opacity-100 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
             aria-label="dismiss"
           >
             ×

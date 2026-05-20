@@ -15,7 +15,13 @@ export function getRoutes(): RouteOverride[] {
 }
 
 export function setRoutes(next: RouteOverride[]): void {
-  routes = next.map((r) => ({ ...r, regex: new RegExp(r.pattern) }));
+  // Compile all regexes first so that a single bad pattern aborts the update
+  // atomically rather than partially mutating the active route table.
+  const compiled: CompiledRoute[] = [];
+  for (const r of next) {
+    compiled.push({ ...r, regex: new RegExp(r.pattern) });
+  }
+  routes = compiled;
   logger.info({ count: routes.length }, 'routes updated at runtime');
 }
 

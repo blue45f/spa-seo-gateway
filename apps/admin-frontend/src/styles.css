@@ -55,3 +55,29 @@
     transition: transform 200ms;
   }
 }
+
+/* Skeleton loading pulse */
+.skeleton-pulse {
+  animation: skeleton-pulse 1.4s ease-in-out infinite;
+}
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+
+/*
+ * 접근성 — 사용자가 'reduce motion' 을 켰을 때는
+ * 토스트 슬라이드 / 사이드바 transition / 스켈레톤 펄스를 즉시 정지.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .toast-enter,
+  .toast-exit,
+  .skeleton-pulse,
+  .nav-item {
+    animation: none !important;
+    transition: none !important;
+  }
+  aside {
+    transition: none !important;
+  }
+}

@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url';
 import compress from '@fastify/compress';
 import cors from '@fastify/cors';
 import rateLimit from '@fastify/rate-limit';
@@ -14,12 +15,22 @@ import {
   stopWarmCron,
 } from '@heejun/spa-seo-gateway-core';
 import { FileTenantStore, registerMultiTenant } from '@heejun/spa-seo-gateway-multi-tenant';
-import Fastify from 'fastify';
+import Fastify, { type FastifyInstance } from 'fastify';
 import { registerRoutes } from './routes.js';
 
-async function main() {
+/**
+ * Build the Fastify app with all middleware and routes wired up — but do NOT
+ * start the browser pool, hot reload, warm cron, or call `app.listen()`.
+ *
+ * Use this in tests (or other embedded scenarios) when you want to exercise the
+ * full route/middleware composition without side-effects on global subsystems.
+ */
+export async function buildApp(
+  opts: { useLoggerInstance?: boolean } = {},
+): Promise<FastifyInstance> {
+  const useLoggerInstance = opts.useLoggerInstance ?? true;
   const app = Fastify({
-    loggerInstance: logger,
+    ...(useLoggerInstance ? { loggerInstance: logger } : { logger: false }),
     disableRequestLogging: false,
     trustProxy: true,
     bodyLimit: 4 * 1024 * 1024,
@@ -63,6 +74,14 @@ async function main() {
   await registerAdminUI(app as unknown as Parameters<typeof registerAdminUI>[0], {
     prefix: '/admin/ui',
   });
+
+  // Cast away the Pino-specific logger generic so callers (tests + main) can
+  // treat the result as a plain FastifyInstance.
+  return app as unknown as FastifyInstance;
+}
+
+async function main() {
+  const app = await buildApp();
 
   let shuttingDown = false;
   const shutdown = async (signal: string) => {
@@ -127,7 +146,21 @@ async function main() {
   );
 }
 
-main().catch((err) => {
-  logger.fatal({ err: err.message, stack: err.stack }, 'fatal startup error');
-  process.exit(1);
-});
+// Only auto-invoke main() when this file is the entrypoint (e.g. `node dist/main.js` or
+// `tsx src/main.ts`). When imported by tests we want `buildApp()` to be available
+// without triggering listen / pool / hot-reload side effects.
+const isEntrypoint = (() => {
+  if (!process.argv[1]) return false;
+  try {
+    return fileURLToPath(import.meta.url) === process.argv[1];
+  } catch {
+    return false;
+  }
+})();
+
+if (isEntrypoint) {
+  main().catch((err) => {
+    logger.fatal({ err: err.message, stack: err.stack }, 'fatal startup error');
+    process.exit(1);
+  });
+}

@@ -3,6 +3,10 @@ import { logger } from './logger.js';
 import { renderErrors } from './metrics.js';
 
 const breakers = new Map<string, CircuitBreaker<unknown[], unknown>>();
+// Cap on number of per-host breakers to avoid unbounded growth when serving
+// many distinct origin hosts (multi-tenant). When exceeded, the oldest entry
+// is shutdown and dropped; that host gets a fresh breaker on its next call.
+const BREAKERS_MAX = 512;
 
 const OPTIONS = {
   timeout: 30_000,
@@ -21,6 +25,19 @@ export function withBreaker<TArgs extends unknown[], TResult>(
 ): BreakerFn<TArgs, TResult> {
   let breaker = breakers.get(host) as CircuitBreaker<TArgs, TResult> | undefined;
   if (!breaker) {
+    if (breakers.size >= BREAKERS_MAX) {
+      const oldestKey = breakers.keys().next().value;
+      if (oldestKey !== undefined) {
+        const old = breakers.get(oldestKey);
+        breakers.delete(oldestKey);
+        // shutdown returns void; opossum keeps timers, so disable them.
+        try {
+          old?.shutdown();
+        } catch {
+          /* ignore: shutdown is idempotent best-effort */
+        }
+      }
+    }
     breaker = new CircuitBreaker<TArgs, TResult>(fn as BreakerFn<TArgs, TResult>, OPTIONS);
     breaker.on('open', () => {
       logger.warn({ host }, 'circuit OPEN — origin failing');

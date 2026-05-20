@@ -41,6 +41,7 @@ export function Sidebar({ publicMode }: SidebarProps) {
 
   return (
     <aside
+      id="primary-sidebar"
       data-testid="sidebar"
       className={`w-60 bg-slate-900 dark:bg-black text-slate-200 flex flex-col fixed md:static md:translate-x-0 inset-y-0 left-0 z-40 ${sidebarOpen ? '' : 'collapsed'}`}
     >
@@ -48,20 +49,28 @@ export function Sidebar({ publicMode }: SidebarProps) {
         <div className="font-bold text-white text-lg">spa-seo-gateway</div>
         <div className="text-xs text-slate-400 mt-0.5">admin console</div>
       </div>
-      <nav className="flex-1 px-2 py-3 space-y-0.5 text-sm overflow-y-auto">
-        {items.map((item) => (
-          <Link
-            key={item.id}
-            to={item.path}
-            className={`nav-item w-full text-left px-3 py-2 rounded flex items-center gap-2 hover:bg-slate-800 ${isActive(item.path) ? 'active' : ''}`}
-          >
-            <span className="w-5 text-center">{item.icon}</span>
-            <span className="flex-1">{item.label}</span>
-            {item.public ? (
-              <span className="text-[10px] uppercase tracking-wider text-emerald-400">public</span>
-            ) : null}
-          </Link>
-        ))}
+      <nav className="flex-1 px-2 py-3 space-y-0.5 text-sm overflow-y-auto" aria-label="Primary">
+        {items.map((item) => {
+          const active = isActive(item.path);
+          return (
+            <Link
+              key={item.id}
+              to={item.path}
+              aria-current={active ? 'page' : undefined}
+              className={`nav-item w-full text-left px-3 py-2 rounded flex items-center gap-2 hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 ${active ? 'active' : ''}`}
+            >
+              <span className="w-5 text-center" aria-hidden="true">
+                {item.icon}
+              </span>
+              <span className="flex-1">{item.label}</span>
+              {item.public ? (
+                <span className="text-[10px] uppercase tracking-wider text-emerald-400">
+                  public
+                </span>
+              ) : null}
+            </Link>
+          );
+        })}
       </nav>
       <div className="px-3 py-3 border-t border-slate-800 text-xs space-y-2">
         {publicMode ? (
@@ -95,19 +104,21 @@ export function Sidebar({ publicMode }: SidebarProps) {
         </a>
         <button
           type="button"
-          className="w-full text-left text-slate-500 dark:text-slate-400 hover:text-slate-300 flex items-center gap-2"
+          className="w-full text-left text-slate-500 dark:text-slate-400 hover:text-slate-300 flex items-center gap-2 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
           onClick={toggleTheme}
+          aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
         >
-          <span>{theme === 'dark' ? '☀️' : '🌙'}</span>
+          <span aria-hidden="true">{theme === 'dark' ? '☀️' : '🌙'}</span>
           <span>{theme === 'dark' ? t('theme.light') : t('theme.dark')}</span>
         </button>
         <button
           type="button"
-          className="w-full text-left text-slate-500 dark:text-slate-400 hover:text-slate-300 flex items-center gap-2"
+          className="w-full text-left text-slate-500 dark:text-slate-400 hover:text-slate-300 flex items-center gap-2 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
           onClick={toggleLang}
           title={lang === 'ko' ? 'Switch to English' : '한국어로 전환'}
+          aria-label={lang === 'ko' ? 'Switch to English' : 'Switch to Korean'}
         >
-          <span>🌐</span>
+          <span aria-hidden="true">🌐</span>
           <span>{lang === 'ko' ? 'English' : '한국어'}</span>
         </button>
       </div>

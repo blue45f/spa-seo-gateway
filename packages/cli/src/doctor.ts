@@ -6,7 +6,7 @@ import pc from 'picocolors';
 
 type Check = { label: string; ok: boolean; detail?: string; fix?: string };
 
-async function checkPort(port: number): Promise<boolean> {
+export async function checkPort(port: number): Promise<boolean> {
   return new Promise((resolve) => {
     const srv = createServer();
     srv.once('error', () => resolve(false));
@@ -15,7 +15,7 @@ async function checkPort(port: number): Promise<boolean> {
   });
 }
 
-function commandExists(cmd: string): { ok: boolean; version?: string } {
+export function commandExists(cmd: string): { ok: boolean; version?: string } {
   try {
     const v = execSync(`${cmd} --version`, {
       encoding: 'utf8',

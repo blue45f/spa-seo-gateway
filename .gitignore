@@ -17,3 +17,6 @@ packages/admin-ui/public/
 
 # tsc -b incremental build info
 *.tsbuildinfo
+
+# Storybook static build output
+storybook-static/

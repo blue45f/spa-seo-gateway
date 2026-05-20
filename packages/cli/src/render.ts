@@ -2,9 +2,9 @@ import { writeFileSync } from 'node:fs';
 import * as p from '@clack/prompts';
 import pc from 'picocolors';
 
-type Args = { url?: string; out?: string; ua?: string; mobile?: boolean; stdout?: boolean };
+export type Args = { url?: string; out?: string; ua?: string; mobile?: boolean; stdout?: boolean };
 
-function parse(rest: string[]): Args {
+export function parseArgs(rest: string[]): Args {
   const out: Args = {};
   for (let i = 0; i < rest.length; i++) {
     const a = rest[i];
@@ -18,8 +18,16 @@ function parse(rest: string[]): Args {
   return out;
 }
 
+const MOBILE_UA =
+  'Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)';
+const DESKTOP_UA = 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)';
+
+export function resolveUserAgent(args: Pick<Args, 'ua' | 'mobile'>): string {
+  return args.ua ?? (args.mobile ? MOBILE_UA : DESKTOP_UA);
+}
+
 export async function runRender(rest: string[]): Promise<void> {
-  const a = parse(rest);
+  const a = parseArgs(rest);
   if (!a.url) {
     console.error(
       pc.red('URL 이 필요합니다.'),
@@ -44,11 +52,7 @@ export async function runRender(rest: string[]): Promise<void> {
   await core.browserPool.start();
   s.stop('풀 준비됨');
 
-  const ua =
-    a.ua ??
-    (a.mobile
-      ? 'Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'
-      : 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)');
+  const ua = resolveUserAgent(a);
 
   const t0 = Date.now();
   s.start(`렌더 중 — ${pc.cyan(a.url)}`);

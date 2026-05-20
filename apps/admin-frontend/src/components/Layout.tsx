@@ -1,8 +1,9 @@
-import { useEffect } from 'react';
+import { Suspense, useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { api } from '../lib/api';
 import { useStore } from '../lib/store';
 import type { PublicInfo } from '../lib/types';
+import { ErrorBoundary } from './ErrorBoundary';
 import { Header } from './Header';
 import { MobileMenu } from './MobileMenu';
 import { Sidebar } from './Sidebar';
@@ -50,7 +51,21 @@ export function Layout() {
         <Header />
         <main className="flex-1 p-6 max-w-7xl w-full mx-auto space-y-6">
           <GlobalErrorBanner />
-          <Outlet context={{ publicInfo }} />
+          <ErrorBoundary>
+            <Suspense
+              fallback={
+                <p
+                  role="status"
+                  aria-live="polite"
+                  className="text-sm text-slate-500 dark:text-slate-400"
+                >
+                  loading…
+                </p>
+              }
+            >
+              <Outlet context={{ publicInfo }} />
+            </Suspense>
+          </ErrorBoundary>
         </main>
         <footer className="border-t border-slate-200 px-6 py-3 text-xs text-slate-500 dark:text-slate-400 flex justify-between bg-white dark:bg-slate-900 dark:border-slate-800">
           <span>spa-seo-gateway · open-source dynamic rendering</span>
@@ -73,9 +88,18 @@ function GlobalErrorBanner() {
   const setError = useStore((s) => s.setGlobalError);
   if (!error) return null;
   return (
-    <div className="bg-red-50 border border-red-200 text-red-800 rounded px-4 py-3 text-sm flex items-start gap-3">
+    <div
+      role="alert"
+      data-testid="global-error"
+      className="bg-red-50 dark:bg-red-950 dark:border-red-900 border border-red-200 text-red-800 dark:text-red-200 rounded px-4 py-3 text-sm flex items-start gap-3"
+    >
       <span className="flex-1">{error}</span>
-      <button type="button" onClick={() => setError('')} className="opacity-70 hover:opacity-100">
+      <button
+        type="button"
+        onClick={() => setError('')}
+        aria-label="Dismiss error"
+        className="opacity-70 hover:opacity-100 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
+      >
         ×
       </button>
     </div>
