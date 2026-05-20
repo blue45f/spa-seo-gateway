@@ -2,6 +2,100 @@
 
 날짜는 한국 시간(KST). 모든 커밋은 [GitHub history](https://github.com/blue45f/spa-seo-gateway/commits/main) 참고.
 
+## v1.11.0 — 2026-05-21
+
+🧪 **테스트 sprint + 보안 강화 + Storybook + 의존성 현대화**. 게이트웨이 라인 커버리지 46% → **98.67%**, 283 → **701 테스트** (+418).
+
+### Added
+- **Storybook 10 통합** (`apps/admin-frontend/.storybook/`): Vite 빌더, `@storybook/addon-themes` 로 다크 모드 토글, Tailwind v4 스타일 자동 로드. 8개 스토리:
+  - `Modal` / `ToastContainer` / `ShortcutsModal` / `CommandPalette` / `LoginForm` / `MobileMenu` / `RoutesEditor` / `Sidebar` (gateway mode 별 variants 포함)
+  - 루트 스크립트: `pnpm storybook` / `pnpm build-storybook`
+- **`ErrorBoundary`** 컴포넌트 — `Layout` 의 `<Outlet>` + `Suspense` 를 감싸 페이지 단위 런타임 에러에 fallback UI 제공
+- **`Skeleton` / `CardGridSkeleton`** 로딩 컴포넌트 (role="status" + aria-label). Dashboard 초기 로딩이 `"loading..."` 텍스트에서 카드 스켈레톤으로 교체
+- **`apps/gateway`** `buildApp()` 팩토리 export — 테스트가 puppeteer/hot-reload/warm-cron 부작용 없이 Fastify 앱을 빌드 가능. `main()` 은 `import.meta.url === argv[1]` 가드로 직접 실행 시에만 동작
+- **`packages/cli`** 순수 유틸 export 추가: `parseArgs`, `resolveUserAgent`, `checkPort`, `commandExists` (동작 변경 없음, 테스트 가능성 위함)
+
+### Tests (418건 신규)
+- **게이트웨이 (159 → 552, +393)** — 17개 테스트 파일 신규:
+  - `pool.test.ts` (17) — puppeteer-cluster 모킹으로 풀 시작/재활용/통계
+  - `renderer.test.ts` (22) — 모바일 UA 분기, 품질 게이트 (soft-404 / 500), retry, SSRF, A/B variant, schema template
+  - `gateway-e2e.test.ts` (16) — 실제 Fastify boot + fetch (health/metrics/admin login/SPA fallback/CORS)
+  - `admin-ui-api.test.ts` (28) — login/logout/cookie auth, /site /routes /audit /cache /warm /render-test /visual-diff /ai/schema /lighthouse
+  - `cms-deep.test.ts` (19), `multi-tenant-deep.test.ts` (18) — store, preHandler, render handler branches, rate-limit trip
+  - `cli-*.test.ts` (72건 across 6 files) — render parseArgs, doctor checks, init interactive (clack mock), index dispatcher (resetModules), runRender, error paths
+  - `distributed-lock-redis.test.ts` (14) — Redis SETNX 락 획득/대기/폴링/실패 fallback (@keyv/redis 모킹)
+  - `lighthouse-full.test.ts` (9), `warm-cron-tick.test.ts` (6) — 동적 import + fake timer 기반
+  - `url-ssrf*.test.ts` (30) — 0.0.0.0, IPv4-mapped IPv6 (dotted+hex), RFC1918, link-local, AWS metadata 차단
+  - `optimize-deep.test.ts` (12) — stripImages, schemaTemplate (Article/Product/FAQ/HowTo/WebSite), breadcrumb 중복 방지
+  - `audit-extra.test.ts` (8) — HMAC 서명, 파일 sink, webhook POST/실패 swallow
+  - `visual-regression.test.ts` (5) — browserPool 모킹으로 baseline 생성/비교/사이즈 mismatch
+  - `hot-reload.test.ts` (6), `warm-cron.test.ts` (4), `distributed-lock.test.ts` (3), `lighthouse.test.ts` (2), `telemetry.test.ts` (5)
+  - `coverage-final-*.test.ts` (64) — 잔여 분기 보완 (applyRequestInterception, prerender-warmer 분기, audit file 에러, url cache 축출, SWR 재검증, config process.exit, telemetry OTEL init log 등)
+- **Admin-frontend (124 → 149, +25)**:
+  - `ErrorBoundary` (4), `Skeleton` (4), `Modal` a11y (6), `RoutesEditor` (6), `LoginForm` (5)
+
+### Coverage (gateway, line %)
+| 모듈 | Before | After |
+|---|---|---|
+| pool.ts | 20.68 | **100** |
+| distributed-lock.ts | 22.22 | **100** |
+| lighthouse.ts | 42.10 | **100** |
+| warm-cron.ts | 48.00 | **100** |
+| cli/* | 17.87 | **100** (lines, branches 95+) |
+| admin-ui | 89.44 | **100** |
+| audit / hot-reload / optimize / prerender-warmer / telemetry / url | 88–95 | **100** |
+| renderer.ts | 40.86 | **96.52** |
+| config.ts | 71.42 | **97.61** |
+| cms / multi-tenant | 50–87 | **95–99** |
+| **Overall** | **46** | **98.67** |
+
+남은 unreachable 분기는 모두 defensive fallback (예: `??` 기본값 도달 불가, `URL` parse catch 가 schema 통과한 입력에 닿지 않음) — 테스트 코멘트에 명시.
+
+### Security hardening (`packages/core`)
+- **`url.ts` SSRF 강화**:
+  - `0.0.0.0`, `[::]`, `::ffff:127.0.0.1` / `::ffff:7f00:1` (dotted+hex IPv4-mapped IPv6) 명시 차단
+  - RFC1918 IPv4 (10/8, 172.16/12, 192.168/16) 리터럴은 DNS 조회 없이 즉시 거부 — AWS 메타데이터 (`169.254.169.254`) 포함
+  - `safeCache` 1024 항목 바운드 (FIFO 축출)
+  - `isHostAllowed` 가 invalid URL 입력에 throw 하지 않고 false 반환
+- **`circuit-breaker.ts`** breakers Map 512 항목 바운드 + 축출 시 `breaker.shutdown()` 으로 opossum 타이머 회수
+- **`hot-reload.ts`** `startHotReload()` idempotent — 중복 SIGHUP 핸들러 등록 방지. `stopHotReload()` 가 listener + debounce timer 모두 정리
+- **`lighthouse.ts`** 점수 캐시 256 항목 바운드
+- **`runtime-config.ts`** `setRoutes()` 의 정규식 컴파일 → 원자적 swap 패턴 명시화
+
+### Design + a11y (admin-frontend)
+- **16개 sub-page React.lazy 적용** — 초기 JS 번들 **132 KB → 63 KB (-52%)**, gzip 29.8 KB → 18.4 KB
+- `Modal`: `aria-labelledby` + body-scroll lock + focus restore + close 버튼 focus ring
+- `Sidebar` 활성 링크 `aria-current="page"`, 테마/언어 토글 `aria-label`, 모든 토글 버튼 focus-visible ring
+- `MobileMenu` `aria-expanded` / `aria-controls`, `GlobalErrorBanner` `role="alert"`, `ToastContainer` 에러 토스트 `role="alert"`
+- `LoginForm` `aria-busy` + `autoComplete="current-password"` + focus ring
+- `styles.css` `prefers-reduced-motion` 미디어 쿼리 — 토스트/사이드바/스켈레톤 애니메이션 무력화
+- 컴포넌트 분리: `ErrorBoundary.tsx`, `Skeleton.tsx`
+
+### Modernized
+- **Storybook**: 8.6 → **10.4** — `addon-essentials` 폐기 → core 기본 + `addon-docs` 명시. Vite 8 공식 peer 지원
+- **puppeteer**: 24 → **25** — 새 Chrome 148 헤드리스 사용
+- **@cacheable/utils**: 1 → **2**, **zod**: 4.3 → 4.4, **isbot** / **pixelmatch** / **fast-xml-parser** 최신
+- **vite**: 8.0.10 → 8.0.13, **vitest**: 4.1.5 → 4.1.7, **react**: 19.2.5 → 19.2.6, **react-router**: 7.14 → 7.15
+- **tailwindcss**: 4.2 → 4.3, **@vitejs/plugin-react**: 6.0.1 → 6.0.2
+- **biome**: 2.4.13 → 2.4.15, **@types/node**: 25.6 → 25.9, **tsx**: 4.21 → 4.22
+- **@clack/prompts**: 1.2 → 1.4
+
+### Testing technique 메모
+pnpm 워크스페이스로 격리된 패키지의 transitive 의존성 (`puppeteer-cluster`, `@keyv/redis` 등) 을 vitest 4 `vi.mock()` 으로 대체하려면 bare specifier 가 통하지 않음. 해결책:
+
+```ts
+const pkgPath = vi.hoisted(() => {
+  const req = createRequire(`${process.cwd()}/packages/core/src/index.js`);
+  return req.resolve('puppeteer-cluster');
+});
+vi.mock(pkgPath, () => ({ ... }));
+```
+
+`tests/pool.test.ts`, `tests/distributed-lock-redis.test.ts` 헤더에 패턴 문서화.
+
+### Bumps
+- 패키지 메이저 변경 없음 (테스트/모듈 내부 개선). `core`, `admin-ui`, `cms`, `multi-tenant`, `anthropic`, `openai`, `cli` 모두 1.10.x 호환.
+
 ## v1.10.0 — 2026-04-27
 
 per-site / per-tenant 상세 + routes 인라인 편집 GUI 추가. Sites/Tenants 목록의 ID 를 클릭하면 상세 페이지로 이동, 메타데이터 + routes 한 화면에서 편집/저장.
