@@ -5,9 +5,14 @@ ENV PUPPETEER_SKIP_DOWNLOAD=true
 RUN corepack enable && corepack prepare pnpm@9.14.4 --activate
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
 COPY packages/core/package.json packages/core/
+COPY packages/cli/package.json packages/cli/
+COPY packages/cms/package.json packages/cms/
+COPY packages/anthropic/package.json packages/anthropic/
 COPY packages/admin-ui/package.json packages/admin-ui/
 COPY packages/multi-tenant/package.json packages/multi-tenant/
-COPY packages/cms/package.json packages/cms/
+COPY packages/openai/package.json packages/openai/
+COPY apps/demo/package.json apps/demo/
+COPY apps/admin-frontend/package.json apps/admin-frontend/
 COPY apps/gateway/package.json apps/gateway/
 RUN --mount=type=cache,target=/root/.local/share/pnpm/store \
     pnpm install --frozen-lockfile --prod=false
@@ -30,7 +35,7 @@ COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
 COPY packages ./packages
 COPY apps ./apps
 RUN --mount=type=cache,target=/root/.local/share/pnpm/store \
-    pnpm install --frozen-lockfile --prod
+    pnpm install --frozen-lockfile --prod --ignore-scripts
 
 FROM node:24-slim AS runtime
 ENV NODE_ENV=production \
