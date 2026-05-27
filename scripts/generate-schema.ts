@@ -7,11 +7,12 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { ConfigSchema } from '@heejun/spa-seo-gateway-core';
-// @ts-expect-error — zod is a transitive dep of core; resolve via node module resolution
 import { z } from 'zod';
 
 const schema = z.toJSONSchema(ConfigSchema, {
   target: 'draft-2020-12',
+  io: 'input',
+  unrepresentable: 'any',
 });
 
 const outDir = resolve(process.cwd(), 'schema');
