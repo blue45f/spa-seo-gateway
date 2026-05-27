@@ -9,7 +9,7 @@
     "pnpm": ">=9.0.0"
   },
   "scripts": {
-    "build": "pnpm -r --filter='./packages/*' --filter='./apps/*' run build",
+    "build": "pnpm --filter @heejun/spa-seo-gateway-core run build && pnpm --filter @heejun/spa-seo-gateway-admin-ui run build && pnpm -r --filter='./packages/*' --filter='./apps/*' --filter='!@heejun/spa-seo-gateway-core' --filter='!@heejun/spa-seo-gateway-admin-ui' run build",
     "storybook": "pnpm --filter @spa-seo-gateway/admin-frontend run storybook",
     "build-storybook": "pnpm --filter @spa-seo-gateway/admin-frontend run build-storybook",
     "dev": "pnpm --filter @spa-seo-gateway/gateway run dev",
@@ -21,7 +21,7 @@
     "format:check": "biome format .",
     "test": "vitest run && pnpm --filter @spa-seo-gateway/admin-frontend run test",
     "clean": "pnpm -r --if-present run clean",
-    "ci": "pnpm run format:check && pnpm run lint && pnpm run typecheck && pnpm run test && pnpm run build && pnpm run schema:gen",
+    "ci": "pnpm run format:check && pnpm run lint && pnpm run typecheck && pnpm run build && pnpm run test && pnpm run schema:gen",
     "verify": "pnpm run ci",
     "verify:push": "pnpm run verify",
     "schema:gen": "tsx scripts/generate-schema.ts",
