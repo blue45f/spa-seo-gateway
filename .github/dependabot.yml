@@ -9,9 +9,53 @@ updates:
       timezone: Asia/Seoul
     open-pull-requests-limit: 10
     labels: ['dependencies']
+    # 14개 PR burst 를 줄이기 위해 의미 단위로 묶음.
+    # patch / minor 가 한 묶음에 들어가고, major 만 PR 이 별도로 만들어짐.
+    groups:
+      storybook:
+        patterns:
+          - 'storybook'
+          - '@storybook/*'
+      vitest:
+        patterns:
+          - 'vitest'
+          - '@vitest/*'
+      types:
+        patterns:
+          - '@types/*'
+      eslint-biome:
+        patterns:
+          - '@biomejs/*'
+          - 'eslint*'
+      build-tooling:
+        patterns:
+          - 'vite'
+          - 'tsx'
+          - 'typescript'
+          - 'tsconfig-paths'
+      runtime-prod:
+        patterns:
+          - 'fastify*'
+          - 'zod'
+          - 'pino*'
+          - 'opossum'
+          - 'isbot'
+          - 'puppeteer*'
+          - '@keyv/*'
+          - 'keyv'
 
   - package-ecosystem: github-actions
     directory: '/'
     schedule:
       interval: monthly
     labels: ['ci']
+    groups:
+      actions:
+        patterns:
+          - '*'
+
+  - package-ecosystem: docker
+    directory: '/'
+    schedule:
+      interval: monthly
+    labels: ['docker']
