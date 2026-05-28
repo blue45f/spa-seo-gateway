@@ -2,6 +2,21 @@
 
 날짜는 한국 시간(KST). 모든 커밋은 [GitHub history](https://github.com/blue45f/spa-seo-gateway/commits/main) 참고.
 
+## v1.15.1 — 2026-05-28
+
+🧪 **Admin-frontend 커버리지 + 추가 스토어 테스트**.
+
+### Admin-frontend 커버리지 (PR #36)
+- `vite.config.ts`: `coverage` 블록 추가 (provider: v8, reporter: text + lcov)
+- `package.json`: `test:coverage` 스크립트 + `@vitest/coverage-v8` devDep
+- `store.test.ts`: 미테스트 스토어 액션 5개 추가
+  - `toggleSidebar`, `setSidebarOpen`, `openShortcuts/closeShortcuts`, `startTour`, `tourNext`
+  - admin-frontend 테스트: 149 → **154** (5 추가)
+
+### Verified
+- 708 total tests pass (554 gateway + 154 admin-frontend)
+- `pnpm run ci` EXIT=0
+
 ## v1.15.0 — 2026-05-28
 
 🧪 **테스트 강화 + 커밋 품질 게이트 추가**.
