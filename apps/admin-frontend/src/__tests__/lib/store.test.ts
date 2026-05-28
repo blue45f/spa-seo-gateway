@@ -30,7 +30,7 @@ describe('admin store', () => {
     useStore.getState().toggleTheme();
     expect(useStore.getState().theme).toBe('dark');
     expect(document.documentElement.classList.contains('dark')).toBe(true);
-    expect(localStorage.getItem('seo-admin-theme')).toBe('dark');
+    expect(window.localStorage?.getItem('seo-admin-theme')).toBe('dark');
     useStore.getState().toggleTheme();
     expect(useStore.getState().theme).toBe('light');
     expect(document.documentElement.classList.contains('dark')).toBe(false);
@@ -39,7 +39,7 @@ describe('admin store', () => {
   it('toggleLang persists to localStorage', () => {
     useStore.getState().toggleLang();
     expect(useStore.getState().lang).toBe('en');
-    expect(localStorage.getItem('seo-admin-lang')).toBe('en');
+    expect(window.localStorage?.getItem('seo-admin-lang')).toBe('en');
   });
 
   it('t() resolves keys for the current language', () => {
@@ -76,7 +76,7 @@ describe('admin store', () => {
   it('endTour persists tourSeen', () => {
     useStore.getState().endTour();
     expect(useStore.getState().tourSeen).toBe(true);
-    expect(localStorage.getItem('seo-admin-tour-seen')).toBe('1');
+    expect(window.localStorage?.getItem('seo-admin-tour-seen')).toBe('1');
   });
 
   it('setGlobalError stores text', () => {
