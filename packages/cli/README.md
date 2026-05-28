@@ -1,5 +1,8 @@
 # @heejun/spa-seo-gateway-cli
 
+[![npm version](https://img.shields.io/npm/v/@heejun/spa-seo-gateway-cli.svg)](https://www.npmjs.com/package/@heejun/spa-seo-gateway-cli)
+[![license](https://img.shields.io/npm/l/@heejun/spa-seo-gateway-cli.svg)](LICENSE)
+
 `spa-seo-gateway` 의 인터랙티브 CLI. 새 프로젝트 셋업, 환경 진단, 단발 렌더를 한 명령으로.
 
 ## 설치 / 실행

@@ -2,6 +2,25 @@
 
 날짜는 한국 시간(KST). 모든 커밋은 [GitHub history](https://github.com/blue45f/spa-seo-gateway/commits/main) 참고.
 
+## v1.14.0 — 2026-05-28
+
+📦 **Package 문서 + 에디터 설정 추적**.
+
+### Package README 강화 (PR #29)
+- 7개 패키지 (core / admin-ui / cms / multi-tenant / anthropic / openai / cli) 모두에 npm version + license 배지 추가
+- `core`, `cms`, `multi-tenant`, `admin-ui` — `## Install` 섹션 추가 (이전 누락)
+- shields.io 배지: 공개 npm 패키지 기준 버전 자동 반영
+
+### .vscode 설정 트래킹 (PR #29)
+- `.gitignore`: `.vscode/` → `.vscode/*` 로 변경 + `!settings.json` / `!extensions.json` 예외 추가
+- `.vscode/settings.json` — biome formatter / formatOnSave / tsdk / vitest workspace 설정 공유
+- `.vscode/extensions.json` — biomejs.biome, vitest.explorer, tailwindcss 등 권장 확장 목록
+
+### Verified
+- 701 tests pass (552 gateway + 149 admin-frontend)
+- 커버리지 98.67% (lines)
+- biome 0 warnings
+
 ## v1.13.1 — 2026-05-28
 
 🔧 **pnpm 11 + Docker base image 갱신 + branch protection 일관성**.

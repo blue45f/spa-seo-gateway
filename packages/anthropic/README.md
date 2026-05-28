@@ -1,5 +1,8 @@
 # @heejun/spa-seo-gateway-anthropic
 
+[![npm version](https://img.shields.io/npm/v/@heejun/spa-seo-gateway-anthropic.svg)](https://www.npmjs.com/package/@heejun/spa-seo-gateway-anthropic)
+[![license](https://img.shields.io/npm/l/@heejun/spa-seo-gateway-anthropic.svg)](LICENSE)
+
 Anthropic Claude reference adapter for [`spa-seo-gateway`](https://github.com/blue45f/spa-seo-gateway) — HTML 본문에서 schema.org JSON-LD 를 자동 추론.
 
 ## Install

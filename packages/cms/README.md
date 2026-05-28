@@ -1,6 +1,15 @@
 # @heejun/spa-seo-gateway-cms
 
+[![npm version](https://img.shields.io/npm/v/@heejun/spa-seo-gateway-cms.svg)](https://www.npmjs.com/package/@heejun/spa-seo-gateway-cms)
+[![license](https://img.shields.io/npm/l/@heejun/spa-seo-gateway-cms.svg)](LICENSE)
+
 `cms` 모드 구현. 한 조직이 여러 사이트를 한 게이트웨이로 운영.
+
+## Install
+
+```sh
+npm install @heejun/spa-seo-gateway-cms
+```
 
 ## 사용법
 

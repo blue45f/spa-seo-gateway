@@ -1,6 +1,15 @@
 # @heejun/spa-seo-gateway-admin-ui
 
+[![npm version](https://img.shields.io/npm/v/@heejun/spa-seo-gateway-admin-ui.svg)](https://www.npmjs.com/package/@heejun/spa-seo-gateway-admin-ui)
+[![license](https://img.shields.io/npm/l/@heejun/spa-seo-gateway-admin-ui.svg)](LICENSE)
+
 임베드형 어드민 UI. **Fastify 플러그인** + **Alpine.js + Tailwind 단일 HTML** 로 구성. 외부 빌드 불필요.
+
+## Install
+
+```sh
+npm install @heejun/spa-seo-gateway-admin-ui
+```
 
 ## 통합
 
