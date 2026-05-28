@@ -36,6 +36,8 @@
     "@types/autocannon": "^7.12.7",
     "@types/node": "^25.9.1",
     "@vercel/node": "^5.8.6",
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
     "@vitest/coverage-v8": "^4.1.7",
     "autocannon": "^8.0.0",
     "fastify": "^5.8.5",
