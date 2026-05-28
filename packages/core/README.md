@@ -1,5 +1,14 @@
 # @heejun/spa-seo-gateway-core
 
+[![npm version](https://img.shields.io/npm/v/@heejun/spa-seo-gateway-core.svg)](https://www.npmjs.com/package/@heejun/spa-seo-gateway-core)
+[![license](https://img.shields.io/npm/l/@heejun/spa-seo-gateway-core.svg)](LICENSE)
+
+## Install
+
+```sh
+npm install @heejun/spa-seo-gateway-core
+```
+
 SPA SEO 게이트웨이의 **HTTP 비의존 엔진**. 다른 Fastify 앱에서 라이브러리로 import 해 자체 게이트웨이를 만들 수도 있음.
 
 ## 모듈 일람

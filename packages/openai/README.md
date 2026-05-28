@@ -1,5 +1,8 @@
 # @heejun/spa-seo-gateway-openai
 
+[![npm version](https://img.shields.io/npm/v/@heejun/spa-seo-gateway-openai.svg)](https://www.npmjs.com/package/@heejun/spa-seo-gateway-openai)
+[![license](https://img.shields.io/npm/l/@heejun/spa-seo-gateway-openai.svg)](LICENSE)
+
 OpenAI-compatible reference adapter for [`spa-seo-gateway`](https://github.com/blue45f/spa-seo-gateway) — `chat/completions` 엔드포인트를 가진 모든 호환 API 와 동작.
 
 동일 코드로 다음 모두 사용 가능:

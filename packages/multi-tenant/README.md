@@ -1,6 +1,15 @@
 # @heejun/spa-seo-gateway-multi-tenant
 
+[![npm version](https://img.shields.io/npm/v/@heejun/spa-seo-gateway-multi-tenant.svg)](https://www.npmjs.com/package/@heejun/spa-seo-gateway-multi-tenant)
+[![license](https://img.shields.io/npm/l/@heejun/spa-seo-gateway-multi-tenant.svg)](LICENSE)
+
 `saas` 모드 구현. 한 게이트웨이가 여러 외부 고객(테넌트) 의 SPA 를 동시에 SEO 렌더링.
+
+## Install
+
+```sh
+npm install @heejun/spa-seo-gateway-multi-tenant
+```
 
 ## 사용법
 
