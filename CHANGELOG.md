@@ -2,6 +2,28 @@
 
 날짜는 한국 시간(KST). 모든 커밋은 [GitHub history](https://github.com/blue45f/spa-seo-gateway/commits/main) 참고.
 
+## v1.13.1 — 2026-05-28
+
+🔧 **pnpm 11 + Docker base image 갱신 + branch protection 일관성**.
+
+### pnpm 9 → 11 (PR #27)
+- `package.json`: `packageManager: pnpm@11.4.0`, `engines.pnpm: >=11.0.0`. `pnpm.overrides` 제거
+- `pnpm-workspace.yaml`: pnpm 10+ `allowBuilds: { esbuild, puppeteer }` (post-install approval), pnpm 11 `minimumReleaseAgeExclude` (@biomejs/* + @vercel/*), `overrides` 통합
+- `packages/{anthropic,cli,openai}/package.json`: devDep `@heejun/spa-seo-gateway-core: workspace:*` → `^1.9.0` (외부 publish 시 정상 의존, 내부 monorepo 는 pnpm 이 workspace 우선)
+- `Dockerfile`: `corepack prepare pnpm@9.14.4` → `@11.4.0` (3 stages 모두). lockfile v11 호환
+- 새 `pnpm-lock.yaml` (v11 format, +796 라인)
+
+### Docker base image (PR #24)
+- `node:24-slim` → `node:26-slim` (4 stages). dependabot.yml 의 새 `docker` ecosystem 이 자동 감지한 첫 PR — 인프라 검증 사례
+
+### Branch protection consistency (PR #26)
+- `branch-protection.yml` 의 `REQUIRED_CHECKS_JSON` 이 `CodeRabbit` status 를 누락 → workflow 재실행 시 정책 silent downgrade. 3개 (`Quality gate` + `CodeRabbit` + `CodeRabbit review gate`) 모두 유지
+
+### Verified
+- `pnpm verify` EXIT=0 — 701 tests / 0 lint warnings
+- pnpm 11 lockfile + workspace: \* 해제 후 monorepo 내부 의존 정상
+- GitHub API rate limit 5000/h 도달 후 reset 대기 → 자동 머지 (응급 우회 패턴 유지)
+
 ## v1.13.0 — 2026-05-28
 
 🧰 **Developer & community baseline + CI 자동화 마무리**.
