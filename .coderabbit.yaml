@@ -1,0 +1,21 @@
+language: ko-KR
+early_access: false
+reviews:
+  high_level_summary: true
+  review_status: true
+  poem: false
+  collapse_walkthrough: true
+  request_changes_workflow: false
+  auto_review:
+    enabled: true
+    ignore_title_keywords:
+      - WIP
+      - DO NOT MERGE
+    drafts: false
+  path_filters:
+    - '!**/*.lock'
+    - '!**/pnpm-lock.yaml'
+    - '!**/dist/**'
+    - '!**/node_modules/**'
+chat:
+  auto_reply: true
