@@ -75,6 +75,8 @@ function SiteDetailBody() {
   }
 
   // ⌘/Ctrl + S 저장
+  // save 는 site 의 클로저에 의존 — site/saving 변할 때마다 핸들러 갱신
+  // biome-ignore lint/correctness/useExhaustiveDependencies: save is intentionally captured via the site/saving closure; re-binding on save would churn the global listener
   useEffect(() => {
     function handler(e: KeyboardEvent) {
       const meta = e.metaKey || e.ctrlKey;
@@ -85,8 +87,7 @@ function SiteDetailBody() {
     }
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-    // save 는 site 의 클로저에 의존 — site/saving 변할 때마다 핸들러 갱신
-  }, [site, saving]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [site, saving]);
 
   if (loading) return <p className="text-sm text-slate-500">loading...</p>;
   if (missing) {
@@ -202,10 +203,12 @@ function SiteDetailBody() {
 }
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  // biome 의 noLabelWithoutControl 은 children 안의 input 을 추적하지 못한다.
+  // 시각 레이아웃은 유지하면서 outer 를 div 로 변경, span 도 div 로 유지해 동일 hierarchy.
   return (
-    <label className="block">
-      <span className="text-xs font-medium text-slate-700 dark:text-slate-300">{label}</span>
+    <div className="block">
+      <div className="text-xs font-medium text-slate-700 dark:text-slate-300">{label}</div>
       <div className="mt-1">{children}</div>
-    </label>
+    </div>
   );
 }

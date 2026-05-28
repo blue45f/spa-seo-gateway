@@ -77,6 +77,7 @@ function AiSchemaBody() {
 
       {suggestions.map((s, i) => (
         <div
+          // biome-ignore lint/suspicious/noArrayIndexKey: AI suggestions are append-only and never reorder within a session
           key={`${s.type}-${i}`}
           className="border border-slate-200 dark:border-slate-700 rounded p-3 text-sm"
         >

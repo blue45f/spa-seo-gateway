@@ -130,7 +130,7 @@ describe('multi-tenant render route — /admin /health /metrics → callNotFound
     app = await buildAppWith(store);
     const res = await app.inject({
       method: 'GET',
-      url: '/admin/totally-unmapped-' + Math.random().toString(36).slice(2),
+      url: `/admin/totally-unmapped-${Math.random().toString(36).slice(2)}`,
       headers: { 'user-agent': BOT_UA, host: 'www.acme.com' },
     });
     expect(res.statusCode).toBe(404);
@@ -167,7 +167,7 @@ describe('multi-tenant rate-limit (lines 185 / 331-336)', () => {
     // Use a UNIQUE tenant id so the module-level rate counter doesn't collide
     // with other tests (counter is shared per-process).
     const tenant = makeTenant({
-      id: 'rl-test-' + Math.random().toString(36).slice(2, 8),
+      id: `rl-test-${Math.random().toString(36).slice(2, 8)}`,
       origin: 'https://rl.example.com',
       plan: 'free',
     });

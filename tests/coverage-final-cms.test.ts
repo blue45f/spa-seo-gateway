@@ -144,7 +144,7 @@ describe('CMS render route — /admin/... callNotFound (line 303)', () => {
     // wildcard handler runs and matches the prefix → calls callNotFound.
     const res = await app.inject({
       method: 'GET',
-      url: '/admin/totally-unmapped-route-' + Math.random().toString(36).slice(2),
+      url: `/admin/totally-unmapped-route-${Math.random().toString(36).slice(2)}`,
       headers: { 'user-agent': 'Googlebot/2.1', host: 'a.example.com' },
     });
     expect(res.statusCode).toBe(404);

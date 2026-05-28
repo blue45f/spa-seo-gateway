@@ -158,7 +158,7 @@ function buildBreadcrumbJsonLd(url: string): string | null {
     const parts = u.pathname.split('/').filter(Boolean);
     if (!parts.length) return null;
     const items: Array<{ '@type': string; position: number; name: string; item: string }> = [];
-    items.push({ '@type': 'ListItem', position: 1, name: 'Home', item: u.origin + '/' });
+    items.push({ '@type': 'ListItem', position: 1, name: 'Home', item: `${u.origin}/` });
     let acc = '';
     parts.forEach((seg, i) => {
       acc += `/${seg}`;

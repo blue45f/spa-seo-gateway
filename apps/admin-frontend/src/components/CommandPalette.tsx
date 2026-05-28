@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { navItemsForLang } from '../lib/nav';
 import { useStore } from '../lib/store';
@@ -11,9 +11,14 @@ export function CommandPalette() {
   const t = useStore((s) => s.t);
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (open) setQuery('');
+    if (open) {
+      setQuery('');
+      // autoFocus 대체 — open 시 input 으로 포커스 이동
+      inputRef.current?.focus();
+    }
   }, [open]);
 
   const items = useMemo(() => navItemsForLang(lang, mode), [lang, mode]);
@@ -30,6 +35,8 @@ export function CommandPalette() {
 
   if (!open) return null;
   return (
+    // biome-ignore lint/a11y/noStaticElementInteractions: backdrop intentionally not interactive — close on backdrop click only
+    // biome-ignore lint/a11y/useKeyWithClickEvents: Escape key handled by Modal/global shortcut; backdrop has no keyboard target
     <div
       className="fixed inset-0 z-[80] bg-black/50 flex items-start justify-center pt-24 px-4"
       onClick={(e) => {
@@ -39,7 +46,7 @@ export function CommandPalette() {
     >
       <div className="bg-white dark:bg-slate-900 rounded-lg shadow-2xl w-full max-w-md overflow-hidden">
         <input
-          autoFocus
+          ref={inputRef}
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}

@@ -95,6 +95,7 @@ function TenantDetailBody() {
   }
 
   // ⌘/Ctrl + S
+  // biome-ignore lint/correctness/useExhaustiveDependencies: save is intentionally captured via the tenant/saving closure; re-binding on save would churn the global listener
   useEffect(() => {
     function handler(e: KeyboardEvent) {
       const meta = e.metaKey || e.ctrlKey;
@@ -105,7 +106,7 @@ function TenantDetailBody() {
     }
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [tenant, saving]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [tenant, saving]);
 
   if (loading) return <p className="text-sm text-slate-500">loading...</p>;
   if (missing) {
@@ -232,10 +233,11 @@ function TenantDetailBody() {
 }
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  // biome 의 noLabelWithoutControl 은 children 안의 input 을 추적하지 못한다.
   return (
-    <label className="block">
-      <span className="text-xs font-medium text-slate-700 dark:text-slate-300">{label}</span>
+    <div className="block">
+      <div className="text-xs font-medium text-slate-700 dark:text-slate-300">{label}</div>
       <div className="mt-1">{children}</div>
-    </label>
+    </div>
   );
 }

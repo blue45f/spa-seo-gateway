@@ -8,6 +8,7 @@
 
 @layer utilities {
   [x-cloak] {
+    /* biome-ignore lint/complexity/noImportantStyles: required for x-cloak to win against Tailwind display utilities */
     display: none !important;
   }
   pre {
@@ -93,10 +94,13 @@
   .toast-exit,
   .skeleton-pulse,
   .nav-item {
+    /* biome-ignore lint/complexity/noImportantStyles: must override Tailwind transition utilities for reduced-motion users */
     animation: none !important;
+    /* biome-ignore lint/complexity/noImportantStyles: must override Tailwind transition utilities for reduced-motion users */
     transition: none !important;
   }
   aside {
+    /* biome-ignore lint/complexity/noImportantStyles: must override Tailwind transition utilities for reduced-motion users */
     transition: none !important;
   }
 }

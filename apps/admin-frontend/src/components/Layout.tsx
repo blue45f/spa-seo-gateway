@@ -15,6 +15,7 @@ export function Layout() {
   const location = useLocation();
 
   // 라우트 변경 시 모바일 사이드바 닫기 — UX 일관성
+  // biome-ignore lint/correctness/useExhaustiveDependencies: location.pathname triggers the effect on every route change
   useEffect(() => {
     if (typeof window !== 'undefined' && window.innerWidth < 768) {
       setSidebarOpen(false);
@@ -35,16 +36,9 @@ export function Layout() {
     };
   }, [setPublicInfo]);
 
+  // ⌘S 와 Escape 는 페이지 별 / App 레벨에서 자체 처리하므로 root div 에 핸들러 불필요.
   return (
-    <div
-      className="flex min-h-screen"
-      onKeyDown={(e) => {
-        // ⌘S 는 페이지 별로 자체 처리. 여기서는 막지 않음.
-        if (e.key === 'Escape') {
-          // close palette/shortcuts handled at App level
-        }
-      }}
-    >
+    <div className="flex min-h-screen">
       <MobileMenu />
       <Sidebar publicMode={publicInfo?.mode ?? undefined} />
       <div className="flex-1 flex flex-col min-w-0 md:ml-0 ml-0">

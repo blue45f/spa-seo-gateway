@@ -328,10 +328,11 @@ function SiteForm({
 }
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  // biome 의 noLabelWithoutControl 은 children 안의 input 을 추적하지 못한다.
   return (
-    <label className="block">
-      <span className="text-xs font-medium text-slate-700 dark:text-slate-300">{label}</span>
+    <div className="block">
+      <div className="text-xs font-medium text-slate-700 dark:text-slate-300">{label}</div>
       <div className="mt-1">{children}</div>
-    </label>
+    </div>
   );
 }

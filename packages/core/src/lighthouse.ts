@@ -21,6 +21,25 @@ export type LighthouseScores = {
   fetchedAt: string;
 };
 
+type LighthouseCategory = { score?: number | null };
+type LighthouseAudit = { title?: string; score?: number | null };
+type LighthouseResult = {
+  lhr?: {
+    categories?: Record<string, LighthouseCategory>;
+    audits?: Record<string, LighthouseAudit>;
+  };
+};
+type LighthouseRunner = (
+  url: string,
+  opts: { port: number; output: 'json'; logLevel: 'error'; onlyCategories: string[] },
+) => Promise<LighthouseResult>;
+type ChromeLauncher = {
+  launch(opts: {
+    chromeFlags: string[];
+    chromePath?: string;
+  }): Promise<{ port: number; kill(): Promise<void> | void }>;
+};
+
 const cache = new Map<string, { scores: LighthouseScores; expiresAt: number }>();
 const TTL_MS = 24 * 60 * 60 * 1000;
 const CACHE_MAX = 256;
@@ -36,12 +55,12 @@ export async function runLighthouse(
   }
 
   // 동적 import — lighthouse 미설치 시 즉시 안내
-  let lighthouse: any;
-  let chromeLauncher: any;
+  let lighthouse: LighthouseRunner;
+  let chromeLauncher: ChromeLauncher;
   try {
-    lighthouse = (await import('lighthouse' as string)).default;
-    chromeLauncher = await import('chrome-launcher' as string);
-  } catch (e) {
+    lighthouse = ((await import('lighthouse' as string)) as { default: LighthouseRunner }).default;
+    chromeLauncher = (await import('chrome-launcher' as string)) as ChromeLauncher;
+  } catch {
     throw new Error(
       'lighthouse 가 설치되어 있지 않습니다. `pnpm add lighthouse chrome-launcher` 후 재시도하세요.',
     );
@@ -72,9 +91,9 @@ export async function runLighthouse(
 
     const audits = lhr.audits ?? {};
     const topAudits = Object.entries(audits)
-      .map(([id, a]: [string, any]) => ({
+      .map(([id, a]) => ({
         id,
-        title: a.title as string,
+        title: a.title ?? id,
         score: typeof a.score === 'number' ? Math.round(a.score * 100) : null,
       }))
       .filter((a) => typeof a.score === 'number' && a.score < 90)
@@ -104,7 +123,7 @@ export async function runLighthouse(
     logger.error({ err: (e as Error).message, url }, 'lighthouse 실행 실패');
     throw e;
   } finally {
-    await chrome.kill().catch(() => {});
+    await Promise.resolve(chrome.kill()).catch(() => {});
   }
 }
 

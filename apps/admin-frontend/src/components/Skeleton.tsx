@@ -30,6 +30,7 @@ export function CardGridSkeleton({ count = 3 }: { count?: number }) {
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4" data-testid="card-grid-skeleton">
       {Array.from({ length: count }).map((_, i) => (
         <div
+          // biome-ignore lint/suspicious/noArrayIndexKey: decorative skeleton placeholders never reorder
           key={i}
           className="bg-white dark:bg-slate-900 dark:border-slate-800 rounded-lg shadow-sm border border-slate-200 p-5 space-y-3"
         >

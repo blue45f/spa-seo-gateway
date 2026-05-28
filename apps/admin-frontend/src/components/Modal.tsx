@@ -48,6 +48,7 @@ export function Modal({ open, onClose, title, children, size = 'lg' }: ModalProp
 
   if (!open) return null;
   return (
+    // biome-ignore lint/a11y/useKeyWithClickEvents: Escape key is handled by a window-level listener (see effect above); backdrop click is mouse-only
     <div
       role="dialog"
       aria-modal="true"

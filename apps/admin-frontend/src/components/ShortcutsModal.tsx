@@ -7,6 +7,8 @@ export function ShortcutsModal() {
 
   if (!open) return null;
   return (
+    // biome-ignore lint/a11y/noStaticElementInteractions: backdrop intentionally not interactive — close on backdrop click only
+    // biome-ignore lint/a11y/useKeyWithClickEvents: Escape key handled globally; backdrop click is mouse-only
     <div
       className="fixed inset-0 z-[80] bg-black/50 flex items-center justify-center"
       onClick={(e) => {

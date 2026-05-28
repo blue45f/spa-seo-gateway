@@ -109,7 +109,11 @@ function AuditLogBody() {
           </thead>
           <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
             {events.map((e, i) => (
-              <tr key={`${e.ts}-${i}`} className="hover:bg-slate-50 dark:hover:bg-slate-800">
+              <tr
+                // biome-ignore lint/suspicious/noArrayIndexKey: audit log is append-only and never reorders; (ts + i) is stable per row
+                key={`${e.ts}-${i}`}
+                className="hover:bg-slate-50 dark:hover:bg-slate-800"
+              >
                 <td className="px-3 py-2 font-mono text-xs whitespace-nowrap">
                   {e.ts?.slice(11, 19) ?? '-'}
                 </td>
