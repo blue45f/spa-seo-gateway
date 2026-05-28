@@ -27,6 +27,7 @@
 ## 체크리스트
 
 - [ ] `pnpm run verify` 통과
+- [ ] `CodeRabbit review gate` 통과
 - [ ] config/schema 변경 시 `pnpm run schema:gen` 반영
 - [ ] gateway runtime 변경 시 캐시/렌더링 실패 경로 확인
 - [ ] admin API 변경 시 admin frontend 영향 확인
