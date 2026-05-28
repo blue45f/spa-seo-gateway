@@ -2,6 +2,39 @@
 
 날짜는 한국 시간(KST). 모든 커밋은 [GitHub history](https://github.com/blue45f/spa-seo-gateway/commits/main) 참고.
 
+## v1.12.2 — 2026-05-28
+
+🛡 **CodeRabbit APPROVED 리뷰 gate + CI 하드닝**.
+
+### CodeRabbit APPROVED review gate (`.github/workflows/coderabbit-gate.yml`)
+- 기존 `CodeRabbit` status check 는 *어떤 응답이든* success 가 떨어지면 통과. 새 gate workflow 는 **CodeRabbit 의 review state 가 `APPROVED` 일 때만** 통과
+- `pull_request` (opened/synchronize/reopened/ready_for_review) + `pull_request_review` (submitted/edited/dismissed) 양쪽 트리거
+- **최신 head SHA 에 대한 리뷰만** 카운트 — stale review 무효화. 새 commit 푸시하면 gate 다시 빨간색
+- `COMMENTED` / `CHANGES_REQUESTED` / `DISMISSED` / `PENDING` 모두 명시적 fail. "코멘트만 남기고 통과되는" 사고 차단
+- CodeRabbit 봇 login 변경 대비: `coderabbitai[bot]` / `coderabbitai` / `coderabbit-ai[bot]` / `coderabbit[bot]` 모두 허용
+- Draft PR 자동 skip (CodeRabbit 이 draft 자동 리뷰 안 함). Ready-for-review 전환 시 재 트리거
+- 5 분 timeout, `concurrency` 로 같은 PR 의 review 이벤트들 순차 실행 (cancel-in-progress: false)
+
+### CI workflow 하드닝 (`.github/workflows/ci.yml`)
+- **`concurrency: { group: workflow-ref, cancel-in-progress: true }`** — 같은 브랜치에 새 push 가 오면 이전 run 자동 cancel. PR #15 같은 hang 상황 자동 정리
+- `quality` job: `name: Quality gate`, `timeout-minutes: 20` — 무한 hang 방지
+
+### Dependabot auto-merge 조건 정교화 (`.github/workflows/dependabot-auto-merge.yml`)
+- `on.pull_request.branches: [main]` 명시 — main 외 base 로 만들어진 dependabot PR 무시
+- `dependabot/fetch-metadata@v2` 에 `github-token` 명시
+- self-approve 단계 제거 — branch protection 이 status check 기반이므로 review approval 불필요. CodeRabbit gate 가 진짜 approval 책임
+- 자동 머지 조건 확장:
+  - patch / minor 업데이트
+  - `package-ecosystem == github_actions` (액션 버전 업)
+  - `dependency-type == direct:development` 의 major (devDep major 도 OK)
+  - 그 외 runtime major 는 수동 검토 유지
+
+### PR template
+- 체크리스트에 **`CodeRabbit review gate 통과`** 항목 추가 — 머지 전 검증 항목 명시
+
+### Required status checks (branch protection)
+- `[quality, CodeRabbit]` 외에 **`CodeRabbit review gate`** 추가 필요 (이 PR 머지 직후 적용)
+
 ## v1.12.1 — 2026-05-28
 
 🔒 **보안 audit 0건 + branch protection 하드닝**.
