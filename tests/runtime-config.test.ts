@@ -1,4 +1,5 @@
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import fs from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
@@ -7,7 +8,7 @@ import {
   persistRoutesToFile,
   setRoutes,
 } from '@heejun/spa-seo-gateway-core';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 let tmp: string;
 let originalCwd: string;
@@ -85,5 +86,26 @@ describe('runtime-config routes', () => {
     expect(written.originUrl).toBe('https://x.com');
     expect(written.other).toBe(1);
     expect(written.routes).toEqual([{ pattern: '^/y/' }]);
+  });
+
+  it('persistRoutesToFile uses GATEWAY_CONFIG_FILE env var when no path given', async () => {
+    const target = join(tmp, 'via-env.json');
+    process.env.GATEWAY_CONFIG_FILE = target;
+    setRoutes([{ pattern: '^/env-test/' }]);
+    const result = await persistRoutesToFile();
+    expect(result.ok).toBe(true);
+    expect(result.path).toBe(target);
+    const written = JSON.parse(readFileSync(target, 'utf8'));
+    expect(written.routes).toEqual([{ pattern: '^/env-test/' }]);
+  });
+
+  it('persistRoutesToFile returns ok:false when write fails', async () => {
+    const spy = vi.spyOn(fs, 'rename').mockRejectedValueOnce(new Error('disk full'));
+    const target = join(tmp, 'fail.json');
+    setRoutes([]);
+    const result = await persistRoutesToFile(target);
+    expect(result.ok).toBe(false);
+    expect(result.error).toMatch(/disk full/);
+    spy.mockRestore();
   });
 });
