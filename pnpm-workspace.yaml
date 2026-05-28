@@ -1,3 +1,27 @@
 packages:
   - 'packages/*'
   - 'apps/*'
+
+allowBuilds:
+  esbuild: true
+  puppeteer: true
+
+minimumReleaseAgeExclude:
+  - '@biomejs/biome@2.4.16'
+  - '@biomejs/cli-darwin-arm64@2.4.16'
+  - '@biomejs/cli-darwin-x64@2.4.16'
+  - '@biomejs/cli-linux-arm64-musl@2.4.16'
+  - '@biomejs/cli-linux-arm64@2.4.16'
+  - '@biomejs/cli-linux-x64-musl@2.4.16'
+  - '@biomejs/cli-linux-x64@2.4.16'
+  - '@biomejs/cli-win32-arm64@2.4.16'
+  - '@biomejs/cli-win32-x64@2.4.16'
+  - '@vercel/build-utils@13.26.3'
+  - '@vercel/node@5.8.6'
+  - '@vercel/static-config@3.4.0'
+
+overrides:
+  minimatch: ">=10.2.3"
+  undici: ">=6.24.0"
+  ajv: ">=8.18.0"
+  smol-toml: ">=1.6.1"
