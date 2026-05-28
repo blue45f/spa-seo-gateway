@@ -20,7 +20,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.97.1"
+    "@anthropic-ai/sdk": "^0.99.0"
   },
   "peerDependencies": {
     "@heejun/spa-seo-gateway-core": "^1.6.0"
