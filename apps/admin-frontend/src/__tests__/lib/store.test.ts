@@ -83,4 +83,41 @@ describe('admin store', () => {
     useStore.getState().setGlobalError('boom');
     expect(useStore.getState().globalError).toBe('boom');
   });
+
+  it('toggleSidebar flips sidebarOpen', () => {
+    useStore.setState({ sidebarOpen: false });
+    useStore.getState().toggleSidebar();
+    expect(useStore.getState().sidebarOpen).toBe(true);
+    useStore.getState().toggleSidebar();
+    expect(useStore.getState().sidebarOpen).toBe(false);
+  });
+
+  it('setSidebarOpen sets exact value', () => {
+    useStore.getState().setSidebarOpen(false);
+    expect(useStore.getState().sidebarOpen).toBe(false);
+    useStore.getState().setSidebarOpen(true);
+    expect(useStore.getState().sidebarOpen).toBe(true);
+  });
+
+  it('openShortcuts / closeShortcuts', () => {
+    useStore.getState().openShortcuts();
+    expect(useStore.getState().shortcutsOpen).toBe(true);
+    useStore.getState().closeShortcuts();
+    expect(useStore.getState().shortcutsOpen).toBe(false);
+  });
+
+  it('startTour resets tour state', () => {
+    useStore.setState({ tourStep: 5, tourSeen: true });
+    useStore.getState().startTour();
+    expect(useStore.getState().tourStep).toBe(0);
+    expect(useStore.getState().tourSeen).toBe(false);
+  });
+
+  it('tourNext advances step', () => {
+    useStore.setState({ tourStep: 0 });
+    useStore.getState().tourNext();
+    expect(useStore.getState().tourStep).toBe(1);
+    useStore.getState().tourNext();
+    expect(useStore.getState().tourStep).toBe(2);
+  });
 });
