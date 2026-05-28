@@ -22,7 +22,9 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  REQUIRED_CHECKS_JSON: '["Quality gate","CodeRabbit review gate"]'
+  # 이 목록을 변경하기 전에 정책 문서 (docs/CI-AUTOMATION.md) 도 함께 갱신할 것.
+  # CodeRabbit (status) 는 free-tier rate limit 으로 우회된 경우를 대비해 별도 entry 로 유지.
+  REQUIRED_CHECKS_JSON: '["Quality gate","CodeRabbit","CodeRabbit review gate"]'
 
 jobs:
   protect:
