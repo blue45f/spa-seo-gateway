@@ -2,11 +2,11 @@
   "name": "spa-seo-gateway-monorepo",
   "version": "1.0.0",
   "private": true,
-  "packageManager": "pnpm@9.15.4",
+  "packageManager": "pnpm@11.4.0",
   "type": "module",
   "engines": {
     "node": ">=20.0.0",
-    "pnpm": ">=9.0.0"
+    "pnpm": ">=11.0.0"
   },
   "scripts": {
     "build": "pnpm --filter @heejun/spa-seo-gateway-core run build && pnpm --filter @heejun/spa-seo-gateway-admin-ui run build && pnpm -r --filter='./packages/*' --filter='./apps/*' --filter='!@heejun/spa-seo-gateway-core' --filter='!@heejun/spa-seo-gateway-admin-ui' run build",
@@ -48,14 +48,6 @@
   },
   "lint-staged": {
     "*.{ts,js,json}": "biome check --write --no-errors-on-unmatched"
-  },
-  "pnpm": {
-    "overrides": {
-      "minimatch": ">=10.2.3",
-      "undici": ">=6.24.0",
-      "ajv": ">=8.18.0",
-      "smol-toml": ">=1.6.1"
-    }
   },
   "license": "MIT"
 }
