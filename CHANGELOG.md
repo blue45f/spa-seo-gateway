@@ -2,6 +2,21 @@
 
 날짜는 한국 시간(KST). 모든 커밋은 [GitHub history](https://github.com/blue45f/spa-seo-gateway/commits/main) 참고.
 
+## v1.14.2 — 2026-05-28
+
+🔧 **Node 26 전반 일관성 + localStorage 호환성 픽스**.
+
+### Node 26 정렬 (PR #32)
+- `ci.yml`: `node-version: 22` → `26` (Dockerfile 과 일치)
+- `.nvmrc`: `24` → `26`
+- `store.ts`: 직접 `localStorage.{get,set}Item` → `window.localStorage?.{get,set}Item` (Node 26 + happy-dom 환경에서 bare localStorage global undefined)
+- 테스트 setup.ts: `window.localStorage` 미노출 환경용 in-memory 폴리필 추가 (happy-dom v20.x + Node 26 호환)
+- 테스트 store.test.ts: 동일 이유로 `window.localStorage?.getItem` 로 수정
+
+### Verified
+- CI Quality gate 통과 (Node 26)
+- 149 admin-frontend tests pass on Node 26 (localStorage polyfill 적용 후)
+
 ## v1.14.1 — 2026-05-28
 
 🔒 **보안 패치 + 개발 환경 개선**.
