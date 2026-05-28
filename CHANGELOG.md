@@ -2,6 +2,25 @@
 
 날짜는 한국 시간(KST). 모든 커밋은 [GitHub history](https://github.com/blue45f/spa-seo-gateway/commits/main) 참고.
 
+## v1.14.1 — 2026-05-28
+
+🔒 **보안 패치 + 개발 환경 개선**.
+
+### 보안 패치 (PR #30)
+- `pnpm-workspace.yaml` overrides:
+  - `path-to-regexp: >=6.3.0` (GHSA-9wv6-86v2-598j HIGH — `@vercel/node` transitive dep, backtracking regex)
+  - `uuid: >=11.1.1` (GHSA-w5hq-g745-h8pq MODERATE — `autocannon>hyperid` transitive dep, buffer bounds)
+- `pnpm audit` 결과: **0 vulnerabilities**
+- `biome.json`: schema `2.4.15` → `2.4.16` (`biome migrate --write`)
+
+### 개발 환경 (이번 스프린트)
+- `vitest.workspace.ts` 추가: VS Code Vitest 확장이 gateway + admin-frontend 테스트를 한 탐색창에서 인식
+- `.vscode/settings.json` `vitest.workspaceConfig` 참조 파일 실체화
+
+### Verified
+- `pnpm audit` — No known vulnerabilities found
+- 701 tests pass / biome 0 warnings / typecheck clean
+
 ## v1.14.0 — 2026-05-28
 
 📦 **Package 문서 + 에디터 설정 추적**.
