@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.6
-FROM node:24-slim AS deps
+FROM node:26-slim AS deps
 WORKDIR /app
 ENV PUPPETEER_SKIP_DOWNLOAD=true
 RUN corepack enable && corepack prepare pnpm@9.14.4 --activate
@@ -17,7 +17,7 @@ COPY apps/gateway/package.json apps/gateway/
 RUN --mount=type=cache,target=/root/.local/share/pnpm/store \
     pnpm install --frozen-lockfile --prod=false
 
-FROM node:24-slim AS build
+FROM node:26-slim AS build
 WORKDIR /app
 ENV PUPPETEER_SKIP_DOWNLOAD=true
 RUN corepack enable && corepack prepare pnpm@9.14.4 --activate
@@ -27,7 +27,7 @@ COPY --from=deps /app/apps ./apps
 COPY . .
 RUN pnpm run build
 
-FROM node:24-slim AS prod-deps
+FROM node:26-slim AS prod-deps
 WORKDIR /app
 ENV PUPPETEER_SKIP_DOWNLOAD=true
 RUN corepack enable && corepack prepare pnpm@9.14.4 --activate
@@ -37,7 +37,7 @@ COPY apps ./apps
 RUN --mount=type=cache,target=/root/.local/share/pnpm/store \
     pnpm install --frozen-lockfile --prod --ignore-scripts
 
-FROM node:24-slim AS runtime
+FROM node:26-slim AS runtime
 ENV NODE_ENV=production \
     PUPPETEER_SKIP_DOWNLOAD=true \
     PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium \
