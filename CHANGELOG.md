@@ -2,6 +2,25 @@
 
 날짜는 한국 시간(KST). 모든 커밋은 [GitHub history](https://github.com/blue45f/spa-seo-gateway/commits/main) 참고.
 
+## v1.12.1 — 2026-05-28
+
+🔒 **보안 audit 0건 + branch protection 하드닝**.
+
+### Security
+- **`pnpm audit` 12 → 0 vulnerabilities** (5 high + 6 moderate + 1 low → 0). 모두 `apps/demo > @vercel/node` 의 transitive. root `package.json` 에 pnpm `overrides` 추가로 patched 버전 강제:
+  - `minimatch: ">=10.2.3"` (ReDoS via 반복 wildcard / nested extglobs / matchOne 백트래킹)
+  - `undici: ">=6.24.0"` (WebSocket 무한 메모리 / Unhandled exception / Request smuggling / CRLF injection / 무한 decompression chain). 5.x → 6.x 강제했지만 verify 통과 — `@vercel/node` 호환성 유지
+  - `ajv: ">=8.18.0"` (ReDoS via `$data` option)
+  - `smol-toml: ">=1.6.1"` (TOML DoS)
+- `pnpm install` 후 `pnpm audit --prod` → **No known vulnerabilities found**
+
+### CI Hardening
+- **`enforce_admins: true`** — main branch protection 이 admin(소유자) 도 우회 불가. 응급 시 토글 패턴 필요. `required_status_checks` `[quality, CodeRabbit]` strict 정책이 모든 머지에 100% 적용
+
+### Verified
+- `pnpm verify` EXIT=0 (701 tests / 0 lint warnings)
+- undici 5.x → 6.x 강제 후 `@vercel/node`, `apps/demo` 빌드/테스트 정상
+
 ## v1.12.0 — 2026-05-28
 
 🤖 **자동화 & 코드 품질 — Dependabot auto-merge + CodeRabbit AI 리뷰 + lint 0 warnings**. 의존성 14건 일괄 머지, biome warning 25 → 0, main branch protection (CI + CodeRabbit 통과 강제).
