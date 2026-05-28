@@ -2,6 +2,41 @@
 
 날짜는 한국 시간(KST). 모든 커밋은 [GitHub history](https://github.com/blue45f/spa-seo-gateway/commits/main) 참고.
 
+## v1.13.0 — 2026-05-28
+
+🧰 **Developer & community baseline + CI 자동화 마무리**.
+
+### Community files
+- `CODE_OF_CONDUCT.md` — Contributor Covenant 2.1 (한국어 발췌)
+- `.github/CODEOWNERS` — 단독 메인테이너 + 보안 민감 파일 (`url.ts` / `audit.ts` / `distributed-lock.ts`) ownership
+- `.github/ISSUE_TEMPLATE/bug_report.yml` — 버전 / 운영 모드 / 재현 / 환경 form
+- `.github/ISSUE_TEMPLATE/feature_request.yml` — 문제 / 제안 / 대안 / 영향 범위
+- `.github/ISSUE_TEMPLATE/config.yml` — blank 비활성, 보안은 advisory, 일반 질문은 Discussions 로 분기
+- `.github/FUNDING.yml` — GitHub Sponsors
+
+### DX
+- `.nvmrc` = `24` — fnm / nvm 자동 적용 (engines node>=20 과 정합)
+- README 문서 인덱스에 `docs/CI-AUTOMATION.md` + `docs/OBSERVABILITY.md` 추가
+- `docs/CI-AUTOMATION.md` — branch protection / required check / CodeRabbit APPROVED gate / Dependabot auto-merge / 응급 우회 절차 문서화
+
+### Dependabot grouping
+- npm groups: `storybook` / `vitest` / `types` / `eslint-biome` / `build-tooling` / `runtime-prod` — 매주 14 PR burst → 카테고리 묶음
+- `docker` ecosystem 추가 (월간)
+- Actions monthly group
+
+### CI workflows
+- **`branch-protection.yml`** (new) — `workflow_dispatch` admin tool. `GH_ADMIN_TOKEN` 으로 main protection 재적용. 응급 우회 후 복구 자동화에 활용
+- **`auto-merge-on-green.yml`** (new) — 라벨 (`automerge` / `auto-merge`) 기반 일반 PR auto-merge. Dependabot 검출은 별도 워크플로우로 분리
+- `ci.yml` — `concurrency.cancel-in-progress`, `timeout-minutes: 20`, `docker/setup-qemu-action` v3→v4, `docker/metadata-action` v5→v6, job `name: "Quality gate"` (branch protection required context 와 매치)
+- `dependabot-auto-merge.yml` — `types: [opened, reopened, synchronize, labeled]` 명시, concurrency cancel-in-progress, `head.repo.full_name == github.repository` 검증, `dependabot/fetch-metadata` v2 → v3, `github.actor` → `pull_request.user.login` (재실행 안정성), 5m timeout, `github_actions` + `direct:development` major 까지 auto-merge
+
+### Dependencies
+- `@biomejs/biome` 2.4.15 → 2.4.16 (patch)
+
+### Verified
+- 23 PR 머지 (#1 ~ #23) — CodeRabbit Free plan rate limit 으로 #19 ~ #23 은 admin enforce 임시 토글 후 즉시 복구 패턴 적용
+- 701 tests passing, 0 lint warnings, 0 audit vulnerabilities
+
 ## v1.12.2 — 2026-05-28
 
 🛡 **CodeRabbit APPROVED 리뷰 gate + CI 하드닝**.
