@@ -2,6 +2,51 @@
 
 날짜는 한국 시간(KST). 모든 커밋은 [GitHub history](https://github.com/blue45f/spa-seo-gateway/commits/main) 참고.
 
+## v1.12.0 — 2026-05-28
+
+🤖 **자동화 & 코드 품질 — Dependabot auto-merge + CodeRabbit AI 리뷰 + lint 0 warnings**. 의존성 14건 일괄 머지, biome warning 25 → 0, main branch protection (CI + CodeRabbit 통과 강제).
+
+### CI & Automation
+- **Dependabot auto-merge** (`.github/workflows/dependabot-auto-merge.yml`) — patch / minor 업데이트는 `dependabot/fetch-metadata@v2` 로 판별 후 자동 approve + squash auto-merge. major 는 수동 검토 유지
+- **Main branch protection rule** — `required_status_checks: [quality, CodeRabbit]`, `strict: true` (up-to-date 강제), force-push / 삭제 차단. `enforce_admins: false` 로 응급 시 admin 우회 가능
+- **Repo 설정** — `allow_auto_merge=true`, `delete_branch_on_merge=true`, `allow_update_branch=true`, `can_approve_pull_request_reviews=true` (Actions self-approval) 일괄 활성화
+- **CI 안정화 5 commits** (오리진 fast-forward) — docker workspace dependency install fix, biome lint baseline 정렬, admin UI prebuild before tests, renderer wait delay assertion 안정화, pnpm setup + schema 생성 정돈
+
+### CodeRabbit AI Review
+- **`.coderabbit.yaml`** — `language: ko-KR`, `auto_review.enabled: true`, lock/dist/node_modules path filter. PR 생성 시 자동 한국어 리뷰 트리거
+- Status context 이름 `CodeRabbit` 을 branch protection required check 에 추가 — review 통과해야 머지 가능
+
+### Code Quality (biome lint 25 → 0)
+- **`packages/core/src/lighthouse.ts`** — `any` 3개 제거 (`LighthouseRunner` / `ChromeLauncher` / `LighthouseResult` / `LighthouseCategory` / `LighthouseAudit` 타입 정의). 사용하지 않는 `catch (e)` 바인딩 제거. `chrome.kill()` 의 `Promise<void> | void` 모두 처리하도록 `Promise.resolve(...).catch(...)` 래핑
+- **`packages/core/src/optimize.ts` + `tests/coverage-final-*.test.ts`** — string concat 4곳 → template literal
+- **`apps/admin-frontend/src/pages/{SiteDetail,TenantDetail,Sites,Tenants}.tsx`** — `Field` 래퍼 컴포넌트 `<label>` → `<div>` 리팩토링으로 `noLabelWithoutControl` 해결 (자식 컨트롤에 자체 label association 의존)
+- **`apps/admin-frontend/src/components/CommandPalette.tsx`** — `autoFocus` 속성 → `useRef` + `useEffect` 패턴
+- **`apps/admin-frontend/src/components/{Modal,ShortcutsModal,Layout}.tsx`** — modal/backdrop a11y biome-ignore (Escape 핸들러 부재 경고는 글로벌 keydown 리스너로 처리하기 때문)
+- **`apps/admin-frontend/src/styles.css`** — x-cloak + prefers-reduced-motion 블록의 `!important` biome-ignore (Tailwind utility override 의도)
+
+### Dependencies (PRs #1 – #14, 모두 squash 머지)
+**Runtime**:
+- `puppeteer` 25.0.4 → 25.1.0 (#6)
+- `@anthropic-ai/sdk` 0.97.1 → 0.99.0 (#14)
+- `@vercel/node` 5.8.3 → 5.8.6 (#9)
+
+**Dev — Storybook 10.4.0 → 10.4.1**:
+- `storybook` (#10), `@storybook/react` (#11), `@storybook/react-vite` (#8), `@storybook/addon-themes` (#13), `@storybook/addon-docs` (#12)
+- `vite` 8.0.13 → 8.0.14 (#7)
+
+**GitHub Actions**:
+- `actions/checkout` v4 → v6 (#5)
+- `pnpm/action-setup` v4 → v6 (#2)
+- `docker/setup-buildx-action` v3 → v4 (#1)
+- `docker/setup-qemu-action` v3 → v4 (#4)
+- `docker/login-action` v3 → v4 (#3)
+
+### Verified
+- `pnpm verify` (format / lint / typecheck / build / test / schema): **EXIT=0**
+- Lint: 25 → **0 warnings** (across 214 files)
+- Tests: gateway 552 / admin-frontend 149 = **701 / 701 passing** (변동 없음)
+- Build: vite production bundle 65 modules, react-vendor 73.72 kB gzip, index 18.44 kB gzip
+
 ## v1.11.0 — 2026-05-21
 
 🧪 **테스트 sprint + 보안 강화 + Storybook + 의존성 현대화**. 게이트웨이 라인 커버리지 46% → **98.67%**, 283 → **701 테스트** (+418).
