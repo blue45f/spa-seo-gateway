@@ -20,6 +20,16 @@ pnpm dev            # tsx watch (apps/gateway)
 4. `pnpm test` / `pnpm typecheck` / `pnpm lint` 통과
 5. PR 생성 — 작은 단위로 자주
 
+## PR 규칙
+
+- PR 템플릿(체크리스트)을 기준으로 모든 항목을 완료합니다.
+- PR 본문에는 아래를 기록합니다.
+  - 변경 요약 및 영향 범위
+  - `pnpm test` / `pnpm typecheck` / `pnpm lint` 결과 요약
+  - 회귀 재현 명령 또는 롤백 경로
+- 저장소의 `CodeRabbit review gate` 정책이 있는 경우 최신 head SHA 기준 `APPROVED` 상태여야 병합이 가능합니다.
+- `CodeRabbit review gate`가 없는 PR은 최소 1명 이상의 사람 리뷰와 병합 전 정합성 확인을 충족해야 합니다.
+
 husky 가 commit/push 단계에서 자동으로 typecheck + build + test 검증합니다.
 
 ## 코드 스타일
