@@ -109,6 +109,8 @@ open http://localhost:3000/admin/ui
 | 운영 | [docs/USAGE.md](docs/USAGE.md) | Nginx / Caddy / CDN / K8s 연동 |
 | 성능 | [docs/BENCHMARKS.md](docs/BENCHMARKS.md) | 측정 시나리오와 기대 수치 |
 | 배포 | [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) | Docker / K8s / Cloudflare / Nginx |
+| 관측성 | [docs/OBSERVABILITY.md](docs/OBSERVABILITY.md) | OpenTelemetry / 메트릭 / 로그 |
+| CI / 머지 정책 | [docs/CI-AUTOMATION.md](docs/CI-AUTOMATION.md) | branch protection / CodeRabbit gate / Dependabot auto-merge |
 
 API 레벨 문서: [packages/core/README.md](packages/core/README.md), [packages/admin-ui/README.md](packages/admin-ui/README.md)
 

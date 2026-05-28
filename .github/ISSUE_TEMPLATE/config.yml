@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 🔒 보안 취약점 신고
+    url: https://github.com/blue45f/spa-seo-gateway/security/advisories/new
+    about: 보안 이슈는 비공개 advisory 로 신고해 주세요 (SECURITY.md 참고)
+  - name: 💬 일반 질문
+    url: https://github.com/blue45f/spa-seo-gateway/discussions
+    about: 사용법 / 운영 관련 질문은 Discussions 에서

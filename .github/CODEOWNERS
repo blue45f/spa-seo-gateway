@@ -1,0 +1,12 @@
+# Default owner for everything.
+# 단독 메인테이너 — 모든 PR 에 자동으로 review request 가 들어감.
+* @blue45f
+
+# CI / 자동화 변경은 더 엄격한 검토 대상.
+/.github/ @blue45f
+/.github/workflows/ @blue45f
+
+# 보안에 직접 영향 가는 모듈.
+/packages/core/src/url.ts @blue45f
+/packages/core/src/audit.ts @blue45f
+/packages/core/src/distributed-lock.ts @blue45f

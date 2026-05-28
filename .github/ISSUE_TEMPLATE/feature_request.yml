@@ -1,0 +1,55 @@
+name: ✨ Feature request
+description: 새 기능 / 개선 사항을 제안합니다
+labels: ['enhancement', 'triage']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        기능 제안 감사합니다. 우선 [docs/ARCHITECTURE.md](../docs/ARCHITECTURE.md) 의 설계 원칙과 trade-off 를 확인해 주세요.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: 해결하려는 문제
+      description: 어떤 시나리오에서 막혔거나 불편한지. "왜" 가 핵심입니다.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 제안하는 해결책
+      description: 구체적인 API, 옵션, 동작을 설명해 주세요. 가능하면 사용 예시 포함.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: 검토한 대안
+      description: 다른 접근 방식을 살펴봤다면 — 왜 기각했는지 함께 설명해 주세요.
+
+  - type: dropdown
+    id: scope
+    attributes:
+      label: 영향 범위
+      options:
+        - core 엔진
+        - admin UI / API
+        - CLI
+        - CMS / 멀티 테넌트 모드
+        - 통합 (Anthropic, OpenAI 등 어댑터)
+        - 인프라 (Docker, CI, 배포)
+        - 문서 / DX
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: 사전 확인
+      options:
+        - label: 이미 등록된 비슷한 제안이 없는지 검색했습니다
+          required: true
+        - label: docs/ARCHITECTURE.md 의 trade-off 와 충돌하지 않는지 확인했습니다
+          required: false

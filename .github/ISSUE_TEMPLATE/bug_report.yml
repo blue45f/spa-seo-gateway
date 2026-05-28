@@ -1,0 +1,74 @@
+name: 🐛 Bug report
+description: 재현 가능한 버그를 신고합니다
+labels: ['bug', 'triage']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        버그 리포트 감사합니다. 재현에 필요한 정보를 가능한 한 자세히 적어주세요.
+
+  - type: input
+    id: version
+    attributes:
+      label: spa-seo-gateway 버전
+      description: '`pnpm list @heejun/spa-seo-gateway-core` 또는 git SHA'
+      placeholder: 1.12.2 / git e26bdbc
+    validations:
+      required: true
+
+  - type: dropdown
+    id: mode
+    attributes:
+      label: 운영 모드
+      options:
+        - render-only / proxy
+        - cms
+        - saas
+        - 라이브러리로 직접 import
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: 재현 절차
+      description: 1, 2, 3 형식으로 작성. 최소 재현 케이스가 있으면 더 좋습니다.
+      placeholder: |
+        1. `.env` 의 ORIGIN_URL 을 ... 로 설정
+        2. `pnpm dev` 실행
+        3. `curl -A "Googlebot" http://localhost:3000/...`
+        4. 응답이 ... 가 되어야 하는데 ... 임
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: 기대 동작
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: 실제 동작 / 에러 로그
+      render: shell
+    validations:
+      required: true
+
+  - type: input
+    id: env
+    attributes:
+      label: 환경
+      description: Node / pnpm / OS / 배포 환경 (Docker / bare metal / Cloudflare 등)
+      placeholder: Node 24.4.0 / pnpm 9.15.4 / macOS 15.5 / Docker Compose
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: 사전 확인
+      options:
+        - label: 이미 등록된 비슷한 이슈가 없는지 검색했습니다
+          required: true
+        - label: docs/ 및 README 의 트러블슈팅 섹션을 확인했습니다
+          required: true
