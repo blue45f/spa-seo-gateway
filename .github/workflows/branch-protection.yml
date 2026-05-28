@@ -52,13 +52,11 @@ jobs:
 
           jq -n \
             --argjson contexts "$REQUIRED_CHECKS_JSON" \
-            --argjson checks "$(jq -c '[.[] | {context: ., app_id: -1}]' <<< "$REQUIRED_CHECKS_JSON")" \
             --argjson review_count "$REQUIRED_APPROVING_REVIEW_COUNT" \
             '{
               required_status_checks: {
                 strict: true,
-                contexts: $contexts,
-                checks: $checks
+                contexts: $contexts
               },
               enforce_admins: false,
               required_pull_request_reviews: {
