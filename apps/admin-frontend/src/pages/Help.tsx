@@ -47,25 +47,18 @@ export function Help() {
   const t = useStore((s) => s.t);
   return (
     <section className="space-y-4" data-testid="page-help">
-      <div className="bg-blue-50 dark:bg-indigo-950 dark:border-indigo-900 border border-blue-200 rounded-lg p-4 text-sm">
-        <h3 className="font-semibold text-blue-900 dark:text-indigo-200 mb-1">{t('help.title')}</h3>
-        <p className="text-blue-800 dark:text-indigo-300">
-          처음 접하는 분들이 흔히 만나는 상황과 해결법.
-        </p>
+      <div className="alert alert--info p-4 text-sm">
+        <h3 className="font-semibold text-ink mb-1">{t('help.title')}</h3>
+        <p className="text-ink-muted">처음 접하는 분들이 흔히 만나는 상황과 해결법.</p>
       </div>
       {FAQS.map((f) => (
-        <details
-          key={f.q}
-          className="bg-white dark:bg-slate-900 dark:border-slate-800 rounded-lg shadow-sm border border-slate-200 p-4"
-        >
-          <summary className="cursor-pointer font-semibold">{f.q}</summary>
-          <div className="mt-2 text-sm text-slate-700 dark:text-slate-200 leading-relaxed">
-            {f.a}
-          </div>
+        <details key={f.q} className="panel p-4">
+          <summary className="cursor-pointer font-semibold text-ink">{f.q}</summary>
+          <div className="mt-2 text-sm text-ink-muted leading-relaxed">{f.a}</div>
         </details>
       ))}
-      <div className="bg-white dark:bg-slate-900 dark:border-slate-800 rounded-lg shadow-sm border border-slate-200 p-5 text-sm">
-        <h3 className="font-semibold mb-2">더 자세한 가이드</h3>
+      <div className="panel p-5 text-sm">
+        <h3 className="font-semibold text-ink mb-2">더 자세한 가이드</h3>
         <ul className="space-y-1.5">
           <li>
             📚{' '}
@@ -73,7 +66,7 @@ export function Help() {
               href="https://github.com/blue45f/spa-seo-gateway/blob/main/docs/GETTING-STARTED.md"
               target="_blank"
               rel="noreferrer"
-              className="text-indigo-600 hover:underline"
+              className="link"
             >
               5분 시작 가이드
             </a>
@@ -84,7 +77,7 @@ export function Help() {
               href="https://github.com/blue45f/spa-seo-gateway/blob/main/docs/CONFIGURATION.md"
               target="_blank"
               rel="noreferrer"
-              className="text-indigo-600 hover:underline"
+              className="link"
             >
               전체 설정 레퍼런스
             </a>
@@ -95,7 +88,7 @@ export function Help() {
               href="https://github.com/blue45f/spa-seo-gateway/blob/main/docs/DEPLOYMENT.md"
               target="_blank"
               rel="noreferrer"
-              className="text-indigo-600 hover:underline"
+              className="link"
             >
               배포 (Docker / K8s / CDN)
             </a>
@@ -106,7 +99,7 @@ export function Help() {
               href="https://github.com/blue45f/spa-seo-gateway/blob/main/docs/MULTI-TENANT.md"
               target="_blank"
               rel="noreferrer"
-              className="text-indigo-600 hover:underline"
+              className="link"
             >
               SaaS 모드 (다중 테넌트)
             </a>
@@ -117,7 +110,7 @@ export function Help() {
               href="https://github.com/blue45f/spa-seo-gateway/blob/main/docs/CMS-MODE.md"
               target="_blank"
               rel="noreferrer"
-              className="text-indigo-600 hover:underline"
+              className="link"
             >
               CMS 모드 (다중 사이트)
             </a>
@@ -128,7 +121,7 @@ export function Help() {
               href="https://github.com/blue45f/spa-seo-gateway/blob/main/docs/ARCHITECTURE.md"
               target="_blank"
               rel="noreferrer"
-              className="text-indigo-600 hover:underline"
+              className="link"
             >
               내부 아키텍처
             </a>
@@ -139,7 +132,7 @@ export function Help() {
               href="https://github.com/blue45f/spa-seo-gateway/blob/main/docs/CONCURRENCY.md"
               target="_blank"
               rel="noreferrer"
-              className="text-indigo-600 hover:underline"
+              className="link"
             >
               동시성 모델
             </a>
@@ -150,7 +143,7 @@ export function Help() {
               href="https://github.com/blue45f/spa-seo-gateway/blob/main/docs/BENCHMARKS.md"
               target="_blank"
               rel="noreferrer"
-              className="text-indigo-600 hover:underline"
+              className="link"
             >
               벤치마크 시나리오
             </a>
@@ -161,7 +154,7 @@ export function Help() {
               href="https://github.com/blue45f/spa-seo-gateway/blob/main/docs/MIGRATION-1.7.md"
               target="_blank"
               rel="noreferrer"
-              className="text-indigo-600 hover:underline"
+              className="link"
             >
               v1.5 → v1.7 마이그레이션
             </a>

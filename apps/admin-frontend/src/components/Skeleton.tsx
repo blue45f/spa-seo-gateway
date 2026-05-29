@@ -19,7 +19,7 @@ export function Skeleton({ className = '', style, label = 'loading' }: SkeletonP
       aria-label={label}
       data-testid="skeleton"
       style={style}
-      className={`skeleton-pulse rounded bg-slate-200 dark:bg-slate-800 ${className}`}
+      className={`skeleton-pulse rounded bg-line ${className}`}
     />
   );
 }
@@ -32,7 +32,7 @@ export function CardGridSkeleton({ count = 3 }: { count?: number }) {
         <div
           // biome-ignore lint/suspicious/noArrayIndexKey: decorative skeleton placeholders never reorder
           key={i}
-          className="bg-white dark:bg-slate-900 dark:border-slate-800 rounded-lg shadow-sm border border-slate-200 p-5 space-y-3"
+          className="panel p-5 space-y-3"
         >
           <Skeleton className="h-3 w-20" />
           <Skeleton className="h-7 w-28" />

@@ -9,21 +9,21 @@ export function formatUptime(sec?: number): string {
 }
 
 export function lighthouseScoreColor(score?: number | null): string {
-  if (score == null) return 'text-slate-400';
-  if (score >= 90) return 'text-emerald-600 dark:text-emerald-400';
-  if (score >= 50) return 'text-amber-600 dark:text-amber-400';
-  return 'text-red-600 dark:text-red-400';
+  if (score == null) return 'text-ink-subtle';
+  if (score >= 90) return 'text-ok-fg';
+  if (score >= 50) return 'text-warn-fg';
+  return 'text-err-fg';
 }
 
 export function methodPillClass(method: string): string {
   return (
     {
-      GET: 'bg-emerald-100 text-emerald-800',
-      POST: 'bg-blue-100 text-blue-800 dark:text-indigo-300',
-      PUT: 'bg-amber-100 text-amber-800',
-      DELETE: 'bg-red-100 text-red-800',
-      PATCH: 'bg-purple-100 text-purple-800',
-    }[method] ?? 'bg-slate-100'
+      GET: 'bg-ok-bg text-ok-fg',
+      POST: 'bg-accent-soft text-accent',
+      PUT: 'bg-warn-bg text-warn-fg',
+      DELETE: 'bg-err-bg text-err-fg',
+      PATCH: 'bg-panel-2 text-ink-muted',
+    }[method] ?? 'bg-panel-2 text-ink-subtle'
   );
 }
 

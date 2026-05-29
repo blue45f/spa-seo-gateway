@@ -86,17 +86,15 @@ function RoutesBody() {
 
   return (
     <section className="space-y-4" data-testid="page-routes">
-      <div className="bg-blue-50 dark:bg-indigo-950 dark:border-indigo-900 border border-blue-200 rounded-lg p-4 text-sm">
-        <h3 className="font-semibold text-blue-900 dark:text-indigo-200 mb-1">
-          {t('routes.title')}
-        </h3>
-        <p className="text-blue-800 dark:text-indigo-300">{t('routes.intro')}</p>
+      <div className="alert alert--info p-4 text-sm">
+        <h3 className="font-semibold text-ink mb-1">{t('routes.title')}</h3>
+        <p className="text-ink-muted">{t('routes.intro')}</p>
       </div>
 
       <div className="flex flex-wrap gap-2">
         <button
           type="button"
-          className="px-3 py-2 rounded bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-sm"
+          className="btn-ghost px-3 py-2 text-sm"
           onClick={load}
           disabled={loading}
         >
@@ -104,14 +102,14 @@ function RoutesBody() {
         </button>
         <button
           type="button"
-          className="ml-auto px-3 py-2 rounded bg-emerald-600 hover:bg-emerald-700 text-white text-sm"
+          className="btn-primary ml-auto px-3 py-2 text-sm"
           onClick={() => save(false)}
         >
           {t('btn.save-memory')}
         </button>
         <button
           type="button"
-          className="px-3 py-2 rounded bg-emerald-700 hover:bg-emerald-800 text-white text-sm"
+          className="btn-primary px-3 py-2 text-sm"
           onClick={() => save(true)}
           title="seo-gateway.config.json 에 영구 저장"
         >

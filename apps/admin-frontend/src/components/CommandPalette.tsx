@@ -44,21 +44,21 @@ export function CommandPalette() {
       }}
       data-testid="cmd-palette"
     >
-      <div className="bg-white dark:bg-slate-900 rounded-lg shadow-2xl w-full max-w-md overflow-hidden">
+      <div className="bg-panel border border-line rounded-lg shadow-2xl w-full max-w-md overflow-hidden">
         <input
           ref={inputRef}
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder={t('cmd.placeholder')}
-          className="w-full px-4 py-3 text-sm border-b border-slate-200 dark:border-slate-700 bg-transparent focus:outline-none"
+          className="w-full px-4 py-3 text-sm border-b border-line bg-transparent text-ink placeholder:text-ink-subtle focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-inset"
         />
         <ul className="max-h-72 overflow-y-auto">
           {filtered.map((n) => (
             <li key={n.id}>
               <button
                 type="button"
-                className="w-full text-left px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-3"
+                className="w-full text-left px-4 py-2 hover:bg-accent-soft flex items-center gap-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-inset"
                 onClick={() => {
                   navigate(n.path);
                   close();
@@ -66,12 +66,12 @@ export function CommandPalette() {
               >
                 <span aria-hidden="true">{n.icon}</span>
                 <span className="flex-1 text-sm">{n.label}</span>
-                <span className="text-xs text-slate-500">{n.subtitle}</span>
+                <span className="text-xs text-ink-subtle">{n.subtitle}</span>
               </button>
             </li>
           ))}
           {filtered.length === 0 ? (
-            <li className="px-4 py-8 text-sm text-center text-slate-500">{t('cmd.empty')}</li>
+            <li className="px-4 py-8 text-sm text-center text-ink-subtle">{t('cmd.empty')}</li>
           ) : null}
         </ul>
       </div>

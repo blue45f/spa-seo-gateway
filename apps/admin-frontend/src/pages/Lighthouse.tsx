@@ -45,20 +45,17 @@ function LighthouseBody() {
 
   return (
     <section className="space-y-4" data-testid="page-lighthouse">
-      <h2 className="font-semibold text-lg">{t('lighthouse.title')}</h2>
-      <p className="text-sm text-slate-600 dark:text-slate-300">
+      <h2 className="text-lg font-semibold tracking-tight text-ink">{t('lighthouse.title')}</h2>
+      <p className="text-sm text-ink-muted">
         peer-installed <code>lighthouse</code> + <code>chrome-launcher</code> 가 필요합니다.
       </p>
 
-      <form
-        onSubmit={run}
-        className="bg-white dark:bg-slate-900 dark:border-slate-800 rounded-lg shadow-sm border border-slate-200 p-5 space-y-3"
-      >
+      <form onSubmit={run} className="panel p-5 space-y-3">
         <label className="block">
           <span className="text-sm font-medium">{t('lighthouse.url.label')}</span>
           <input
             type="url"
-            className="mt-1 w-full px-3 py-2 rounded border border-slate-300 dark:border-slate-700 dark:bg-slate-800 text-sm"
+            className="input mt-1 w-full px-3 py-2 text-sm"
             placeholder="https://www.example.com/"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
@@ -67,29 +64,27 @@ function LighthouseBody() {
         <button
           type="submit"
           disabled={running || !url.trim()}
-          className="px-4 py-2 rounded bg-slate-900 dark:bg-indigo-600 text-white text-sm font-medium hover:bg-slate-700 disabled:opacity-60"
+          className="btn-primary px-4 py-2 text-sm font-medium disabled:opacity-60"
         >
           {running ? t('btn.running') : t('lighthouse.run')}
         </button>
       </form>
 
       {result ? (
-        <div className="bg-white dark:bg-slate-900 dark:border-slate-800 rounded-lg shadow-sm border border-slate-200 p-5 space-y-3">
+        <div className="panel p-5 space-y-3">
           <div className="flex items-center justify-between flex-wrap gap-2">
             <div>
               <code className="text-sm">{result.url}</code>
               {result.cached ? (
-                <span className="ml-2 text-xs text-emerald-600 dark:text-emerald-400">
-                  {t('lighthouse.cached')}
-                </span>
+                <span className="ml-2 text-xs text-ok">{t('lighthouse.cached')}</span>
               ) : null}
             </div>
-            <span className="text-xs text-slate-500">{result.durationMs}ms</span>
+            <span className="text-xs text-ink-subtle">{result.durationMs}ms</span>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {labels.map((l) => (
-              <div key={l.key} className="bg-slate-50 dark:bg-slate-800 rounded p-4 text-center">
-                <div className="text-xs text-slate-500 dark:text-slate-400">{l.label}</div>
+              <div key={l.key} className="bg-panel-2 rounded p-4 text-center">
+                <div className="text-xs text-ink-subtle">{l.label}</div>
                 <div
                   className={`mt-2 text-3xl font-bold ${lighthouseScoreColor(result.scores[l.key])}`}
                 >

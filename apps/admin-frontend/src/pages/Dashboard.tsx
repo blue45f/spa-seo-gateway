@@ -45,16 +45,20 @@ function DashboardBody() {
         </section>
       );
     }
-    return <p className="text-sm text-slate-500">{t('dashboard.empty')}</p>;
+    return <p className="text-sm text-ink-subtle">{t('dashboard.empty')}</p>;
   }
 
+  const ttlMin = Math.floor((info.cache?.ttlMs ?? 0) / 60_000);
+  const swrMin = info.cache?.swrMs ? Math.floor(info.cache.swrMs / 60_000) : 0;
+  const breakerHosts = info.breakers ? Object.entries(info.breakers) : [];
+
   return (
-    <section className="space-y-4" data-testid="page-dashboard">
+    <section className="space-y-5" data-testid="page-dashboard">
       <div className="flex items-center justify-between">
-        <h2 className="font-semibold text-lg">현재 게이트웨이 상태</h2>
+        <h2 className="text-lg font-semibold tracking-tight text-ink">현재 게이트웨이 상태</h2>
         <button
           type="button"
-          className="px-3 py-1.5 text-sm rounded bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700"
+          className="px-3 py-1.5 text-sm rounded-md border border-line bg-panel-2 text-ink-muted hover:text-ink hover:border-line-strong disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
           onClick={load}
           disabled={loading}
         >
@@ -62,59 +66,68 @@ function DashboardBody() {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card label="mode" value={info.mode} detail={info.origin || '(origin 미설정)'} />
-        <Card label="routes" value={String(info.site?.routes ?? 0)} detail="런타임 활성" />
-        <Card
-          label="cache"
-          value={`${Math.floor((info.cache?.ttlMs ?? 0) / 60_000)}m TTL`}
-          detail={`${info.cache?.swrMs ? Math.floor(info.cache.swrMs / 60_000) : 0}m SWR · redis ${info.cache?.redisEnabled ? 'ON' : 'OFF'}`}
-        />
+      {/* vitals — 동일 카드 3개 그리드가 아닌, 내부 위계가 있는 단일 패널 */}
+      <div className="panel divide-y divide-line sm:flex sm:divide-y-0 sm:divide-x">
+        <div className="flex-1 p-5 min-w-0">
+          <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.12em] text-ink-subtle">
+            <span className="w-1.5 h-1.5 rounded-full bg-ok" aria-hidden="true" />
+            mode
+          </div>
+          <div className="font-mono text-2xl text-ink mt-2">{info.mode}</div>
+          <div className="text-xs text-ink-muted mt-1.5 font-mono truncate">
+            {info.origin || '(origin 미설정)'}
+          </div>
+        </div>
+        <div className="flex-1 p-5">
+          <div className="text-[11px] uppercase tracking-[0.12em] text-ink-subtle">routes</div>
+          <div className="font-mono text-2xl text-ink mt-2">{String(info.site?.routes ?? 0)}</div>
+          <div className="text-xs text-ink-muted mt-1.5">런타임 활성</div>
+        </div>
+        <div className="flex-1 p-5">
+          <div className="text-[11px] uppercase tracking-[0.12em] text-ink-subtle">cache</div>
+          <div className="font-mono text-2xl text-ink mt-2">{ttlMin}m TTL</div>
+          <div className="text-xs text-ink-muted mt-2 flex items-center gap-2 flex-wrap">
+            <span className="font-mono">{swrMin}m SWR</span>
+            <span className={`badge ${info.cache?.redisEnabled ? 'badge--ok' : 'badge--neutral'}`}>
+              redis {info.cache?.redisEnabled ? 'ON' : 'OFF'}
+            </span>
+          </div>
+        </div>
       </div>
 
-      <div className="bg-white dark:bg-slate-900 dark:border-slate-800 rounded-lg shadow-sm border border-slate-200 p-5">
-        <h3 className="font-semibold mb-3">Circuit breakers (호스트별)</h3>
-        {info.breakers && Object.keys(info.breakers).length > 0 ? (
+      <div className="panel p-5">
+        <h3 className="font-semibold tracking-tight text-ink mb-3">Circuit breakers (호스트별)</h3>
+        {breakerHosts.length > 0 ? (
           <table className="w-full text-sm">
-            <thead className="text-xs uppercase text-slate-500">
-              <tr>
-                <th className="text-left py-2">host</th>
-                <th className="text-left py-2">state</th>
-                <th className="text-left py-2">failures</th>
+            <thead className="text-[11px] uppercase tracking-wider text-ink-subtle">
+              <tr className="border-b border-line">
+                <th className="text-left font-medium py-2">host</th>
+                <th className="text-left font-medium py-2">state</th>
+                <th className="text-right font-medium py-2">failures</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {Object.entries(info.breakers).map(([host, b]) => (
+            <tbody className="divide-y divide-line">
+              {breakerHosts.map(([host, b]) => (
                 <tr key={host}>
-                  <td className="py-2 font-mono text-xs">{host}</td>
-                  <td className="py-2">
+                  <td className="py-2.5 font-mono text-xs text-ink">{host}</td>
+                  <td className="py-2.5">
                     <span
-                      className={`px-2 py-0.5 rounded text-xs ${b.state === 'open' ? 'bg-red-100 text-red-800' : b.state === 'half-open' ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}`}
+                      className={`badge ${b.state === 'open' ? 'badge--err' : b.state === 'half-open' ? 'badge--warn' : 'badge--ok'}`}
                     >
                       {b.state}
                     </span>
                   </td>
-                  <td className="py-2 font-mono text-xs">{b.failures}</td>
+                  <td className="py-2.5 font-mono text-xs text-right text-ink-muted">
+                    {b.failures}
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         ) : (
-          <p className="text-sm text-slate-500">아직 추적된 호스트가 없습니다.</p>
+          <p className="text-sm text-ink-subtle">아직 추적된 호스트가 없습니다.</p>
         )}
       </div>
     </section>
-  );
-}
-
-function Card({ label, value, detail }: { label: string; value: string; detail: string }) {
-  return (
-    <div className="bg-white dark:bg-slate-900 dark:border-slate-800 rounded-lg shadow-sm border border-slate-200 p-5">
-      <div className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-        {label}
-      </div>
-      <div className="font-mono text-2xl mt-1">{value}</div>
-      <div className="text-xs text-slate-500 dark:text-slate-400 mt-2">{detail}</div>
-    </div>
   );
 }

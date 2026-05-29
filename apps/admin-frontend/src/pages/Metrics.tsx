@@ -42,12 +42,12 @@ function MetricsBody() {
     return () => clearInterval(id);
   }, [autoRefresh, load]);
 
-  if (!parsed) return <p className="text-sm text-slate-500">loading metrics...</p>;
+  if (!parsed) return <p className="text-sm text-ink-subtle">loading metrics...</p>;
 
   return (
     <section className="space-y-4" data-testid="page-metrics">
       <div className="flex items-center justify-between flex-wrap gap-2">
-        <h2 className="font-semibold text-lg">{t('metrics.title')}</h2>
+        <h2 className="text-lg font-semibold tracking-tight text-ink">{t('metrics.title')}</h2>
         <div className="flex items-center gap-2 text-sm">
           <label className="flex items-center gap-1">
             <input
@@ -57,14 +57,10 @@ function MetricsBody() {
             />
             {t('metrics.autoRefresh')}
           </label>
-          <span className="text-xs text-slate-500">
+          <span className="text-xs text-ink-subtle">
             {t('metrics.lastUpdated')}: {updated || '...'}
           </span>
-          <button
-            type="button"
-            className="px-3 py-1.5 rounded bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700"
-            onClick={load}
-          >
+          <button type="button" className="btn-ghost px-3 py-1.5" onClick={load}>
             {t('btn.refresh')}
           </button>
         </div>
@@ -82,10 +78,10 @@ function MetricsBody() {
       </div>
 
       {parsed.renderHist.length > 0 ? (
-        <div className="bg-white dark:bg-slate-900 dark:border-slate-800 rounded-lg shadow-sm border border-slate-200 p-5">
-          <h3 className="font-semibold mb-3">렌더 지연 히스토그램 (per outcome/host)</h3>
+        <div className="panel p-5">
+          <h3 className="font-semibold mb-3 text-ink">렌더 지연 히스토그램 (per outcome/host)</h3>
           <table className="w-full text-sm">
-            <thead className="text-xs uppercase text-slate-500">
+            <thead className="text-xs uppercase text-ink-subtle">
               <tr>
                 <th className="text-left py-2">key</th>
                 <th className="text-right py-2">p50</th>
@@ -94,7 +90,7 @@ function MetricsBody() {
                 <th className="text-right py-2">count</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+            <tbody className="divide-y divide-line">
               {parsed.renderHist.map((r) => (
                 <tr key={r.key}>
                   <td className="py-2 font-mono text-xs">{r.key}</td>
@@ -110,10 +106,10 @@ function MetricsBody() {
       ) : null}
 
       {Object.keys(parsed.errors).length > 0 ? (
-        <div className="bg-white dark:bg-slate-900 dark:border-slate-800 rounded-lg shadow-sm border border-slate-200 p-5">
-          <h3 className="font-semibold mb-3">에러 분류</h3>
+        <div className="panel p-5">
+          <h3 className="font-semibold mb-3 text-ink">에러 분류</h3>
           <table className="w-full text-sm">
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+            <tbody className="divide-y divide-line">
               {Object.entries(parsed.errors)
                 .sort((a, b) => b[1] - a[1])
                 .map(([reason, count]) => (
@@ -129,7 +125,7 @@ function MetricsBody() {
 
       <details className="text-sm">
         <summary className="cursor-pointer">/metrics 원본 (Prometheus exposition)</summary>
-        <pre className="mt-2 text-xs bg-slate-50 dark:bg-slate-800 p-3 rounded overflow-auto max-h-96">
+        <pre className="panel-inset mt-2 text-xs p-3 overflow-auto max-h-96">
           {raw || '(empty)'}
         </pre>
       </details>
@@ -139,12 +135,10 @@ function MetricsBody() {
 
 function Card({ label, value, detail }: { label: string; value: string; detail: string }) {
   return (
-    <div className="bg-white dark:bg-slate-900 dark:border-slate-800 rounded-lg shadow-sm border border-slate-200 p-4">
-      <div className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-        {label}
-      </div>
+    <div className="panel p-4">
+      <div className="text-xs text-ink-subtle uppercase tracking-wider">{label}</div>
       <div className="font-mono text-2xl mt-1">{value}</div>
-      <div className="text-xs text-slate-500 dark:text-slate-400 mt-2">{detail}</div>
+      <div className="text-xs text-ink-subtle mt-2">{detail}</div>
     </div>
   );
 }

@@ -40,21 +40,19 @@ export class ErrorBoundary extends Component<Props, State> {
         <div
           role="alert"
           data-testid="error-boundary"
-          className="bg-red-50 dark:bg-red-950 dark:border-red-900 border border-red-200 rounded p-5 text-sm space-y-3"
+          className="alert alert--err p-5 text-sm space-y-3"
         >
           <div>
-            <strong className="text-red-800 dark:text-red-200">
+            <strong>
               페이지를 그리는 중 오류가 발생했습니다 / Something broke while rendering this page.
             </strong>
-            <p className="mt-1 text-red-700 dark:text-red-300 font-mono text-xs break-words">
-              {this.state.error.message}
-            </p>
+            <p className="mt-1 font-mono text-xs break-words">{this.state.error.message}</p>
           </div>
           <div className="flex gap-2">
             <button
               type="button"
               onClick={this.reset}
-              className="px-3 py-1.5 rounded bg-red-600 text-white text-xs font-medium hover:bg-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2"
+              className="btn-primary px-3 py-1.5 text-xs font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
             >
               다시 시도 / Retry
             </button>
@@ -63,7 +61,7 @@ export class ErrorBoundary extends Component<Props, State> {
               onClick={() => {
                 if (typeof window !== 'undefined') window.location.reload();
               }}
-              className="px-3 py-1.5 rounded bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2"
+              className="btn-ghost px-3 py-1.5 text-xs font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
             >
               새로고침 / Reload
             </button>

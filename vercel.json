@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "pnpm --filter @spa-seo-gateway/demo run build",
+  "buildCommand": "pnpm --filter @spa-seo-gateway/admin-frontend run build && pnpm --filter @spa-seo-gateway/demo run build",
   "outputDirectory": "apps/demo/public",
   "framework": null,
   "rewrites": [

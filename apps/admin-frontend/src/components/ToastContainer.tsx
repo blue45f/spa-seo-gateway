@@ -1,10 +1,10 @@
 import { useStore } from '../lib/store';
 
 const KIND_BG: Record<string, string> = {
-  success: 'bg-emerald-600',
-  error: 'bg-red-600',
-  warn: 'bg-amber-500',
-  info: 'bg-slate-700',
+  success: 'bg-ok-bg text-ok-fg border border-ok',
+  error: 'bg-err-bg text-err-fg border border-err',
+  warn: 'bg-warn-bg text-warn-fg border border-warn',
+  info: 'bg-accent-soft text-ink border border-accent',
 };
 
 export function ToastContainer() {
@@ -22,14 +22,14 @@ export function ToastContainer() {
         <div
           key={t.id}
           role={t.kind === 'error' ? 'alert' : 'status'}
-          className={`toast-enter ${KIND_BG[t.kind] ?? 'bg-slate-700'} text-white text-sm rounded-lg px-4 py-2 shadow-lg flex items-center gap-2 min-w-[220px]`}
+          className={`toast-enter ${KIND_BG[t.kind] ?? 'bg-accent-soft text-ink border border-accent'} text-sm rounded-lg px-4 py-2 shadow-lg flex items-center gap-2 min-w-[220px]`}
         >
           <span aria-hidden="true">{t.icon}</span>
           <span className="flex-1">{t.message}</span>
           <button
             type="button"
             onClick={() => removeToast(t.id)}
-            className="opacity-70 hover:opacity-100 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+            className="opacity-70 hover:opacity-100 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
             aria-label="dismiss"
           >
             ×
