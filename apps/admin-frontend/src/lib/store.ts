@@ -3,17 +3,31 @@
  */
 import { create } from 'zustand';
 import { translate } from './i18n';
-import type { Lang, PublicInfo, Theme, ToastItem, ToastKind } from './types';
+import type { Density, Lang, PublicInfo, Theme, ThemeMode, ToastItem, ToastKind } from './types';
 
 const TOUR_KEY = 'seo-admin-tour-seen';
 const THEME_KEY = 'seo-admin-theme';
+const DENSITY_KEY = 'seo-admin-density';
 const LANG_KEY = 'seo-admin-lang';
 
-function detectInitialTheme(): Theme {
-  if (typeof window === 'undefined') return 'light';
-  const saved = window.localStorage?.getItem(THEME_KEY) as Theme | null;
-  if (saved === 'dark' || saved === 'light') return saved;
-  return matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+function systemPrefersDark(): boolean {
+  return typeof window !== 'undefined' && matchMedia('(prefers-color-scheme: dark)').matches;
+}
+
+function detectInitialThemeMode(): ThemeMode {
+  if (typeof window === 'undefined') return 'system';
+  const saved = window.localStorage?.getItem(THEME_KEY);
+  return saved === 'dark' || saved === 'light' || saved === 'system' ? saved : 'system';
+}
+
+function resolveTheme(mode: ThemeMode): Theme {
+  if (mode === 'system') return systemPrefersDark() ? 'dark' : 'light';
+  return mode;
+}
+
+function detectInitialDensity(): Density {
+  if (typeof window === 'undefined') return 'comfortable';
+  return window.localStorage?.getItem(DENSITY_KEY) === 'compact' ? 'compact' : 'comfortable';
 }
 
 function detectInitialLang(): Lang {
@@ -28,6 +42,8 @@ type State = {
   adminEnabled: boolean;
   loginToken: string;
   theme: Theme;
+  themeMode: ThemeMode;
+  density: Density;
   lang: Lang;
   sidebarOpen: boolean;
   cmdPaletteOpen: boolean;
@@ -44,6 +60,8 @@ type Actions = {
   setAdminEnabled(v: boolean): void;
   setPublicInfo(info: PublicInfo | null): void;
   toggleTheme(): void;
+  setThemeMode(mode: ThemeMode): void;
+  toggleDensity(): void;
   toggleLang(): void;
   toggleSidebar(): void;
   setSidebarOpen(open: boolean): void;
@@ -65,7 +83,9 @@ export const useStore = create<State & Actions>((set, get) => ({
   authed: false,
   adminEnabled: true,
   loginToken: '',
-  theme: detectInitialTheme(),
+  theme: resolveTheme(detectInitialThemeMode()),
+  themeMode: detectInitialThemeMode(),
+  density: detectInitialDensity(),
   lang: detectInitialLang(),
   sidebarOpen: typeof window !== 'undefined' ? window.innerWidth >= 768 : true,
   cmdPaletteOpen: false,
@@ -87,12 +107,24 @@ export const useStore = create<State & Actions>((set, get) => ({
   },
 
   toggleTheme() {
-    const next: Theme = get().theme === 'dark' ? 'light' : 'dark';
+    // explicit flip (light <-> dark); "system" is only reachable via setThemeMode
+    get().setThemeMode(get().theme === 'dark' ? 'light' : 'dark');
+  },
+  setThemeMode(mode) {
+    const eff = resolveTheme(mode);
     if (typeof document !== 'undefined') {
-      document.documentElement.classList.toggle('dark', next === 'dark');
-      window.localStorage?.setItem(THEME_KEY, next);
+      document.documentElement.classList.toggle('dark', eff === 'dark');
+      window.localStorage?.setItem(THEME_KEY, mode);
     }
-    set({ theme: next });
+    set({ themeMode: mode, theme: eff });
+  },
+  toggleDensity() {
+    const next: Density = get().density === 'compact' ? 'comfortable' : 'compact';
+    if (typeof document !== 'undefined') {
+      document.documentElement.setAttribute('data-density', next);
+      window.localStorage?.setItem(DENSITY_KEY, next);
+    }
+    set({ density: next });
   },
 
   toggleLang() {
@@ -152,3 +184,13 @@ export const useStore = create<State & Actions>((set, get) => ({
     return translate(get().lang, key, fallback);
   },
 }));
+
+// Live-follow the OS theme while the user's choice is "system".
+if (typeof window !== 'undefined') {
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+    if (useStore.getState().themeMode !== 'system') return;
+    const eff: Theme = e.matches ? 'dark' : 'light';
+    document.documentElement.classList.toggle('dark', eff === 'dark');
+    useStore.setState({ theme: eff });
+  });
+}

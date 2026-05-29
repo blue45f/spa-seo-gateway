@@ -41,6 +41,8 @@ export function resetStore() {
     adminEnabled: true,
     loginToken: '',
     theme: 'light',
+    themeMode: 'system',
+    density: 'comfortable',
     lang: 'ko',
     sidebarOpen: true,
     cmdPaletteOpen: false,

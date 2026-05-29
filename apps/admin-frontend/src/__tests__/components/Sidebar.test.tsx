@@ -48,11 +48,23 @@ describe('Sidebar', () => {
     expect(badges).toHaveLength(4);
   });
 
-  it('toggleTheme changes theme on click', () => {
+  it('theme button cycles system → light → dark → system', () => {
     renderWithRouter(<Sidebar />);
-    expect(useStore.getState().theme).toBe('light');
-    fireEvent.click(screen.getByText('다크 모드'));
+    // resetStore leaves themeMode at its default 'system'
+    fireEvent.click(screen.getByText('시스템 테마'));
+    expect(useStore.getState().themeMode).toBe('light');
+    fireEvent.click(screen.getByText('라이트 모드'));
+    expect(useStore.getState().themeMode).toBe('dark');
     expect(useStore.getState().theme).toBe('dark');
+    fireEvent.click(screen.getByText('다크 모드'));
+    expect(useStore.getState().themeMode).toBe('system');
+  });
+
+  it('density button toggles comfortable ↔ compact', () => {
+    renderWithRouter(<Sidebar />);
+    fireEvent.click(screen.getByText('보통 간격'));
+    expect(useStore.getState().density).toBe('compact');
+    expect(screen.getByText('좁은 간격')).toBeInTheDocument();
   });
 
   it('toggleLang switches between KO and EN', () => {

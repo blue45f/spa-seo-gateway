@@ -1,4 +1,4 @@
-import { ExternalLink, Languages, Moon, Sun } from 'lucide-react';
+import { ExternalLink, Languages, Monitor, Moon, Rows3, Rows4, Sun } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { api } from '../lib/api';
 import { type GatewayMode, type NavItem, navItemsForLang } from '../lib/nav';
@@ -11,14 +11,19 @@ type SidebarProps = {
 
 export function Sidebar({ publicMode }: SidebarProps) {
   const lang = useStore((s) => s.lang);
-  const theme = useStore((s) => s.theme);
+  const themeMode = useStore((s) => s.themeMode);
+  const setThemeMode = useStore((s) => s.setThemeMode);
+  const density = useStore((s) => s.density);
+  const toggleDensity = useStore((s) => s.toggleDensity);
   const authed = useStore((s) => s.authed);
   const sidebarOpen = useStore((s) => s.sidebarOpen);
-  const toggleTheme = useStore((s) => s.toggleTheme);
   const toggleLang = useStore((s) => s.toggleLang);
   const t = useStore((s) => s.t);
   const setAuthed = useStore((s) => s.setAuthed);
   const pushToast = useStore((s) => s.pushToast);
+
+  const ThemeIcon = themeMode === 'system' ? Monitor : themeMode === 'dark' ? Moon : Sun;
+  const DensityIcon = density === 'compact' ? Rows4 : Rows3;
 
   const items: Array<NavItem & { label: string; subtitle: string }> = navItemsForLang(
     lang,
@@ -115,15 +120,22 @@ export function Sidebar({ publicMode }: SidebarProps) {
         <button
           type="button"
           className="w-full text-left text-rail-ink-muted hover:text-rail-ink flex items-center gap-2 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-          onClick={toggleTheme}
-          aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
+          onClick={() =>
+            setThemeMode(themeMode === 'light' ? 'dark' : themeMode === 'dark' ? 'system' : 'light')
+          }
+          aria-label={`Theme: ${themeMode} — click to change`}
         >
-          {theme === 'dark' ? (
-            <Sun aria-hidden="true" className="h-4 w-4" strokeWidth={1.75} />
-          ) : (
-            <Moon aria-hidden="true" className="h-4 w-4" strokeWidth={1.75} />
-          )}
-          <span>{theme === 'dark' ? t('theme.light') : t('theme.dark')}</span>
+          <ThemeIcon aria-hidden="true" className="h-4 w-4" strokeWidth={1.75} />
+          <span>{t(`theme.${themeMode}`)}</span>
+        </button>
+        <button
+          type="button"
+          className="w-full text-left text-rail-ink-muted hover:text-rail-ink flex items-center gap-2 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+          onClick={toggleDensity}
+          aria-label={`Density: ${density} — click to toggle`}
+        >
+          <DensityIcon aria-hidden="true" className="h-4 w-4" strokeWidth={1.75} />
+          <span>{density === 'compact' ? t('density.compact') : t('density.comfortable')}</span>
         </button>
         <button
           type="button"

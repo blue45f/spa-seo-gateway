@@ -128,6 +128,8 @@ export type ToastItem = {
 
 export type Lang = 'ko' | 'en';
 export type Theme = 'light' | 'dark';
+export type ThemeMode = 'light' | 'dark' | 'system';
+export type Density = 'comfortable' | 'compact';
 
 // ─────────── CMS / SaaS shared route entry (subset of core's RouteOverride) ───────────
 export type ScopedRoute = {

@@ -6,11 +6,15 @@
     <title>spa-seo-gateway · admin</title>
     <link rel="icon" href="data:," />
     <script>
-      // FOUC 방지 — paint 전에 다크 클래스 복원
+      // FOUC 방지 — paint 전에 테마/밀도 복원
       try {
-        const saved = localStorage.getItem('seo-admin-theme');
-        if (saved === 'dark' || (saved === null && matchMedia('(prefers-color-scheme: dark)').matches)) {
+        var tm = localStorage.getItem('seo-admin-theme');
+        var sysDark = matchMedia('(prefers-color-scheme: dark)').matches;
+        if (tm === 'dark' || ((tm === null || tm === 'system') && sysDark)) {
           document.documentElement.classList.add('dark');
+        }
+        if (localStorage.getItem('seo-admin-density') === 'compact') {
+          document.documentElement.setAttribute('data-density', 'compact');
         }
       } catch {}
     </script>

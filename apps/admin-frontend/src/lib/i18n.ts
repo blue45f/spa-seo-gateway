@@ -48,6 +48,9 @@ const ko: Strings = {
   // Theme / lang
   'theme.dark': '다크 모드',
   'theme.light': '라이트 모드',
+  'theme.system': '시스템 테마',
+  'density.comfortable': '보통 간격',
+  'density.compact': '좁은 간격',
 
   // Common buttons
   'btn.save-memory': '저장 (메모리)',
@@ -308,6 +311,9 @@ const en: Strings = {
   // Theme / lang
   'theme.dark': 'Dark mode',
   'theme.light': 'Light mode',
+  'theme.system': 'System theme',
+  'density.comfortable': 'Comfortable',
+  'density.compact': 'Compact',
 
   // Common buttons
   'btn.save-memory': 'Save (memory)',

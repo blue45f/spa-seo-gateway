@@ -36,6 +36,29 @@ describe('admin store', () => {
     expect(document.documentElement.classList.contains('dark')).toBe(false);
   });
 
+  it('setThemeMode applies explicit dark and "system" (follows OS)', () => {
+    useStore.getState().setThemeMode('dark');
+    expect(useStore.getState().themeMode).toBe('dark');
+    expect(useStore.getState().theme).toBe('dark');
+    expect(document.documentElement.classList.contains('dark')).toBe(true);
+    expect(window.localStorage?.getItem('seo-admin-theme')).toBe('dark');
+
+    useStore.getState().setThemeMode('system');
+    expect(useStore.getState().themeMode).toBe('system');
+    expect(window.localStorage?.getItem('seo-admin-theme')).toBe('system');
+    expect(['light', 'dark']).toContain(useStore.getState().theme);
+  });
+
+  it('toggleDensity flips density + root attr + localStorage', () => {
+    useStore.setState({ density: 'comfortable' });
+    useStore.getState().toggleDensity();
+    expect(useStore.getState().density).toBe('compact');
+    expect(document.documentElement.getAttribute('data-density')).toBe('compact');
+    expect(window.localStorage?.getItem('seo-admin-density')).toBe('compact');
+    useStore.getState().toggleDensity();
+    expect(useStore.getState().density).toBe('comfortable');
+  });
+
   it('toggleLang persists to localStorage', () => {
     useStore.getState().toggleLang();
     expect(useStore.getState().lang).toBe('en');
