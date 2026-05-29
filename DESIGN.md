@@ -74,10 +74,35 @@ Use these instead of re-deriving Tailwind clusters. Color/state live in the clas
 
 Dark code/terminal blocks use `bg-rail text-rail-ink` (consistent dark surface in both themes).
 
+Reusable React components: `EmptyState` (teaching empty states), `Skeleton` / `CardGridSkeleton`
+/ `DetailSkeleton` (loading placeholders), `NavIcon`, `Modal`.
+
+## Iconography
+
+[lucide-react](https://lucide.dev) line icons, never emoji. `NavIcon` maps each nav id to an icon
+(keyed by id, so `nav.ts` data stays clean) and is shared by the Sidebar and command palette;
+toasts map `kind` to `CircleCheck` / `CircleX` / `CircleAlert` / `Info`; close / dismiss use `X`;
+the theme/lang toggles use `Sun` / `Moon` / `Languages`. `strokeWidth={1.75}` for the instrument
+feel; every decorative icon is `aria-hidden`. On the constant-dark rail, status green uses the
+`--color-ok-rail` token (a lighter green that still meets AA on the rail).
+
 ## Theme
 
 `.dark` on `<html>` (restored pre-paint by the bootstrap script in `index.html`, mirrored in
 Storybook via `@storybook/addon-themes`). CSS variables swap; component code rarely needs `dark:`.
+
+## Accessibility
+
+- **Contrast**: every text/background token pair meets WCAG AA (≥4.5:1), verified by computing
+  OKLCH→sRGB relative luminance. The muted/subtle ink tiers and status-label colors are tuned to
+  pass in both light and dark.
+- **Focus**: every interactive element has a visible `focus-visible` accent ring (buttons, links,
+  inputs, nav, rail controls).
+- **Bypass blocks**: a skip-to-content link (visible on focus) jumps past the nav to `<main>`
+  (`id="main-content"`).
+- **Motion**: all animation/transition is disabled under `prefers-reduced-motion: reduce`.
+- **Semantics**: roles, `aria-*`, and `aria-current` are preserved; decorative icons are
+  `aria-hidden`; status is never conveyed by color alone (text label + icon accompany it).
 
 ## Do / Don't
 
