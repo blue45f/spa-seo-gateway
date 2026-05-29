@@ -29,7 +29,7 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   render: () => (
-    <div className="p-6 bg-white dark:bg-slate-900">
+    <div className="p-6 bg-panel">
       <SeedAuth authed={false} />
       <LoginForm />
     </div>
@@ -42,9 +42,9 @@ export const Default: Story = {
  */
 export const DisabledInitially: Story = {
   render: () => (
-    <div className="p-6 bg-white dark:bg-slate-900">
+    <div className="p-6 bg-panel">
       <SeedAuth authed={false} />
-      <p className="text-xs text-slate-500 mb-3">
+      <p className="text-xs text-ink-subtle mb-3">
         Type into the field to enable the submit button.
       </p>
       <LoginForm />

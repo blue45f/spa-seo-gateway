@@ -21,7 +21,7 @@ const meta = {
     size: 'lg',
     onClose: () => {},
     children: (
-      <p className="text-sm text-slate-700 dark:text-slate-200">
+      <p className="text-sm text-ink-muted">
         Modal body content goes here. Tailwind dark mode applies automatically.
       </p>
     ),
@@ -46,7 +46,7 @@ export const ExtraLarge: Story = {
     children: (
       <div className="space-y-3 text-sm">
         <p>Larger modals are used for the routes editor and site/tenant detail forms.</p>
-        <pre className="bg-slate-100 dark:bg-slate-800 rounded p-3 text-xs">
+        <pre className="panel-inset p-3 text-xs">
           {`{
   "pattern": "^/products/[0-9]+",
   "ttlMs": 60000,
@@ -77,7 +77,7 @@ export const Interactive: Story = {
         <div className="p-8">
           <button
             type="button"
-            className="px-3 py-2 rounded bg-slate-900 text-white text-sm"
+            className="btn-primary px-3 py-2 text-sm"
             onClick={() => setOpen(true)}
           >
             Open modal

@@ -53,7 +53,7 @@ type Story = StoryObj<typeof meta>;
 
 export const Empty: Story = {
   render: () => (
-    <div className="min-h-screen relative p-6 text-sm text-slate-500">
+    <div className="min-h-screen relative p-6 text-sm text-ink-subtle">
       <SeedToasts items={[]} />
       No toasts visible — store is empty.
       <ToastContainer />

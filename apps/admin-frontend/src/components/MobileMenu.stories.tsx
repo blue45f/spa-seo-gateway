@@ -22,9 +22,9 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   render: () => (
-    <div className="relative min-h-[200px] bg-slate-100 dark:bg-slate-800">
+    <div className="relative min-h-[200px] bg-panel-2">
       <MobileMenu />
-      <div className="p-12 text-sm text-slate-600 dark:text-slate-300">
+      <div className="p-12 text-sm text-ink-muted">
         The hamburger is `fixed top-3 left-3 z-50` — visible only at viewports under `md`.
       </div>
     </div>

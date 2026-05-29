@@ -18,8 +18,8 @@ const preview: Preview = {
     backgrounds: {
       default: 'light',
       values: [
-        { name: 'light', value: '#f8fafc' }, // slate-50
-        { name: 'dark', value: '#020617' }, // slate-950
+        { name: 'light', value: 'oklch(0.974 0.005 80)' }, // --app-bg (warm paper)
+        { name: 'dark', value: 'oklch(0.175 0.006 80)' }, // --app-bg (warm charcoal)
       ],
     },
   },

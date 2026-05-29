@@ -29,7 +29,7 @@ const meta = {
       <MemoryRouter initialEntries={['/']}>
         <div className="flex min-h-screen">
           <Story />
-          <div className="flex-1 p-6 text-sm text-slate-500">
+          <div className="flex-1 p-6 text-sm text-ink-subtle">
             Content area (Storybook preview — Sidebar is on the left).
           </div>
         </div>

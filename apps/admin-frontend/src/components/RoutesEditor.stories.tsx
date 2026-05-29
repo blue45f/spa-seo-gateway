@@ -58,9 +58,9 @@ function Stateful({
   return (
     <div className="space-y-3">
       <RoutesEditor routes={routes} onChange={setRoutes} reorderable={reorderable} />
-      <details className="text-xs text-slate-500">
+      <details className="text-xs text-ink-subtle">
         <summary>current value (JSON)</summary>
-        <pre className="mt-2 bg-slate-100 dark:bg-slate-800 p-2 rounded overflow-x-auto">
+        <pre className="mt-2 panel-inset p-2 overflow-x-auto">
           {JSON.stringify(routes, null, 2)}
         </pre>
       </details>

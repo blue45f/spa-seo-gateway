@@ -42,7 +42,7 @@ export const Open: Story = {
 
 export const Closed: Story = {
   render: () => (
-    <div className="p-8 text-sm text-slate-500">
+    <div className="p-8 text-sm text-ink-subtle">
       <SeedOpen open={false} />
       Modal renders nothing when `shortcutsOpen` is false.
       <ShortcutsModal />
