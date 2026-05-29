@@ -86,7 +86,7 @@ function AuditLogBody() {
           {t('audit.verify')}
         </button>
         {verified !== null ? (
-          <span className={`ml-auto text-sm ${verified ? 'text-ok' : 'text-err'}`}>
+          <span className={`ml-auto text-sm ${verified ? 'text-ok-fg' : 'text-err-fg'}`}>
             {verified ? t('audit.ok') : `${t('audit.broken')} brokenAt=${brokenAt}`}
           </span>
         ) : null}

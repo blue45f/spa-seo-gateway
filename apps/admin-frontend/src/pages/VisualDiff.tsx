@@ -143,7 +143,7 @@ function VisualDiffBody() {
             </div>
           </div>
           {result.baselineCreated ? (
-            <div className="text-xs text-ok">{t('visual.created')}</div>
+            <div className="text-xs text-ok-fg">{t('visual.created')}</div>
           ) : null}
           <div className="text-xs text-ink-subtle">
             baseline path: <code>{result.baselinePath}</code>

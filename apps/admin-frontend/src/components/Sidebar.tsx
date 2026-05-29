@@ -73,7 +73,7 @@ export function Sidebar({ publicMode }: SidebarProps) {
               </span>
               <span className="flex-1">{item.label}</span>
               {item.public ? (
-                <span className="text-[10px] uppercase tracking-wider text-ok">public</span>
+                <span className="text-[10px] uppercase tracking-wider text-ok-rail">public</span>
               ) : null}
             </Link>
           );

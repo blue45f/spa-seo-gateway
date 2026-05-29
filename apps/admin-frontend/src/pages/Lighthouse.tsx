@@ -76,7 +76,7 @@ function LighthouseBody() {
             <div>
               <code className="text-sm">{result.url}</code>
               {result.cached ? (
-                <span className="ml-2 text-xs text-ok">{t('lighthouse.cached')}</span>
+                <span className="ml-2 text-xs text-ok-fg">{t('lighthouse.cached')}</span>
               ) : null}
             </div>
             <span className="text-xs text-ink-subtle">{result.durationMs}ms</span>
