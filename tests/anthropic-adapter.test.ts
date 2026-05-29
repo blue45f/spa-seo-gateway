@@ -42,6 +42,10 @@ describe('extractJson', () => {
     expect(extractJson('Here it is: [{"a":2}] end.')).toEqual([{ a: 2 }]);
   });
 
+  it('extracts the first valid JSON array when earlier bracketed text is not JSON', () => {
+    expect(extractJson('Note: [schema]\n[{"a":3}] end.')).toEqual([{ a: 3 }]);
+  });
+
   it('throws on non-JSON', () => {
     expect(() => extractJson('정말 JSON 아님')).toThrow();
   });

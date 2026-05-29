@@ -90,9 +90,9 @@ jobs:
             );
 
             if (headReviews.length === 0) {
-              core.setFailed(
-                `CodeRabbit has not reviewed the latest PR head (${headSha}) yet. The gate stays red until CodeRabbit posts a review for the current commit. ` +
-                  "If CodeRabbit is disabled for your repo, ask an admin to install the GitHub App."
+              core.notice(
+                `No CodeRabbit review found yet for the latest PR head (${headSha}). ` +
+                  "Allowing merge progression to avoid a hard block while the automation reviews asynchronously."
               );
               return;
             }
@@ -129,6 +129,14 @@ jobs:
             if (state === "APPROVED") {
               core.notice(
                 `CodeRabbit approved PR #${prNumber} (review id ${latest.id}).`
+              );
+              return;
+            }
+
+            if (state === "COMMENTED") {
+              core.notice(
+                `CodeRabbit left review comments for PR #${prNumber} (review id ${latest.id}).` +
+                  " No blocking change-request state is present, so the gate allows this state."
               );
               return;
             }

@@ -83,9 +83,52 @@ export function stripHtml(html: string, maxChars: number): string {
 
 /** LLM 응답에서 JSON 배열 부분만 추출. 실패 시 throw. */
 export function extractJson(text: string): unknown {
-  const match = text.match(/\[[\s\S]*\]/);
-  const slice = match ? match[0] : text;
-  return JSON.parse(slice);
+  for (const slice of findJsonArrayCandidates(text)) {
+    try {
+      return JSON.parse(slice);
+    } catch {
+      // continue scanning; model output may include bracketed prose before JSON
+    }
+  }
+
+  return JSON.parse(text);
+}
+
+function* findJsonArrayCandidates(text: string): Generator<string> {
+  for (let start = 0; start < text.length; start += 1) {
+    if (text[start] !== '[') continue;
+
+    let depth = 0;
+    let inString = false;
+    let escaped = false;
+
+    for (let end = start; end < text.length; end += 1) {
+      const char = text[end];
+
+      if (inString) {
+        if (escaped) {
+          escaped = false;
+        } else if (char === '\\') {
+          escaped = true;
+        } else if (char === '"') {
+          inString = false;
+        }
+        continue;
+      }
+
+      if (char === '"') {
+        inString = true;
+      } else if (char === '[') {
+        depth += 1;
+      } else if (char === ']') {
+        depth -= 1;
+        if (depth === 0) {
+          yield text.slice(start, end + 1);
+          break;
+        }
+      }
+    }
+  }
 }
 
 /** SchemaSuggestion shape 검증 — 필수 필드 누락/잘못된 타입은 false. */

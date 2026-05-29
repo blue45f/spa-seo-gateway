@@ -42,6 +42,10 @@ describe('openai extractJson + isValidSuggestion', () => {
     expect(extractJson('Result:\n[{"a":2}]\nfin.')).toEqual([{ a: 2 }]);
   });
 
+  it('extracts the first valid JSON array when earlier bracketed text is not JSON', () => {
+    expect(extractJson('Note: [schema]\n[{"a":3}]\nfin.')).toEqual([{ a: 3 }]);
+  });
+
   it('throws on non-JSON', () => {
     expect(() => extractJson('garbage')).toThrow();
   });
