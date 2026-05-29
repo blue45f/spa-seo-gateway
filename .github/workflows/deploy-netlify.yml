@@ -1,0 +1,71 @@
+name: Deploy Admin Demo to Netlify
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/admin-frontend/**'
+      - 'apps/demo/**'
+      - 'packages/admin-ui/**'
+      - 'packages/core/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - '.github/workflows/deploy-netlify.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+      NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Skip deployment when Netlify secrets are not configured
+        if: env.NETLIFY_AUTH_TOKEN == '' || env.NETLIFY_SITE_ID == ''
+        run: echo "NETLIFY_AUTH_TOKEN or NETLIFY_SITE_ID is not configured; skipping Netlify deployment."
+
+      - uses: pnpm/action-setup@v6
+        if: env.NETLIFY_AUTH_TOKEN != '' && env.NETLIFY_SITE_ID != ''
+
+      - uses: actions/setup-node@v6
+        if: env.NETLIFY_AUTH_TOKEN != '' && env.NETLIFY_SITE_ID != ''
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        if: env.NETLIFY_AUTH_TOKEN != '' && env.NETLIFY_SITE_ID != ''
+        run: pnpm install --frozen-lockfile
+
+      - name: Build admin frontend
+        if: env.NETLIFY_AUTH_TOKEN != '' && env.NETLIFY_SITE_ID != ''
+        run: pnpm --filter @spa-seo-gateway/admin-frontend run build
+
+      - name: Build demo bundle
+        if: env.NETLIFY_AUTH_TOKEN != '' && env.NETLIFY_SITE_ID != ''
+        run: pnpm --filter @spa-seo-gateway/demo run build
+
+      - name: Install Netlify CLI
+        if: env.NETLIFY_AUTH_TOKEN != '' && env.NETLIFY_SITE_ID != ''
+        run: npm i -g netlify-cli@latest
+
+      - name: Deploy production site
+        if: env.NETLIFY_AUTH_TOKEN != '' && env.NETLIFY_SITE_ID != ''
+        run: |
+          netlify deploy \
+            --auth "$NETLIFY_AUTH_TOKEN" \
+            --site "$NETLIFY_SITE_ID" \
+            --prod \
+            --dir "apps/demo/public" \
+            --message "deploy($GITHUB_SHA)"
