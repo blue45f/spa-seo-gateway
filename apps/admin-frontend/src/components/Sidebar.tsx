@@ -1,4 +1,4 @@
-import { Languages, Moon, Sun } from 'lucide-react';
+import { ExternalLink, Languages, Moon, Sun } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { api } from '../lib/api';
 import { type GatewayMode, type NavItem, navItemsForLang } from '../lib/nav';
@@ -107,9 +107,10 @@ export function Sidebar({ publicMode }: SidebarProps) {
           href="https://github.com/blue45f/spa-seo-gateway"
           target="_blank"
           rel="noreferrer"
-          className="block rounded text-rail-ink-muted hover:text-rail-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+          className="flex items-center gap-1.5 rounded text-rail-ink-muted hover:text-rail-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
         >
-          ↗ GitHub
+          <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+          GitHub
         </a>
         <button
           type="button"

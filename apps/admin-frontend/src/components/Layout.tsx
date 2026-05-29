@@ -1,3 +1,4 @@
+import { X } from 'lucide-react';
 import { Suspense, useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { api } from '../lib/api';
@@ -39,11 +40,21 @@ export function Layout() {
   // ⌘S 와 Escape 는 페이지 별 / App 레벨에서 자체 처리하므로 root div 에 핸들러 불필요.
   return (
     <div className="flex min-h-screen">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-3 focus:top-3 focus:z-[200] focus:rounded-md focus:bg-accent focus:px-3 focus:py-2 focus:text-sm focus:font-medium focus:text-accent-fg"
+      >
+        메인 콘텐츠로 건너뛰기
+      </a>
       <MobileMenu />
       <Sidebar publicMode={publicInfo?.mode ?? undefined} />
       <div className="flex-1 flex flex-col min-w-0 md:ml-0 ml-0">
         <Header />
-        <main className="flex-1 p-6 max-w-7xl w-full mx-auto space-y-6">
+        <main
+          id="main-content"
+          tabIndex={-1}
+          className="flex-1 p-6 max-w-7xl w-full mx-auto space-y-6 focus:outline-none"
+        >
           <GlobalErrorBanner />
           <ErrorBoundary>
             <Suspense
@@ -90,7 +101,7 @@ function GlobalErrorBanner() {
         aria-label="Dismiss error"
         className="opacity-70 hover:opacity-100 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-err"
       >
-        ×
+        <X className="h-4 w-4" aria-hidden="true" />
       </button>
     </div>
   );
