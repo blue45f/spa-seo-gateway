@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { navItemsForLang } from '../lib/nav';
 import { useStore } from '../lib/store';
+import { NavIcon } from './NavIcon';
 
 export function CommandPalette() {
   const open = useStore((s) => s.cmdPaletteOpen);
@@ -64,7 +65,9 @@ export function CommandPalette() {
                   close();
                 }}
               >
-                <span aria-hidden="true">{n.icon}</span>
+                <span aria-hidden="true" className="flex text-ink-subtle">
+                  <NavIcon id={n.id} className="h-4 w-4" />
+                </span>
                 <span className="flex-1 text-sm">{n.label}</span>
                 <span className="text-xs text-ink-subtle">{n.subtitle}</span>
               </button>

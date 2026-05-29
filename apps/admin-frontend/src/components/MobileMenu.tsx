@@ -1,3 +1,4 @@
+import { Menu } from 'lucide-react';
 import { useStore } from '../lib/store';
 
 export function MobileMenu() {
@@ -12,7 +13,7 @@ export function MobileMenu() {
       aria-expanded={open}
       aria-controls="primary-sidebar"
     >
-      <span aria-hidden="true">☰</span>
+      <Menu aria-hidden="true" className="h-5 w-5" strokeWidth={1.75} />
     </button>
   );
 }

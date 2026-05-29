@@ -1,7 +1,9 @@
+import { Languages, Moon, Sun } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { api } from '../lib/api';
 import { type GatewayMode, type NavItem, navItemsForLang } from '../lib/nav';
 import { useStore } from '../lib/store';
+import { NavIcon } from './NavIcon';
 
 type SidebarProps = {
   publicMode?: GatewayMode;
@@ -66,8 +68,8 @@ export function Sidebar({ publicMode }: SidebarProps) {
               aria-current={active ? 'page' : undefined}
               className={`nav-item w-full text-left px-3 py-2 rounded-md flex items-center gap-2.5 hover:bg-rail-elev hover:text-rail-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${active ? 'active' : ''}`}
             >
-              <span className="w-5 text-center text-[15px] opacity-90" aria-hidden="true">
-                {item.icon}
+              <span className="flex w-5 justify-center opacity-90" aria-hidden="true">
+                <NavIcon id={item.id} className="h-[18px] w-[18px]" />
               </span>
               <span className="flex-1">{item.label}</span>
               {item.public ? (
@@ -115,7 +117,11 @@ export function Sidebar({ publicMode }: SidebarProps) {
           onClick={toggleTheme}
           aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
         >
-          <span aria-hidden="true">{theme === 'dark' ? '☀️' : '🌙'}</span>
+          {theme === 'dark' ? (
+            <Sun aria-hidden="true" className="h-4 w-4" strokeWidth={1.75} />
+          ) : (
+            <Moon aria-hidden="true" className="h-4 w-4" strokeWidth={1.75} />
+          )}
           <span>{theme === 'dark' ? t('theme.light') : t('theme.dark')}</span>
         </button>
         <button
@@ -125,7 +131,7 @@ export function Sidebar({ publicMode }: SidebarProps) {
           title={lang === 'ko' ? 'Switch to English' : '한국어로 전환'}
           aria-label={lang === 'ko' ? 'Switch to English' : 'Switch to Korean'}
         >
-          <span aria-hidden="true">🌐</span>
+          <Languages aria-hidden="true" className="h-4 w-4" strokeWidth={1.75} />
           <span>{lang === 'ko' ? 'English' : '한국어'}</span>
         </button>
       </div>
