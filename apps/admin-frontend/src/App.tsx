@@ -9,6 +9,7 @@ import { api } from './lib/api';
 import { useStore } from './lib/store';
 // Eager: 자주 들어오는 페이지 + 초기 진입점 (Welcome/Dashboard/Routes).
 import { Dashboard } from './pages/Dashboard';
+import { NotFound } from './pages/NotFound';
 import { RoutesPage } from './pages/Routes';
 import { Welcome } from './pages/Welcome';
 
@@ -126,7 +127,7 @@ export function App() {
           <Route path="api" element={<ApiExplorer />} />
           <Route path="library" element={<Library />} />
           <Route path="help" element={<Help />} />
-          <Route path="*" element={<Welcome />} />
+          <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
       <CommandPalette />

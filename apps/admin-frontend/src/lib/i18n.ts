@@ -255,6 +255,11 @@ const ko: Strings = {
   // Cmd palette
   'cmd.placeholder': '탭 검색... (⌘/Ctrl + K)',
   'cmd.empty': '일치하는 탭이 없습니다.',
+
+  // Not found
+  'notFound.title': '페이지를 찾을 수 없습니다',
+  'notFound.hint': '주소가 바뀌었거나 삭제된 페이지일 수 있어요. 사이드바에서 다시 찾아보세요.',
+  'notFound.home': '홈으로',
 };
 
 const en: Strings = {
@@ -513,6 +518,11 @@ const en: Strings = {
   // Cmd palette
   'cmd.placeholder': 'Search tabs... (⌘/Ctrl + K)',
   'cmd.empty': 'No matching tabs.',
+
+  // Not found
+  'notFound.title': 'Page not found',
+  'notFound.hint': 'The address may have changed or been removed. Try the sidebar.',
+  'notFound.home': 'Back to home',
 };
 
 const dicts: Record<Lang, Strings> = { ko, en };
