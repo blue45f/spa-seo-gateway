@@ -42,3 +42,16 @@ export function CardGridSkeleton({ count = 3 }: { count?: number }) {
     </div>
   );
 }
+
+/** Detail-page placeholder — a panel with a heading and a few field rows. */
+export function DetailSkeleton({ rows = 4 }: { rows?: number }) {
+  return (
+    <div className="panel p-5 space-y-3" data-testid="detail-skeleton">
+      <Skeleton className="h-4 w-40" />
+      {Array.from({ length: rows }).map((_, i) => (
+        // biome-ignore lint/suspicious/noArrayIndexKey: decorative skeleton placeholders never reorder
+        <Skeleton key={i} className="h-9 w-full" />
+      ))}
+    </div>
+  );
+}

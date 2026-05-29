@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { AuthGate } from '../components/AuthGate';
+import { CardGridSkeleton } from '../components/Skeleton';
 import { fetchText } from '../lib/api';
 import { type ParsedMetrics, parsePrometheus, summarize } from '../lib/metrics';
 import { useStore } from '../lib/store';
@@ -42,7 +43,7 @@ function MetricsBody() {
     return () => clearInterval(id);
   }, [autoRefresh, load]);
 
-  if (!parsed) return <p className="text-sm text-ink-subtle">loading metrics...</p>;
+  if (!parsed) return <CardGridSkeleton count={3} />;
 
   return (
     <section className="space-y-4" data-testid="page-metrics">
