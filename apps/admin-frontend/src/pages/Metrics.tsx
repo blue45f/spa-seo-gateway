@@ -81,6 +81,7 @@ function MetricsBody() {
       {parsed.renderHist.length > 0 ? (
         <div className="panel p-5">
           <h3 className="font-semibold mb-3 text-ink">렌더 지연 히스토그램 (per outcome/host)</h3>
+          <LatencyBars rows={parsed.renderHist} />
           <table className="w-full text-sm">
             <thead className="text-xs uppercase text-ink-subtle">
               <tr>
@@ -140,6 +141,50 @@ function Card({ label, value, detail }: { label: string; value: string; detail: 
       <div className="text-xs text-ink-subtle uppercase tracking-wider">{label}</div>
       <div className="font-mono text-2xl mt-1">{value}</div>
       <div className="text-xs text-ink-subtle mt-2">{detail}</div>
+    </div>
+  );
+}
+
+/** p95 latency → status tone: green <1s, amber <3s, red ≥3s. */
+function latencyTone(ms: number): 'ok' | 'warn' | 'err' {
+  if (ms < 1000) return 'ok';
+  if (ms < 3000) return 'warn';
+  return 'err';
+}
+
+const TONE_BAR: Record<'ok' | 'warn' | 'err', string> = {
+  ok: 'bg-ok',
+  warn: 'bg-warn',
+  err: 'bg-err',
+};
+
+/**
+ * Horizontal p95-latency bars per histogram key — at-a-glance render health.
+ * Decorative (aria-hidden): the table below carries the same data for SR users.
+ */
+function LatencyBars({ rows }: { rows: { key: string; p95?: number }[] }) {
+  const withP95 = rows.filter((r): r is { key: string; p95: number } => r.p95 != null);
+  if (withP95.length === 0) return null;
+  const max = Math.max(...withP95.map((r) => r.p95), 1);
+  return (
+    <div className="mb-4 space-y-1.5" aria-hidden="true">
+      {withP95.map((r) => {
+        const tone = latencyTone(r.p95);
+        return (
+          <div key={r.key} className="flex items-center gap-2 text-xs">
+            <span className="w-44 shrink-0 truncate font-mono text-ink-muted" title={r.key}>
+              {r.key}
+            </span>
+            <div className="h-2 flex-1 overflow-hidden rounded-full bg-panel-2">
+              <div
+                className={`h-full rounded-full ${TONE_BAR[tone]}`}
+                style={{ width: `${Math.max(2, (r.p95 / max) * 100)}%` }}
+              />
+            </div>
+            <span className="w-16 shrink-0 text-right font-mono text-ink">{r.p95}ms</span>
+          </div>
+        );
+      })}
     </div>
   );
 }
