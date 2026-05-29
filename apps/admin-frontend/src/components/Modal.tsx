@@ -1,3 +1,4 @@
+import { X } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useEffect, useId, useRef } from 'react';
 
@@ -70,11 +71,11 @@ export function Modal({ open, onClose, title, children, size = 'lg' }: ModalProp
           </div>
           <button
             type="button"
-            className="text-ink-subtle hover:text-ink text-xl leading-none rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+            className="text-ink-subtle hover:text-ink rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
             onClick={onClose}
             aria-label="Close dialog"
           >
-            ×
+            <X className="h-5 w-5" aria-hidden="true" />
           </button>
         </div>
         <div className="px-5 py-4">{children}</div>
