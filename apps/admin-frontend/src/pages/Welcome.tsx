@@ -161,7 +161,7 @@ Human ──→ Edge/CDN ──→ origin (gateway는 204 또는 proxy)`}</pre>
 
 function Stat({ label, value, truncate }: { label: string; value: string; truncate?: boolean }) {
   return (
-    <div className="bg-white/10 rounded p-3">
+    <div className="bg-accent-fg/10 rounded p-3">
       <div className="text-xs text-accent-fg/80">{label}</div>
       <div className={`font-mono mt-1 ${truncate ? 'truncate' : ''}`}>{value}</div>
     </div>
