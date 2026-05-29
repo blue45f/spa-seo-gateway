@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { AuthGate } from '../components/AuthGate';
+import { EmptyState } from '../components/EmptyState';
 import { ApiError, api } from '../lib/api';
 import { useStore } from '../lib/store';
 import type { AuditEvent } from '../lib/types';
@@ -129,8 +130,11 @@ function AuditLogBody() {
             ))}
             {events.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-3 py-8 text-center text-ink-subtle">
-                  {t('audit.empty')}
+                <td colSpan={6}>
+                  <EmptyState
+                    title={t('audit.empty')}
+                    hint="설정 변경 · 캐시 무효화 같은 관리자 작업이 발생하면 여기에 기록됩니다."
+                  />
                 </td>
               </tr>
             ) : null}

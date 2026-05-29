@@ -1,6 +1,7 @@
 import { type FormEvent, useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AuthGate } from '../components/AuthGate';
+import { EmptyState } from '../components/EmptyState';
 import { Modal } from '../components/Modal';
 import { ApiError, api } from '../lib/api';
 import { useStore } from '../lib/store';
@@ -132,7 +133,12 @@ function TenantsBody() {
       </div>
 
       {tenants.length === 0 ? (
-        <p className="text-sm text-ink-subtle py-8 text-center">{t('tenants.empty')}</p>
+        <div className="panel">
+          <EmptyState
+            title={t('tenants.empty')}
+            hint="테넌트를 추가하면 apiKey · host 로 식별되는 고객별 origin · routes 설정을 관리할 수 있습니다."
+          />
+        </div>
       ) : (
         <div className="panel overflow-x-auto">
           <table className="w-full text-sm">
