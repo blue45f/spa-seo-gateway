@@ -23,13 +23,6 @@ function detectInitialLang(): Lang {
   return navigator.language?.startsWith('ko') ? 'ko' : 'en';
 }
 
-const TOAST_ICONS: Record<ToastKind, string> = {
-  success: '✓',
-  error: '✗',
-  warn: '⚠',
-  info: 'ℹ️',
-};
-
 type State = {
   authed: boolean;
   adminEnabled: boolean;
@@ -143,7 +136,7 @@ export const useStore = create<State & Actions>((set, get) => ({
   pushToast(message, kind = 'info') {
     const id = Date.now() + Math.random();
     set((s) => ({
-      toasts: [...s.toasts, { id, message, kind, icon: TOAST_ICONS[kind] }],
+      toasts: [...s.toasts, { id, message, kind }],
     }));
     setTimeout(() => get().removeToast(id), 4000);
   },
