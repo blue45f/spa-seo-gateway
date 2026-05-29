@@ -19,8 +19,8 @@ import {
 } from 'lucide-react';
 
 /**
- * Maps a nav item id to a cohesive line icon. Keyed by id (not the emoji in
- * nav.ts) so the single-source nav data is untouched. Falls back to Sparkles
+ * Maps a nav item id to a cohesive line icon. Keyed by id so nav.ts stays the
+ * single source for structure while icons live here. Falls back to Sparkles
  * for any unmapped id.
  */
 const NAV_ICONS: Record<string, LucideIcon> = {

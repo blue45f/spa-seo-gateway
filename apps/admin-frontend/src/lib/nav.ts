@@ -7,7 +7,6 @@ export type NavItem = {
   id: string;
   /** react-router path 부분 (basename 은 '/admin/ui') */
   path: string;
-  icon: string;
   labelKey: string;
   subtitleKey: string;
   /** 인증 없이 접근 가능 */
@@ -16,12 +15,14 @@ export type NavItem = {
   modes?: GatewayMode[];
 };
 
-/** 사이드바 / command palette / 라우터 매핑이 모두 참조하는 단일 진실 원천. */
+/**
+ * 사이드바 / command palette / 라우터 매핑이 모두 참조하는 단일 진실 원천.
+ * 아이콘은 id 기준으로 NavIcon(lucide) 이 렌더하므로 여기엔 두지 않는다.
+ */
 export const NAV_ITEMS: NavItem[] = [
   {
     id: 'welcome',
     path: '/',
-    icon: '👋',
     labelKey: 'nav.welcome',
     subtitleKey: 'nav.welcome.sub',
     public: true,
@@ -29,48 +30,42 @@ export const NAV_ITEMS: NavItem[] = [
   {
     id: 'dashboard',
     path: '/dashboard',
-    icon: '📊',
     labelKey: 'nav.dashboard',
     subtitleKey: 'nav.dashboard.sub',
   },
   {
     id: 'routes',
     path: '/routes',
-    icon: '🛣️',
     labelKey: 'nav.routes',
     subtitleKey: 'nav.routes.sub',
   },
-  { id: 'cache', path: '/cache', icon: '🗄️', labelKey: 'nav.cache', subtitleKey: 'nav.cache.sub' },
-  { id: 'warm', path: '/warm', icon: '🔥', labelKey: 'nav.warm', subtitleKey: 'nav.warm.sub' },
-  { id: 'test', path: '/test', icon: '🧪', labelKey: 'nav.test', subtitleKey: 'nav.test.sub' },
+  { id: 'cache', path: '/cache', labelKey: 'nav.cache', subtitleKey: 'nav.cache.sub' },
+  { id: 'warm', path: '/warm', labelKey: 'nav.warm', subtitleKey: 'nav.warm.sub' },
+  { id: 'test', path: '/test', labelKey: 'nav.test', subtitleKey: 'nav.test.sub' },
   {
     id: 'metrics',
     path: '/metrics',
-    icon: '📈',
     labelKey: 'nav.metrics',
     subtitleKey: 'nav.metrics.sub',
   },
   {
     id: 'lighthouse',
     path: '/lighthouse',
-    icon: '💡',
     labelKey: 'nav.lighthouse',
     subtitleKey: 'nav.lighthouse.sub',
   },
   {
     id: 'visual',
     path: '/visual',
-    icon: '🖼️',
     labelKey: 'nav.visual',
     subtitleKey: 'nav.visual.sub',
   },
-  { id: 'ai', path: '/ai', icon: '✨', labelKey: 'nav.ai', subtitleKey: 'nav.ai.sub' },
-  { id: 'audit', path: '/audit', icon: '🔐', labelKey: 'nav.audit', subtitleKey: 'nav.audit.sub' },
+  { id: 'ai', path: '/ai', labelKey: 'nav.ai', subtitleKey: 'nav.ai.sub' },
+  { id: 'audit', path: '/audit', labelKey: 'nav.audit', subtitleKey: 'nav.audit.sub' },
   // 모드별 페이지 — Sidebar/Router/CmdPalette 가 publicInfo.mode 기준으로 필터.
   {
     id: 'sites',
     path: '/sites',
-    icon: '🌐',
     labelKey: 'nav.sites',
     subtitleKey: 'nav.sites.sub',
     modes: ['cms'],
@@ -78,7 +73,6 @@ export const NAV_ITEMS: NavItem[] = [
   {
     id: 'tenants',
     path: '/tenants',
-    icon: '🏢',
     labelKey: 'nav.tenants',
     subtitleKey: 'nav.tenants.sub',
     modes: ['saas'],
@@ -86,7 +80,6 @@ export const NAV_ITEMS: NavItem[] = [
   {
     id: 'api',
     path: '/api',
-    icon: '🔌',
     labelKey: 'nav.api',
     subtitleKey: 'nav.api.sub',
     public: true,
@@ -94,7 +87,6 @@ export const NAV_ITEMS: NavItem[] = [
   {
     id: 'library',
     path: '/library',
-    icon: '📦',
     labelKey: 'nav.library',
     subtitleKey: 'nav.library.sub',
     public: true,
@@ -102,7 +94,6 @@ export const NAV_ITEMS: NavItem[] = [
   {
     id: 'help',
     path: '/help',
-    icon: '❓',
     labelKey: 'nav.help',
     subtitleKey: 'nav.help.sub',
     public: true,

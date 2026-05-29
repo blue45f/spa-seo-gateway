@@ -1,4 +1,30 @@
+import {
+  BookOpen,
+  Building2,
+  ChartColumn,
+  Globe,
+  type LucideIcon,
+  Network,
+  Rocket,
+  Settings,
+  TrendingUp,
+  Zap,
+} from 'lucide-react';
 import { useStore } from '../lib/store';
+
+const DOCS_BASE = 'https://github.com/blue45f/spa-seo-gateway/blob/main/docs';
+
+const GUIDES: Array<{ icon: LucideIcon; href: string; label: string }> = [
+  { icon: BookOpen, href: `${DOCS_BASE}/GETTING-STARTED.md`, label: '5분 시작 가이드' },
+  { icon: Settings, href: `${DOCS_BASE}/CONFIGURATION.md`, label: '전체 설정 레퍼런스' },
+  { icon: Rocket, href: `${DOCS_BASE}/DEPLOYMENT.md`, label: '배포 (Docker / K8s / CDN)' },
+  { icon: Building2, href: `${DOCS_BASE}/MULTI-TENANT.md`, label: 'SaaS 모드 (다중 테넌트)' },
+  { icon: Globe, href: `${DOCS_BASE}/CMS-MODE.md`, label: 'CMS 모드 (다중 사이트)' },
+  { icon: Network, href: `${DOCS_BASE}/ARCHITECTURE.md`, label: '내부 아키텍처' },
+  { icon: Zap, href: `${DOCS_BASE}/CONCURRENCY.md`, label: '동시성 모델' },
+  { icon: ChartColumn, href: `${DOCS_BASE}/BENCHMARKS.md`, label: '벤치마크 시나리오' },
+  { icon: TrendingUp, href: `${DOCS_BASE}/MIGRATION-1.7.md`, label: 'v1.5 → v1.7 마이그레이션' },
+];
 
 const FAQS = [
   {
@@ -60,105 +86,23 @@ export function Help() {
       <div className="panel p-5 text-sm">
         <h3 className="font-semibold text-ink mb-2">더 자세한 가이드</h3>
         <ul className="space-y-1.5">
-          <li>
-            📚{' '}
-            <a
-              href="https://github.com/blue45f/spa-seo-gateway/blob/main/docs/GETTING-STARTED.md"
-              target="_blank"
-              rel="noreferrer"
-              className="link"
-            >
-              5분 시작 가이드
-            </a>
-          </li>
-          <li>
-            ⚙️{' '}
-            <a
-              href="https://github.com/blue45f/spa-seo-gateway/blob/main/docs/CONFIGURATION.md"
-              target="_blank"
-              rel="noreferrer"
-              className="link"
-            >
-              전체 설정 레퍼런스
-            </a>
-          </li>
-          <li>
-            🚀{' '}
-            <a
-              href="https://github.com/blue45f/spa-seo-gateway/blob/main/docs/DEPLOYMENT.md"
-              target="_blank"
-              rel="noreferrer"
-              className="link"
-            >
-              배포 (Docker / K8s / CDN)
-            </a>
-          </li>
-          <li>
-            🏢{' '}
-            <a
-              href="https://github.com/blue45f/spa-seo-gateway/blob/main/docs/MULTI-TENANT.md"
-              target="_blank"
-              rel="noreferrer"
-              className="link"
-            >
-              SaaS 모드 (다중 테넌트)
-            </a>
-          </li>
-          <li>
-            🌐{' '}
-            <a
-              href="https://github.com/blue45f/spa-seo-gateway/blob/main/docs/CMS-MODE.md"
-              target="_blank"
-              rel="noreferrer"
-              className="link"
-            >
-              CMS 모드 (다중 사이트)
-            </a>
-          </li>
-          <li>
-            🏗️{' '}
-            <a
-              href="https://github.com/blue45f/spa-seo-gateway/blob/main/docs/ARCHITECTURE.md"
-              target="_blank"
-              rel="noreferrer"
-              className="link"
-            >
-              내부 아키텍처
-            </a>
-          </li>
-          <li>
-            ⚡{' '}
-            <a
-              href="https://github.com/blue45f/spa-seo-gateway/blob/main/docs/CONCURRENCY.md"
-              target="_blank"
-              rel="noreferrer"
-              className="link"
-            >
-              동시성 모델
-            </a>
-          </li>
-          <li>
-            📊{' '}
-            <a
-              href="https://github.com/blue45f/spa-seo-gateway/blob/main/docs/BENCHMARKS.md"
-              target="_blank"
-              rel="noreferrer"
-              className="link"
-            >
-              벤치마크 시나리오
-            </a>
-          </li>
-          <li>
-            ⬆️{' '}
-            <a
-              href="https://github.com/blue45f/spa-seo-gateway/blob/main/docs/MIGRATION-1.7.md"
-              target="_blank"
-              rel="noreferrer"
-              className="link"
-            >
-              v1.5 → v1.7 마이그레이션
-            </a>
-          </li>
+          {GUIDES.map(({ icon: Icon, href, label }) => (
+            <li key={href}>
+              <a
+                href={href}
+                target="_blank"
+                rel="noreferrer"
+                className="link inline-flex items-center gap-2"
+              >
+                <Icon
+                  className="h-4 w-4 shrink-0 text-ink-subtle"
+                  strokeWidth={1.75}
+                  aria-hidden="true"
+                />
+                {label}
+              </a>
+            </li>
+          ))}
         </ul>
       </div>
     </section>
