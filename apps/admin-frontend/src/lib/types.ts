@@ -124,7 +124,6 @@ export type ToastItem = {
   id: number;
   message: string;
   kind: ToastKind;
-  icon: string;
 };
 
 export type Lang = 'ko' | 'en';

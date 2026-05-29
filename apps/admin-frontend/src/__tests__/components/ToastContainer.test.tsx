@@ -18,8 +18,8 @@ describe('ToastContainer', () => {
   it('renders pushed toasts', () => {
     useStore.setState({
       toasts: [
-        { id: 1, message: '첫 알림', kind: 'success', icon: '✓' },
-        { id: 2, message: '에러 알림', kind: 'error', icon: '✗' },
+        { id: 1, message: '첫 알림', kind: 'success' },
+        { id: 2, message: '에러 알림', kind: 'error' },
       ],
     });
     renderWithRouter(<ToastContainer />);
@@ -29,7 +29,7 @@ describe('ToastContainer', () => {
 
   it('removes a toast on dismiss click', () => {
     useStore.setState({
-      toasts: [{ id: 1, message: '제거 대상', kind: 'info', icon: 'ℹ️' }],
+      toasts: [{ id: 1, message: '제거 대상', kind: 'info' }],
     });
     renderWithRouter(<ToastContainer />);
     fireEvent.click(screen.getByLabelText('dismiss'));
