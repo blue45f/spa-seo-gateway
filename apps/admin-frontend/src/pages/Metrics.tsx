@@ -96,9 +96,9 @@ function MetricsBody() {
               {parsed.renderHist.map((r) => (
                 <tr key={r.key}>
                   <td className="py-2 font-mono text-xs">{r.key}</td>
-                  <td className="py-2 text-right font-mono">{r.p50 ?? '-'}</td>
-                  <td className="py-2 text-right font-mono">{r.p95 ?? '-'}</td>
-                  <td className="py-2 text-right font-mono">{r.p99 ?? '-'}</td>
+                  <td className="py-2 text-right font-mono">{pp(r.p50)}</td>
+                  <td className="py-2 text-right font-mono">{pp(r.p95)}</td>
+                  <td className="py-2 text-right font-mono">{pp(r.p99)}</td>
                   <td className="py-2 text-right font-mono">{r.count}</td>
                 </tr>
               ))}
@@ -152,6 +152,12 @@ function latencyTone(ms: number): 'ok' | 'warn' | 'err' {
   return 'err';
 }
 
+/** Percentile print: '-' when missing, '>30s' for the +Inf / NaN bucket, else the ms value. */
+function pp(v?: number): string {
+  if (v == null) return '-';
+  return Number.isFinite(v) ? String(v) : '>30s';
+}
+
 const TONE_BAR: Record<'ok' | 'warn' | 'err', string> = {
   ok: 'bg-ok',
   warn: 'bg-warn',
@@ -165,11 +171,14 @@ const TONE_BAR: Record<'ok' | 'warn' | 'err', string> = {
 function LatencyBars({ rows }: { rows: { key: string; p95?: number }[] }) {
   const withP95 = rows.filter((r): r is { key: string; p95: number } => r.p95 != null);
   if (withP95.length === 0) return null;
-  const max = Math.max(...withP95.map((r) => r.p95), 1);
+  // Scale only against finite p95s — a +Inf / NaN bucket must not poison Math.max.
+  const max = Math.max(...withP95.map((r) => r.p95).filter(Number.isFinite), 1);
   return (
     <div className="mb-4 space-y-1.5" aria-hidden="true">
       {withP95.map((r) => {
-        const tone = latencyTone(r.p95);
+        const finite = Number.isFinite(r.p95);
+        const tone = finite ? latencyTone(r.p95) : 'err';
+        const width = finite ? Math.max(2, Math.min(100, (r.p95 / max) * 100)) : 100;
         return (
           <div key={r.key} className="flex items-center gap-2 text-xs">
             <span className="w-44 shrink-0 truncate font-mono text-ink-muted" title={r.key}>
@@ -178,10 +187,12 @@ function LatencyBars({ rows }: { rows: { key: string; p95?: number }[] }) {
             <div className="h-2 flex-1 overflow-hidden rounded-full bg-panel-2">
               <div
                 className={`h-full rounded-full ${TONE_BAR[tone]}`}
-                style={{ width: `${Math.max(2, (r.p95 / max) * 100)}%` }}
+                style={{ width: `${width}%` }}
               />
             </div>
-            <span className="w-16 shrink-0 text-right font-mono text-ink">{r.p95}ms</span>
+            <span className="w-16 shrink-0 text-right font-mono text-ink">
+              {finite ? `${r.p95}ms` : '>30s'}
+            </span>
           </div>
         );
       })}
