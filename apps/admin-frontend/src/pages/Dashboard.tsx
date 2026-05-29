@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { AuthGate } from '../components/AuthGate';
+import { EmptyState } from '../components/EmptyState';
 import { CardGridSkeleton } from '../components/Skeleton';
 import { ApiError, api } from '../lib/api';
 import { useStore } from '../lib/store';
@@ -45,7 +46,12 @@ function DashboardBody() {
         </section>
       );
     }
-    return <p className="text-sm text-ink-subtle">{t('dashboard.empty')}</p>;
+    return (
+      <EmptyState
+        title={t('dashboard.empty')}
+        hint="게이트웨이가 시작되면 mode · routes · cache 와 호스트별 서킷 브레이커 상태가 여기 표시됩니다."
+      />
+    );
   }
 
   const ttlMin = Math.floor((info.cache?.ttlMs ?? 0) / 60_000);
@@ -125,7 +131,10 @@ function DashboardBody() {
             </tbody>
           </table>
         ) : (
-          <p className="text-sm text-ink-subtle">아직 추적된 호스트가 없습니다.</p>
+          <EmptyState
+            title="아직 추적된 호스트가 없습니다"
+            hint="봇 요청이 오리진 호스트로 라우팅되면 실패율 기반 상태(closed · half-open · open)가 집계됩니다."
+          />
         )}
       </div>
     </section>
