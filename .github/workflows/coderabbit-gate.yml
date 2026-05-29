@@ -133,6 +133,14 @@ jobs:
               return;
             }
 
+            if (state === "COMMENTED") {
+              core.notice(
+                `CodeRabbit left review comments for PR #${prNumber} (review id ${latest.id}).` +
+                  " No blocking change-request state is present, so the gate allows this state."
+              );
+              return;
+            }
+
             if (state === "CHANGES_REQUESTED") {
               core.setFailed(
                 "CodeRabbit requested changes. Address the review comments and push a new commit — CodeRabbit will re-review and the gate will flip back to green."
