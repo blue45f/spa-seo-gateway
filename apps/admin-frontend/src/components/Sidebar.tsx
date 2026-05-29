@@ -94,7 +94,7 @@ export function Sidebar({ publicMode }: SidebarProps) {
           {authed ? (
             <button
               type="button"
-              className="ml-auto text-rail-ink-muted hover:text-rail-ink"
+              className="ml-auto rounded text-rail-ink-muted hover:text-rail-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
               onClick={logout}
             >
               {t('auth.logout')}
@@ -105,7 +105,7 @@ export function Sidebar({ publicMode }: SidebarProps) {
           href="https://github.com/blue45f/spa-seo-gateway"
           target="_blank"
           rel="noreferrer"
-          className="text-rail-ink-muted hover:text-rail-ink block"
+          className="block rounded text-rail-ink-muted hover:text-rail-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
         >
           ↗ GitHub
         </a>
