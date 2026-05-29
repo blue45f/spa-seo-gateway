@@ -1,3 +1,15 @@
+import {
+  BookOpen,
+  Bot,
+  Building2,
+  Globe,
+  type LucideIcon,
+  Network,
+  Rocket,
+  Settings,
+  ShieldCheck,
+  Zap,
+} from 'lucide-react';
 import { Link, useOutletContext } from 'react-router-dom';
 import { formatUptime } from '../lib/format';
 import { useStore } from '../lib/store';
@@ -23,9 +35,13 @@ export function Welcome() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card icon="🤖" title={t('welcome.cards.bot')} body={t('welcome.cards.bot.body')} />
-        <Card icon="⚡" title={t('welcome.cards.cache')} body={t('welcome.cards.cache.body')} />
-        <Card icon="🛡️" title={t('welcome.cards.shield')} body={t('welcome.cards.shield.body')} />
+        <Card icon={Bot} title={t('welcome.cards.bot')} body={t('welcome.cards.bot.body')} />
+        <Card icon={Zap} title={t('welcome.cards.cache')} body={t('welcome.cards.cache.body')} />
+        <Card
+          icon={ShieldCheck}
+          title={t('welcome.cards.shield')}
+          body={t('welcome.cards.shield.body')}
+        />
       </div>
 
       <div className="panel p-5">
@@ -86,8 +102,12 @@ Human ──→ Edge/CDN ──→ origin (gateway는 204 또는 proxy)`}</pre>
         <div className="panel p-5">
           <h3 className="font-semibold mb-2 text-ink">바로가기 / Resources</h3>
           <ul className="text-sm space-y-1.5">
-            <li>
-              📚{' '}
+            <li className="flex items-center gap-2">
+              <BookOpen
+                className="h-4 w-4 shrink-0 text-ink-subtle"
+                strokeWidth={1.75}
+                aria-hidden="true"
+              />
               <a
                 href="https://github.com/blue45f/spa-seo-gateway/blob/main/docs/GETTING-STARTED.md"
                 target="_blank"
@@ -97,8 +117,12 @@ Human ──→ Edge/CDN ──→ origin (gateway는 204 또는 proxy)`}</pre>
                 설치 가이드
               </a>
             </li>
-            <li>
-              ⚙️{' '}
+            <li className="flex items-center gap-2">
+              <Settings
+                className="h-4 w-4 shrink-0 text-ink-subtle"
+                strokeWidth={1.75}
+                aria-hidden="true"
+              />
               <a
                 href="https://github.com/blue45f/spa-seo-gateway/blob/main/docs/CONFIGURATION.md"
                 target="_blank"
@@ -108,8 +132,12 @@ Human ──→ Edge/CDN ──→ origin (gateway는 204 또는 proxy)`}</pre>
                 전체 설정 레퍼런스
               </a>
             </li>
-            <li>
-              🏢{' '}
+            <li className="flex items-center gap-2">
+              <Building2
+                className="h-4 w-4 shrink-0 text-ink-subtle"
+                strokeWidth={1.75}
+                aria-hidden="true"
+              />
               <a
                 href="https://github.com/blue45f/spa-seo-gateway/blob/main/docs/MULTI-TENANT.md"
                 target="_blank"
@@ -119,8 +147,12 @@ Human ──→ Edge/CDN ──→ origin (gateway는 204 또는 proxy)`}</pre>
                 SaaS 모드 (다중 테넌트)
               </a>
             </li>
-            <li>
-              🌐{' '}
+            <li className="flex items-center gap-2">
+              <Globe
+                className="h-4 w-4 shrink-0 text-ink-subtle"
+                strokeWidth={1.75}
+                aria-hidden="true"
+              />
               <a
                 href="https://github.com/blue45f/spa-seo-gateway/blob/main/docs/CMS-MODE.md"
                 target="_blank"
@@ -130,8 +162,12 @@ Human ──→ Edge/CDN ──→ origin (gateway는 204 또는 proxy)`}</pre>
                 CMS 모드 (다중 사이트)
               </a>
             </li>
-            <li>
-              🚀{' '}
+            <li className="flex items-center gap-2">
+              <Rocket
+                className="h-4 w-4 shrink-0 text-ink-subtle"
+                strokeWidth={1.75}
+                aria-hidden="true"
+              />
               <a
                 href="https://github.com/blue45f/spa-seo-gateway/blob/main/docs/DEPLOYMENT.md"
                 target="_blank"
@@ -141,8 +177,12 @@ Human ──→ Edge/CDN ──→ origin (gateway는 204 또는 proxy)`}</pre>
                 배포 가이드 (Docker/K8s/CDN)
               </a>
             </li>
-            <li>
-              🏗️{' '}
+            <li className="flex items-center gap-2">
+              <Network
+                className="h-4 w-4 shrink-0 text-ink-subtle"
+                strokeWidth={1.75}
+                aria-hidden="true"
+              />
               <a
                 href="https://github.com/blue45f/spa-seo-gateway/blob/main/docs/ARCHITECTURE.md"
                 target="_blank"
@@ -168,10 +208,10 @@ function Stat({ label, value, truncate }: { label: string; value: string; trunca
   );
 }
 
-function Card({ icon, title, body }: { icon: string; title: string; body: string }) {
+function Card({ icon: Icon, title, body }: { icon: LucideIcon; title: string; body: string }) {
   return (
     <div className="panel p-5">
-      <div className="text-2xl">{icon}</div>
+      <Icon className="h-6 w-6 text-ink-muted" strokeWidth={1.75} aria-hidden="true" />
       <h3 className="font-semibold mt-2 text-ink">{title}</h3>
       <p className="text-sm text-ink-muted mt-1">{body}</p>
     </div>
