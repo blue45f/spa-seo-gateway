@@ -51,14 +51,14 @@ export function CommandPalette() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder={t('cmd.placeholder')}
-          className="w-full px-4 py-3 text-sm border-b border-line bg-transparent text-ink placeholder:text-ink-subtle focus:outline-none"
+          className="w-full px-4 py-3 text-sm border-b border-line bg-transparent text-ink placeholder:text-ink-subtle focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-inset"
         />
         <ul className="max-h-72 overflow-y-auto">
           {filtered.map((n) => (
             <li key={n.id}>
               <button
                 type="button"
-                className="w-full text-left px-4 py-2 hover:bg-accent-soft flex items-center gap-3"
+                className="w-full text-left px-4 py-2 hover:bg-accent-soft flex items-center gap-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-inset"
                 onClick={() => {
                   navigate(n.path);
                   close();

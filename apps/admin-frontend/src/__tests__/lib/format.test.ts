@@ -28,27 +28,27 @@ describe('formatUptime', () => {
 
 describe('lighthouseScoreColor', () => {
   it('neutral for null', () => {
-    expect(lighthouseScoreColor(null)).toContain('ink');
+    expect(lighthouseScoreColor(null)).toBe('text-ink-subtle');
   });
   it('ok for 90+', () => {
-    expect(lighthouseScoreColor(95)).toContain('ok');
+    expect(lighthouseScoreColor(95)).toBe('text-ok-fg');
   });
   it('warn for 50-89', () => {
-    expect(lighthouseScoreColor(70)).toContain('warn');
+    expect(lighthouseScoreColor(70)).toBe('text-warn-fg');
   });
   it('err for <50', () => {
-    expect(lighthouseScoreColor(30)).toContain('err');
+    expect(lighthouseScoreColor(30)).toBe('text-err-fg');
   });
 });
 
 describe('methodPillClass', () => {
   it('returns method-specific classes', () => {
-    expect(methodPillClass('GET')).toContain('ok');
-    expect(methodPillClass('POST')).toContain('accent');
-    expect(methodPillClass('DELETE')).toContain('err');
+    expect(methodPillClass('GET')).toBe('bg-ok-bg text-ok-fg');
+    expect(methodPillClass('POST')).toBe('bg-accent-soft text-accent');
+    expect(methodPillClass('DELETE')).toBe('bg-err-bg text-err-fg');
   });
   it('falls back for unknown methods', () => {
-    expect(methodPillClass('CONNECT')).toContain('ink');
+    expect(methodPillClass('CONNECT')).toBe('bg-panel-2 text-ink-subtle');
   });
 });
 

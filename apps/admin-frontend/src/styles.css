@@ -84,7 +84,7 @@
 @theme inline {
   --font-sans: ui-sans-serif, -apple-system, system-ui, sans-serif;
   --font-mono:
-    ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", "Menlo", "Consolas", monospace;
 
   --color-surface: var(--app-bg);
   --color-panel: var(--app-panel);
@@ -124,7 +124,7 @@
     color: var(--color-ink);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
-    text-rendering: optimizeLegibility;
+    text-rendering: optimizelegibility;
   }
   ::selection {
     background: var(--color-accent-soft);
@@ -169,7 +169,7 @@
     width: 0.375rem;
     height: 0.375rem;
     border-radius: 999px;
-    background: currentColor;
+    background: currentcolor;
     flex: none;
   }
   .badge--ok {
