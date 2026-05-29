@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import { CardGridSkeleton, Skeleton } from '../../components/Skeleton';
+import { CardGridSkeleton, DetailSkeleton, Skeleton } from '../../components/Skeleton';
 
 describe('Skeleton', () => {
   it('renders a generic block with role=status', () => {
@@ -31,5 +31,14 @@ describe('CardGridSkeleton', () => {
   it('honors a custom count', () => {
     render(<CardGridSkeleton count={2} />);
     expect(screen.getAllByTestId('skeleton')).toHaveLength(6);
+  });
+});
+
+describe('DetailSkeleton', () => {
+  it('renders a title bar plus the requested field rows', () => {
+    render(<DetailSkeleton rows={3} />);
+    expect(screen.getByTestId('detail-skeleton')).toBeInTheDocument();
+    // 1 title bar + 3 field rows
+    expect(screen.getAllByTestId('skeleton')).toHaveLength(4);
   });
 });
