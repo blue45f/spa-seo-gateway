@@ -27,28 +27,28 @@ describe('formatUptime', () => {
 });
 
 describe('lighthouseScoreColor', () => {
-  it('grey for null', () => {
-    expect(lighthouseScoreColor(null)).toContain('slate');
+  it('neutral for null', () => {
+    expect(lighthouseScoreColor(null)).toContain('ink');
   });
-  it('green for 90+', () => {
-    expect(lighthouseScoreColor(95)).toContain('emerald');
+  it('ok for 90+', () => {
+    expect(lighthouseScoreColor(95)).toContain('ok');
   });
-  it('amber for 50-89', () => {
-    expect(lighthouseScoreColor(70)).toContain('amber');
+  it('warn for 50-89', () => {
+    expect(lighthouseScoreColor(70)).toContain('warn');
   });
-  it('red for <50', () => {
-    expect(lighthouseScoreColor(30)).toContain('red');
+  it('err for <50', () => {
+    expect(lighthouseScoreColor(30)).toContain('err');
   });
 });
 
 describe('methodPillClass', () => {
   it('returns method-specific classes', () => {
-    expect(methodPillClass('GET')).toContain('emerald');
-    expect(methodPillClass('POST')).toContain('blue');
-    expect(methodPillClass('DELETE')).toContain('red');
+    expect(methodPillClass('GET')).toContain('ok');
+    expect(methodPillClass('POST')).toContain('accent');
+    expect(methodPillClass('DELETE')).toContain('err');
   });
   it('falls back for unknown methods', () => {
-    expect(methodPillClass('CONNECT')).toContain('slate');
+    expect(methodPillClass('CONNECT')).toContain('ink');
   });
 });
 

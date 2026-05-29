@@ -27,18 +27,18 @@ export function Header() {
   }
 
   return (
-    <header className="bg-white dark:bg-slate-900 dark:border-slate-800 border-b border-slate-200 px-6 py-3 flex items-center justify-between pl-16 md:pl-6">
-      <div>
-        <h1 className="font-semibold">{item ? t(item.labelKey) : ''}</h1>
-        <p className="text-xs text-slate-500 dark:text-slate-400">
-          {item ? t(item.subtitleKey) : ''}
-        </p>
+    <header className="bg-panel border-b border-line px-6 py-3 flex items-center justify-between gap-4 pl-16 md:pl-6">
+      <div className="min-w-0">
+        <h1 className="font-semibold tracking-tight text-ink truncate">
+          {item ? t(item.labelKey) : ''}
+        </h1>
+        <p className="text-xs text-ink-subtle truncate">{item ? t(item.subtitleKey) : ''}</p>
       </div>
       {showLogin ? <LoginForm /> : null}
       {authed ? (
         <button
           type="button"
-          className="px-3 py-1.5 text-sm rounded bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
+          className="shrink-0 px-3 py-1.5 text-sm rounded-md border border-line bg-panel-2 text-ink-muted hover:text-ink hover:border-line-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-panel)]"
           onClick={logout}
         >
           {t('auth.logout')}

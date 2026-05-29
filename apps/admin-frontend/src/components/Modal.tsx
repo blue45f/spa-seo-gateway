@@ -62,15 +62,15 @@ export function Modal({ open, onClose, title, children, size = 'lg' }: ModalProp
       <div
         ref={dialogRef}
         tabIndex={-1}
-        className={`bg-white dark:bg-slate-900 rounded-lg shadow-2xl w-full ${SIZE_CLASS[size]} max-h-[80vh] overflow-y-auto focus:outline-none`}
+        className={`bg-panel border border-line rounded-lg shadow-2xl w-full ${SIZE_CLASS[size]} max-h-[80vh] overflow-y-auto focus:outline-none`}
       >
-        <div className="px-5 py-3 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+        <div className="px-5 py-3 border-b border-line flex items-center justify-between">
           <div id={titleId} className="font-semibold">
             {title}
           </div>
           <button
             type="button"
-            className="text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 text-xl leading-none rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
+            className="text-ink-subtle hover:text-ink text-xl leading-none rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
             onClick={onClose}
             aria-label="Close dialog"
           >

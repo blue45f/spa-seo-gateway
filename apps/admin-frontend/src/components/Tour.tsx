@@ -76,23 +76,23 @@ export function Tour() {
       className="fixed inset-0 z-[90] bg-black/60 flex items-center justify-center p-4"
       data-testid="tour"
     >
-      <div className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl max-w-md w-full p-6">
-        <div className="text-xs text-slate-500 dark:text-slate-400 mb-2">
+      <div className="bg-panel border border-line rounded-xl shadow-2xl max-w-md w-full p-6">
+        <div className="text-xs text-ink-subtle mb-2">
           {tourStep + 1} / {STEPS.length}
         </div>
         <h3 className="font-bold text-lg mb-2">{title}</h3>
-        <p className="text-sm text-slate-700 dark:text-slate-200">{body}</p>
+        <p className="text-sm text-ink-muted">{body}</p>
         <div className="flex gap-2 mt-5">
           <button
             type="button"
-            className="text-sm text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+            className="text-sm text-ink-subtle hover:text-ink-muted"
             onClick={endTour}
           >
             {t('tour.skip')}
           </button>
           <button
             type="button"
-            className="ml-auto px-4 py-2 rounded bg-slate-900 dark:bg-indigo-600 text-white text-sm hover:bg-slate-700"
+            className="btn-primary ml-auto px-4 py-2 text-sm"
             onClick={() => {
               const next = tourStep + 1;
               if (next >= STEPS.length) {

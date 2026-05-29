@@ -108,14 +108,14 @@ function TenantDetailBody() {
     return () => window.removeEventListener('keydown', handler);
   }, [tenant, saving]);
 
-  if (loading) return <p className="text-sm text-slate-500">loading...</p>;
+  if (loading) return <p className="text-sm text-ink-subtle">loading...</p>;
   if (missing) {
     return (
       <section className="space-y-4" data-testid="page-tenant-detail">
-        <Link to="/tenants" className="text-sm text-indigo-600 hover:underline">
+        <Link to="/tenants" className="link text-sm">
           {t('tenants.detail.back')}
         </Link>
-        <p className="text-sm text-slate-500">{t('tenants.detail.notFound')}</p>
+        <p className="text-sm text-ink-subtle">{t('tenants.detail.notFound')}</p>
       </section>
     );
   }
@@ -124,20 +124,16 @@ function TenantDetailBody() {
   return (
     <section className="space-y-4" data-testid="page-tenant-detail">
       <div className="flex items-center justify-between flex-wrap gap-2">
-        <Link to="/tenants" className="text-sm text-indigo-600 hover:underline">
+        <Link to="/tenants" className="link text-sm">
           {t('tenants.detail.back')}
         </Link>
         <div className="flex gap-2">
-          <button
-            type="button"
-            className="px-3 py-2 rounded bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-sm"
-            onClick={load}
-          >
+          <button type="button" className="btn-ghost px-3 py-2 text-sm" onClick={load}>
             {t('btn.refresh')}
           </button>
           <button
             type="button"
-            className="px-3 py-2 rounded bg-emerald-700 hover:bg-emerald-800 text-white text-sm font-medium disabled:opacity-60"
+            className="btn-primary px-3 py-2 text-sm font-medium disabled:opacity-60"
             onClick={save}
             disabled={saving}
           >
@@ -146,15 +142,15 @@ function TenantDetailBody() {
         </div>
       </div>
 
-      <div className="bg-white dark:bg-slate-900 dark:border-slate-800 rounded-lg shadow-sm border border-slate-200 p-5 space-y-3">
-        <h3 className="font-semibold">{t('tenants.detail.metadata')}</h3>
+      <div className="panel p-5 space-y-3">
+        <h3 className="font-semibold text-ink">{t('tenants.detail.metadata')}</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
           <Field label={t('tenants.form.id')}>
             <input
               type="text"
               disabled
               value={tenant.id}
-              className="w-full px-3 py-2 rounded border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-mono text-xs opacity-70"
+              className="input w-full px-3 py-2 font-mono text-xs opacity-70"
             />
           </Field>
           <Field label={t('tenants.form.name')}>
@@ -162,7 +158,7 @@ function TenantDetailBody() {
               type="text"
               value={tenant.name}
               onChange={(e) => setTenant({ ...tenant, name: e.target.value })}
-              className="w-full px-3 py-2 rounded border border-slate-300 dark:border-slate-700 dark:bg-slate-800"
+              className="input w-full px-3 py-2"
             />
           </Field>
           <Field label={t('tenants.form.origin')}>
@@ -170,14 +166,14 @@ function TenantDetailBody() {
               type="url"
               value={tenant.origin}
               onChange={(e) => setTenant({ ...tenant, origin: e.target.value })}
-              className="w-full px-3 py-2 rounded border border-slate-300 dark:border-slate-700 dark:bg-slate-800"
+              className="input w-full px-3 py-2"
             />
           </Field>
           <Field label={t('tenants.form.plan')}>
             <select
               value={tenant.plan}
               onChange={(e) => setTenant({ ...tenant, plan: e.target.value as TenantPlan })}
-              className="w-full px-3 py-2 rounded border border-slate-300 dark:border-slate-700 dark:bg-slate-800"
+              className="input w-full px-3 py-2"
             >
               {PLANS.map((p) => (
                 <option key={p} value={p}>
@@ -192,18 +188,14 @@ function TenantDetailBody() {
                 type="text"
                 value={tenant.apiKey}
                 onChange={(e) => setTenant({ ...tenant, apiKey: e.target.value })}
-                className="flex-1 min-w-0 px-3 py-2 rounded border border-slate-300 dark:border-slate-700 dark:bg-slate-800 font-mono text-xs"
+                className="input flex-1 min-w-0 px-3 py-2 font-mono text-xs"
               />
-              <button
-                type="button"
-                className="px-3 py-2 rounded bg-slate-100 dark:bg-slate-800 text-sm"
-                onClick={copyKey}
-              >
+              <button type="button" className="btn-ghost px-3 py-2 text-sm" onClick={copyKey}>
                 {t('tenants.copy')}
               </button>
               <button
                 type="button"
-                className="px-3 py-2 rounded bg-amber-100 hover:bg-amber-200 text-amber-900 text-sm"
+                className="px-3 py-2 rounded bg-warn-bg text-warn-fg text-sm"
                 onClick={rotateApiKey}
               >
                 {t('tenants.detail.rotate')}
@@ -221,8 +213,8 @@ function TenantDetailBody() {
         </div>
       </div>
 
-      <div className="bg-white dark:bg-slate-900 dark:border-slate-800 rounded-lg shadow-sm border border-slate-200 p-5 space-y-3">
-        <h3 className="font-semibold">{t('tenants.detail.routes')}</h3>
+      <div className="panel p-5 space-y-3">
+        <h3 className="font-semibold text-ink">{t('tenants.detail.routes')}</h3>
         <RoutesEditor
           routes={tenant.routes}
           onChange={(routes: ScopedRoute[]) => setTenant({ ...tenant, routes })}
@@ -236,7 +228,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   // biome 의 noLabelWithoutControl 은 children 안의 input 을 추적하지 못한다.
   return (
     <div className="block">
-      <div className="text-xs font-medium text-slate-700 dark:text-slate-300">{label}</div>
+      <div className="text-xs font-medium text-ink-muted">{label}</div>
       <div className="mt-1">{children}</div>
     </div>
   );

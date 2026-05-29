@@ -48,11 +48,7 @@ export function Layout() {
           <ErrorBoundary>
             <Suspense
               fallback={
-                <p
-                  role="status"
-                  aria-live="polite"
-                  className="text-sm text-slate-500 dark:text-slate-400"
-                >
+                <p role="status" aria-live="polite" className="text-sm text-ink-subtle">
                   loading…
                 </p>
               }
@@ -61,13 +57,13 @@ export function Layout() {
             </Suspense>
           </ErrorBoundary>
         </main>
-        <footer className="border-t border-slate-200 px-6 py-3 text-xs text-slate-500 dark:text-slate-400 flex justify-between bg-white dark:bg-slate-900 dark:border-slate-800">
+        <footer className="border-t border-line px-6 py-3 text-xs text-ink-subtle flex justify-between bg-panel">
           <span>spa-seo-gateway · open-source dynamic rendering</span>
           <a
             href="https://github.com/blue45f/spa-seo-gateway"
             target="_blank"
             rel="noreferrer"
-            className="hover:text-slate-700 dark:text-slate-200"
+            className="hover:text-ink"
           >
             github
           </a>
@@ -85,14 +81,14 @@ function GlobalErrorBanner() {
     <div
       role="alert"
       data-testid="global-error"
-      className="bg-red-50 dark:bg-red-950 dark:border-red-900 border border-red-200 text-red-800 dark:text-red-200 rounded px-4 py-3 text-sm flex items-start gap-3"
+      className="bg-err-bg border border-err text-err-fg rounded-lg px-4 py-3 text-sm flex items-start gap-3"
     >
       <span className="flex-1">{error}</span>
       <button
         type="button"
         onClick={() => setError('')}
         aria-label="Dismiss error"
-        className="opacity-70 hover:opacity-100 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
+        className="opacity-70 hover:opacity-100 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-err"
       >
         ×
       </button>

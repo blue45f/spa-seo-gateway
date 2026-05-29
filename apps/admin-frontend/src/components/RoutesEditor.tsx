@@ -92,26 +92,22 @@ export function RoutesEditor({ routes, onChange, labels, reorderable = true }: R
       <div className="flex flex-wrap gap-2 items-center">
         <input
           type="text"
-          className="flex-1 min-w-48 px-3 py-2 rounded border border-slate-300 dark:border-slate-700 dark:bg-slate-800 text-sm"
+          className="input flex-1 min-w-48 px-3 py-2 text-sm"
           placeholder={t('routes.filter.placeholder')}
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
         />
-        <button
-          type="button"
-          className="px-3 py-2 rounded bg-slate-900 dark:bg-indigo-600 text-white text-sm"
-          onClick={add}
-        >
+        <button type="button" className="btn-primary px-3 py-2 text-sm" onClick={add}>
           {t('btn.add')}
         </button>
       </div>
 
       {filtered.length === 0 ? (
-        <p className="text-sm text-slate-500 py-8 text-center">{t('routes.empty')}</p>
+        <p className="text-sm text-ink-subtle py-8 text-center">{t('routes.empty')}</p>
       ) : (
-        <div className="overflow-x-auto bg-white dark:bg-slate-900 dark:border-slate-800 rounded-lg shadow-sm border border-slate-200">
+        <div className="panel overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-slate-50 dark:bg-slate-800 text-xs uppercase text-slate-600 dark:text-slate-300">
+            <thead className="bg-panel-2 text-xs uppercase text-ink-muted">
               <tr>
                 <th className="px-3 py-2 text-left w-8">#</th>
                 <th className="px-3 py-2 text-left">{L.pattern}</th>
@@ -123,7 +119,7 @@ export function RoutesEditor({ routes, onChange, labels, reorderable = true }: R
                 <th className="px-3 py-2 text-right w-20">{L.actions}</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+            <tbody className="divide-y divide-line">
               {filtered.map(({ row: r, idx: i }) => (
                 <tr
                   key={`${i}-${r.pattern}`}
@@ -148,11 +144,11 @@ export function RoutesEditor({ routes, onChange, labels, reorderable = true }: R
                   }}
                   onDragEnd={() => setDragSrc(null)}
                 >
-                  <td className="px-3 py-2 text-slate-400 select-none">{i + 1}</td>
+                  <td className="px-3 py-2 text-ink-subtle select-none">{i + 1}</td>
                   <td className="px-3 py-2">
                     <input
                       type="text"
-                      className="w-full px-2 py-1 rounded border border-slate-300 dark:border-slate-700 dark:bg-slate-800 font-mono text-xs"
+                      className="input w-full px-2 py-1 font-mono text-xs"
                       value={r.pattern}
                       onChange={(e) => update(i, { pattern: e.target.value })}
                       placeholder="^/products/[0-9]+"
@@ -161,7 +157,7 @@ export function RoutesEditor({ routes, onChange, labels, reorderable = true }: R
                   <td className="px-3 py-2">
                     <input
                       type="number"
-                      className="w-full px-2 py-1 rounded border border-slate-300 dark:border-slate-700 dark:bg-slate-800 text-xs"
+                      className="input w-full px-2 py-1 text-xs"
                       value={r.ttlMs ?? ''}
                       onChange={(e) =>
                         update(i, {
@@ -172,7 +168,7 @@ export function RoutesEditor({ routes, onChange, labels, reorderable = true }: R
                   </td>
                   <td className="px-3 py-2">
                     <select
-                      className="w-full px-2 py-1 rounded border border-slate-300 dark:border-slate-700 dark:bg-slate-800 text-xs"
+                      className="input w-full px-2 py-1 text-xs"
                       value={r.waitUntil ?? ''}
                       onChange={(e) =>
                         update(i, {
@@ -190,7 +186,7 @@ export function RoutesEditor({ routes, onChange, labels, reorderable = true }: R
                   <td className="px-3 py-2">
                     <input
                       type="text"
-                      className="w-full px-2 py-1 rounded border border-slate-300 dark:border-slate-700 dark:bg-slate-800 text-xs"
+                      className="input w-full px-2 py-1 text-xs"
                       value={r.waitSelector ?? ''}
                       onChange={(e) => update(i, { waitSelector: e.target.value || undefined })}
                       placeholder="[data-loaded]"
@@ -199,7 +195,7 @@ export function RoutesEditor({ routes, onChange, labels, reorderable = true }: R
                   <td className="px-3 py-2">
                     <input
                       type="number"
-                      className="w-full px-2 py-1 rounded border border-slate-300 dark:border-slate-700 dark:bg-slate-800 text-xs"
+                      className="input w-full px-2 py-1 text-xs"
                       value={r.waitMs ?? ''}
                       onChange={(e) =>
                         update(i, {
@@ -218,7 +214,7 @@ export function RoutesEditor({ routes, onChange, labels, reorderable = true }: R
                   <td className="px-3 py-2 text-right">
                     <button
                       type="button"
-                      className="text-red-600 hover:text-red-800 text-xs"
+                      className="text-err hover:text-err-fg text-xs"
                       onClick={() => remove(i)}
                     >
                       {t('btn.delete')}

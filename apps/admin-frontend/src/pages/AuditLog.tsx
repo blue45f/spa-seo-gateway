@@ -62,17 +62,15 @@ function AuditLogBody() {
 
   return (
     <section className="space-y-4" data-testid="page-audit">
-      <div className="bg-amber-50 dark:bg-amber-950 dark:border-amber-900 border border-amber-200 rounded-lg p-4 text-sm">
-        <h3 className="font-semibold text-amber-900 dark:text-amber-200 mb-1">
-          {t('audit.title')}
-        </h3>
-        <p className="text-amber-800 dark:text-amber-300">{t('audit.desc')}</p>
+      <div className="alert alert--warn">
+        <h3 className="font-semibold mb-1">{t('audit.title')}</h3>
+        <p>{t('audit.desc')}</p>
       </div>
 
       <div className="flex flex-wrap gap-2 items-center">
         <button
           type="button"
-          className="px-3 py-1.5 rounded bg-slate-900 dark:bg-indigo-600 text-white text-sm font-medium hover:bg-slate-700 disabled:opacity-60"
+          className="btn-primary px-3 py-1.5 text-sm font-medium disabled:opacity-60"
           onClick={load}
           disabled={busy}
         >
@@ -80,24 +78,22 @@ function AuditLogBody() {
         </button>
         <button
           type="button"
-          className="px-3 py-1.5 rounded bg-white dark:bg-slate-800 text-sm font-medium border border-slate-300 dark:border-slate-700 hover:bg-slate-50 disabled:opacity-60"
+          className="btn-ghost px-3 py-1.5 text-sm font-medium disabled:opacity-60"
           onClick={verify}
           disabled={busy}
         >
           {t('audit.verify')}
         </button>
         {verified !== null ? (
-          <span
-            className={`ml-auto text-sm ${verified ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}
-          >
+          <span className={`ml-auto text-sm ${verified ? 'text-ok' : 'text-err'}`}>
             {verified ? t('audit.ok') : `${t('audit.broken')} brokenAt=${brokenAt}`}
           </span>
         ) : null}
       </div>
 
-      <div className="bg-white dark:bg-slate-900 dark:border-slate-800 rounded-lg shadow-sm border border-slate-200 overflow-x-auto">
+      <div className="panel overflow-x-auto">
         <table className="w-full text-sm">
-          <thead className="bg-slate-50 dark:bg-slate-800 text-xs uppercase text-slate-600 dark:text-slate-300">
+          <thead className="bg-panel-2 text-xs uppercase text-ink-muted">
             <tr>
               <th className="px-3 py-2 text-left">timestamp</th>
               <th className="px-3 py-2 text-left">actor</th>
@@ -107,12 +103,12 @@ function AuditLogBody() {
               <th className="px-3 py-2 text-left">hash</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+          <tbody className="divide-y divide-line">
             {events.map((e, i) => (
               <tr
                 // biome-ignore lint/suspicious/noArrayIndexKey: audit log is append-only and never reorders; (ts + i) is stable per row
                 key={`${e.ts}-${i}`}
-                className="hover:bg-slate-50 dark:hover:bg-slate-800"
+                className="hover:bg-panel-2"
               >
                 <td className="px-3 py-2 font-mono text-xs whitespace-nowrap">
                   {e.ts?.slice(11, 19) ?? '-'}
@@ -121,13 +117,11 @@ function AuditLogBody() {
                 <td className="px-3 py-2 font-mono text-xs">{e.action}</td>
                 <td className="px-3 py-2 truncate max-w-xs">{e.target ?? '-'}</td>
                 <td className="px-3 py-2">
-                  <span
-                    className={`px-1.5 py-0.5 rounded text-xs ${e.outcome === 'ok' ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'}`}
-                  >
+                  <span className={`badge ${e.outcome === 'ok' ? 'badge--ok' : 'badge--err'}`}>
                     {e.outcome}
                   </span>
                 </td>
-                <td className="px-3 py-2 font-mono text-[10px] text-slate-400">
+                <td className="px-3 py-2 font-mono text-[10px] text-ink-subtle">
                   {e.hash?.slice(0, 12) ?? '-'}
                   {e.hash ? '...' : ''}
                 </td>
@@ -135,10 +129,7 @@ function AuditLogBody() {
             ))}
             {events.length === 0 ? (
               <tr>
-                <td
-                  colSpan={6}
-                  className="px-3 py-8 text-center text-slate-500 dark:text-slate-400"
-                >
+                <td colSpan={6} className="px-3 py-8 text-center text-ink-subtle">
                   {t('audit.empty')}
                 </td>
               </tr>

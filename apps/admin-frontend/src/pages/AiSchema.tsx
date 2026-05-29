@@ -45,22 +45,17 @@ function AiSchemaBody() {
 
   return (
     <section className="space-y-4" data-testid="page-ai">
-      <div className="bg-emerald-50 dark:bg-emerald-950 dark:border-emerald-900 border border-emerald-200 rounded-lg p-4 text-sm">
-        <h3 className="font-semibold text-emerald-900 dark:text-emerald-200 mb-1">
-          {t('ai.title')}
-        </h3>
-        <p className="text-emerald-800 dark:text-emerald-300">{t('ai.desc')}</p>
+      <div className="alert alert--ok">
+        <h3 className="font-semibold mb-1">{t('ai.title')}</h3>
+        <p>{t('ai.desc')}</p>
       </div>
 
-      <form
-        onSubmit={run}
-        className="bg-white dark:bg-slate-900 dark:border-slate-800 rounded-lg shadow-sm border border-slate-200 p-5 space-y-3"
-      >
+      <form onSubmit={run} className="panel p-5 space-y-3">
         <label className="block">
           <span className="text-sm font-medium">URL</span>
           <input
             type="url"
-            className="mt-1 w-full px-3 py-2 rounded border border-slate-300 dark:border-slate-700 dark:bg-slate-800 text-sm"
+            className="input mt-1 w-full px-3 py-2 text-sm"
             placeholder="https://www.example.com/blog/post"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
@@ -69,7 +64,7 @@ function AiSchemaBody() {
         <button
           type="submit"
           disabled={running || !url.trim()}
-          className="px-4 py-2 rounded bg-slate-900 dark:bg-indigo-600 text-white text-sm font-medium hover:bg-slate-700 disabled:opacity-60"
+          className="btn-primary px-4 py-2 text-sm font-medium disabled:opacity-60"
         >
           {running ? t('ai.running') : t('ai.run')}
         </button>
@@ -79,33 +74,27 @@ function AiSchemaBody() {
         <div
           // biome-ignore lint/suspicious/noArrayIndexKey: AI suggestions are append-only and never reorder within a session
           key={`${s.type}-${i}`}
-          className="border border-slate-200 dark:border-slate-700 rounded p-3 text-sm"
+          className="panel p-3 text-sm"
         >
           <div className="flex items-center gap-2 mb-2">
-            <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 text-xs font-medium">
-              {s.type}
-            </span>
-            <span className="text-xs text-slate-500 dark:text-slate-400">confidence:</span>
+            <span className="badge badge--ok">{s.type}</span>
+            <span className="text-xs text-ink-subtle">confidence:</span>
             <span className="font-mono text-xs">{(s.confidence * 100).toFixed(0)}%</span>
           </div>
           {s.rationale ? (
-            <div className="text-xs text-slate-600 dark:text-slate-300 italic mb-2">
-              {s.rationale}
-            </div>
+            <div className="text-xs text-ink-muted italic mb-2">{s.rationale}</div>
           ) : null}
-          <pre className="text-xs bg-slate-50 dark:bg-slate-800 p-2 rounded overflow-auto">
+          <pre className="panel-inset text-xs p-2 overflow-auto">
             {JSON.stringify(s.jsonLd, null, 2)}
           </pre>
         </div>
       ))}
 
-      <div className="bg-white dark:bg-slate-900 dark:border-slate-800 rounded-lg shadow-sm border border-slate-200 p-5 text-sm space-y-3">
-        <h3 className="font-semibold mb-2">{t('ai.setup')}</h3>
+      <div className="panel p-5 text-sm space-y-3">
+        <h3 className="font-semibold mb-2 text-ink">{t('ai.setup')}</h3>
         <div>
-          <div className="text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
-            Anthropic Claude
-          </div>
-          <pre className="text-xs bg-slate-50 dark:bg-slate-800 p-3 rounded overflow-auto">{`npm install @heejun/spa-seo-gateway-anthropic @anthropic-ai/sdk
+          <div className="text-xs font-medium text-ink-muted mb-1">Anthropic Claude</div>
+          <pre className="panel-inset text-xs p-3 overflow-auto">{`npm install @heejun/spa-seo-gateway-anthropic @anthropic-ai/sdk
 
 import { setAiSchemaAdapter } from '@heejun/spa-seo-gateway-core';
 import { createAnthropicSchemaAdapter } from '@heejun/spa-seo-gateway-anthropic';
@@ -116,10 +105,10 @@ setAiSchemaAdapter(createAnthropicSchemaAdapter({
 }));`}</pre>
         </div>
         <div>
-          <div className="text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+          <div className="text-xs font-medium text-ink-muted mb-1">
             OpenAI / Groq / Ollama (호환 엔드포인트)
           </div>
-          <pre className="text-xs bg-slate-50 dark:bg-slate-800 p-3 rounded overflow-auto">{`npm install @heejun/spa-seo-gateway-openai
+          <pre className="panel-inset text-xs p-3 overflow-auto">{`npm install @heejun/spa-seo-gateway-openai
 
 import { createOpenAiSchemaAdapter } from '@heejun/spa-seo-gateway-openai';
 

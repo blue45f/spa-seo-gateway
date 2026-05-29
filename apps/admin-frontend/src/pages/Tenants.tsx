@@ -27,9 +27,9 @@ const EMPTY_TENANT: Tenant = {
 const PLANS: TenantPlan[] = ['free', 'pro', 'enterprise'];
 
 const PLAN_PILL: Record<TenantPlan, string> = {
-  free: 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200',
-  pro: 'bg-emerald-100 text-emerald-800',
-  enterprise: 'bg-amber-100 text-amber-800',
+  free: 'badge badge--neutral',
+  pro: 'badge badge--ok',
+  enterprise: 'badge badge--warn',
 };
 
 /** secure-ish API key — 32 hex chars (128 bits). */
@@ -108,17 +108,15 @@ function TenantsBody() {
 
   return (
     <section className="space-y-4" data-testid="page-tenants">
-      <div className="bg-purple-50 dark:bg-purple-950 dark:border-purple-900 border border-purple-200 rounded-lg p-4 text-sm">
-        <h3 className="font-semibold text-purple-900 dark:text-purple-200 mb-1">
-          {t('tenants.title')}
-        </h3>
-        <p className="text-purple-800 dark:text-purple-300">{t('tenants.intro')}</p>
+      <div className="alert alert--info p-4">
+        <h3 className="font-semibold text-ink mb-1">{t('tenants.title')}</h3>
+        <p className="text-ink-muted">{t('tenants.intro')}</p>
       </div>
 
       <div className="flex flex-wrap gap-2">
         <button
           type="button"
-          className="px-3 py-2 rounded bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-sm"
+          className="btn-ghost px-3 py-2 text-sm"
           onClick={load}
           disabled={loading}
         >
@@ -126,7 +124,7 @@ function TenantsBody() {
         </button>
         <button
           type="button"
-          className="ml-auto px-3 py-2 rounded bg-slate-900 dark:bg-indigo-600 text-white text-sm font-medium hover:bg-slate-700"
+          className="btn-primary ml-auto px-3 py-2 text-sm font-medium"
           onClick={() => setEditing({ ...EMPTY_TENANT, apiKey: generateApiKey() })}
         >
           {t('tenants.add')}
@@ -134,11 +132,11 @@ function TenantsBody() {
       </div>
 
       {tenants.length === 0 ? (
-        <p className="text-sm text-slate-500 py-8 text-center">{t('tenants.empty')}</p>
+        <p className="text-sm text-ink-subtle py-8 text-center">{t('tenants.empty')}</p>
       ) : (
-        <div className="overflow-x-auto bg-white dark:bg-slate-900 dark:border-slate-800 rounded-lg shadow-sm border border-slate-200">
+        <div className="panel overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-slate-50 dark:bg-slate-800 text-xs uppercase text-slate-600 dark:text-slate-300">
+            <thead className="bg-panel-2 text-xs uppercase text-ink-muted">
               <tr>
                 <th className="px-3 py-2 text-left">{t('tenants.col.id')}</th>
                 <th className="px-3 py-2 text-left">{t('tenants.col.name')}</th>
@@ -149,63 +147,51 @@ function TenantsBody() {
                 <th className="px-3 py-2 text-right">{t('tenants.col.actions')}</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+            <tbody className="divide-y divide-line">
               {tenants.map((tn) => (
-                <tr key={tn.id} className="hover:bg-slate-50 dark:hover:bg-slate-800">
+                <tr key={tn.id} className="hover:bg-panel-2">
                   <td className="px-3 py-2 font-mono text-xs">
-                    <Link
-                      to={`/tenants/${encodeURIComponent(tn.id)}`}
-                      className="text-indigo-600 hover:underline"
-                    >
+                    <Link to={`/tenants/${encodeURIComponent(tn.id)}`} className="link">
                       {tn.id}
                     </Link>
                   </td>
                   <td className="px-3 py-2">{tn.name}</td>
                   <td className="px-3 py-2 truncate max-w-xs">
-                    <a
-                      href={tn.origin}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-indigo-600 hover:underline"
-                    >
+                    <a href={tn.origin} target="_blank" rel="noreferrer" className="link">
                       {tn.origin}
                     </a>
                   </td>
                   <td className="px-3 py-2">
-                    <span className={`px-1.5 py-0.5 rounded text-xs ${PLAN_PILL[tn.plan]}`}>
-                      {tn.plan}
-                    </span>
+                    <span className={PLAN_PILL[tn.plan]}>{tn.plan}</span>
                   </td>
-                  <td className="px-3 py-2 font-mono text-[11px] text-slate-500 dark:text-slate-400 whitespace-nowrap">
+                  <td className="px-3 py-2 font-mono text-[11px] text-ink-subtle whitespace-nowrap">
                     <span title="masked key">
                       {tn.apiKey.slice(0, 8)}…{tn.apiKey.slice(-4)}
                     </span>
                     <button
                       type="button"
-                      className="ml-2 text-slate-600 hover:text-slate-800 dark:text-slate-300 underline"
+                      className="ml-2 text-ink-muted hover:text-ink underline"
                       onClick={() => copyKey(tn.apiKey)}
                     >
                       {t('tenants.copy')}
                     </button>
                   </td>
                   <td className="px-3 py-2 text-center">
-                    <span
-                      className={`px-1.5 py-0.5 rounded text-xs ${tn.enabled ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-300'}`}
-                    >
+                    <span className={`badge ${tn.enabled ? 'badge--ok' : 'badge--neutral'}`}>
                       {tn.enabled ? 'ON' : 'OFF'}
                     </span>
                   </td>
                   <td className="px-3 py-2 text-right space-x-2 whitespace-nowrap">
                     <button
                       type="button"
-                      className="text-xs text-indigo-600 hover:text-indigo-800"
+                      className="link text-xs"
                       onClick={() => setEditing({ ...tn })}
                     >
                       {t('tenants.edit')}
                     </button>
                     <button
                       type="button"
-                      className="text-xs text-red-600 hover:text-red-800"
+                      className="text-xs text-err hover:text-err-fg"
                       onClick={() => remove(tn.id)}
                     >
                       {t('tenants.delete')}
@@ -263,7 +249,7 @@ function TenantForm({
             required
             disabled={!!tenant.id}
             pattern="[a-z0-9_\-]+"
-            className="w-full px-3 py-2 rounded border border-slate-300 dark:border-slate-700 dark:bg-slate-800"
+            className="input w-full px-3 py-2"
             value={draft.id}
             onChange={(e) => update('id', e.target.value)}
           />
@@ -272,7 +258,7 @@ function TenantForm({
           <input
             type="text"
             required
-            className="w-full px-3 py-2 rounded border border-slate-300 dark:border-slate-700 dark:bg-slate-800"
+            className="input w-full px-3 py-2"
             value={draft.name}
             onChange={(e) => update('name', e.target.value)}
           />
@@ -281,7 +267,7 @@ function TenantForm({
           <input
             type="url"
             required
-            className="w-full px-3 py-2 rounded border border-slate-300 dark:border-slate-700 dark:bg-slate-800"
+            className="input w-full px-3 py-2"
             value={draft.origin}
             onChange={(e) => update('origin', e.target.value)}
           />
@@ -292,13 +278,13 @@ function TenantForm({
               type="text"
               required
               minLength={20}
-              className="flex-1 px-3 py-2 rounded border border-slate-300 dark:border-slate-700 dark:bg-slate-800 font-mono text-xs"
+              className="input flex-1 px-3 py-2 font-mono text-xs"
               value={draft.apiKey}
               onChange={(e) => update('apiKey', e.target.value)}
             />
             <button
               type="button"
-              className="px-3 py-2 rounded bg-slate-100 dark:bg-slate-800 text-sm"
+              className="btn-ghost px-3 py-2 text-sm"
               onClick={() => update('apiKey', generateApiKey())}
             >
               {t('tenants.form.apikey.gen')}
@@ -307,7 +293,7 @@ function TenantForm({
         </Field>
         <Field label={t('tenants.form.plan')}>
           <select
-            className="w-full px-3 py-2 rounded border border-slate-300 dark:border-slate-700 dark:bg-slate-800"
+            className="input w-full px-3 py-2"
             value={draft.plan}
             onChange={(e) => update('plan', e.target.value as TenantPlan)}
           >
@@ -326,18 +312,11 @@ function TenantForm({
           />
           {t('tenants.form.enabled')}
         </label>
-        <div className="flex gap-2 justify-end pt-3 border-t border-slate-200 dark:border-slate-800">
-          <button
-            type="button"
-            className="px-3 py-2 rounded bg-slate-100 dark:bg-slate-800 text-sm"
-            onClick={onCancel}
-          >
+        <div className="flex gap-2 justify-end pt-3 border-t border-line">
+          <button type="button" className="btn-ghost px-3 py-2 text-sm" onClick={onCancel}>
             {t('btn.cancel')}
           </button>
-          <button
-            type="submit"
-            className="px-3 py-2 rounded bg-slate-900 dark:bg-indigo-600 text-white text-sm font-medium"
-          >
+          <button type="submit" className="btn-primary px-3 py-2 text-sm font-medium">
             {t('tenants.form.save')}
           </button>
         </div>
@@ -350,7 +329,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   // biome 의 noLabelWithoutControl 은 children 안의 input 을 추적하지 못한다.
   return (
     <div className="block">
-      <div className="text-xs font-medium text-slate-700 dark:text-slate-300">{label}</div>
+      <div className="text-xs font-medium text-ink-muted">{label}</div>
       <div className="mt-1">{children}</div>
     </div>
   );

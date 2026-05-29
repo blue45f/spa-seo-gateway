@@ -223,17 +223,14 @@ export function ApiExplorer() {
 
   return (
     <section className="space-y-4" data-testid="page-api">
-      <h2 className="font-semibold text-lg">{t('api.title')}</h2>
-      <p className="text-sm text-slate-600 dark:text-slate-300">
+      <h2 className="text-lg font-semibold tracking-tight text-ink">{t('api.title')}</h2>
+      <p className="text-sm text-ink-muted">
         모드: <code className="font-mono">{mode ?? '(loading)'}</code>. 모드별 추가 엔드포인트가
         자동으로 노출됩니다.
       </p>
       <div className="space-y-3">
         {list.map((e) => (
-          <details
-            key={`${e.method}-${e.path}`}
-            className="bg-white dark:bg-slate-900 dark:border-slate-800 rounded-lg shadow-sm border border-slate-200"
-          >
+          <details key={`${e.method}-${e.path}`} className="panel">
             <summary className="cursor-pointer px-4 py-3 flex items-center gap-3">
               <span
                 className={`px-2 py-0.5 rounded text-xs font-mono font-semibold ${methodPillClass(e.method)}`}
@@ -241,15 +238,13 @@ export function ApiExplorer() {
                 {e.method}
               </span>
               <code className="font-mono text-sm">{e.path}</code>
-              <span className="ml-auto text-xs px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+              <span className="ml-auto text-xs px-2 py-0.5 rounded bg-panel-2 text-ink-muted">
                 {e.auth}
               </span>
             </summary>
-            <div className="px-4 pb-4 pt-2 text-sm text-slate-700 dark:text-slate-200">
+            <div className="px-4 pb-4 pt-2 text-sm text-ink-muted">
               <p className="mb-2">{e.desc}</p>
-              <pre className="bg-slate-50 dark:bg-slate-800 p-3 rounded text-xs overflow-auto">
-                {e.example}
-              </pre>
+              <pre className="bg-panel-2 p-3 rounded text-xs overflow-auto">{e.example}</pre>
             </div>
           </details>
         ))}
