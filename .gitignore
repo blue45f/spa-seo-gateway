@@ -22,3 +22,6 @@ packages/admin-ui/public/
 
 # Storybook static build output
 storybook-static/
+
+# Playwright MCP scratch artifacts
+.playwright-mcp/
