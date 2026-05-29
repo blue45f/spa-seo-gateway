@@ -23,9 +23,9 @@ export function Welcome() {
 
   return (
     <section className="space-y-6" data-testid="page-welcome">
-      <div className="bg-accent text-accent-fg rounded-xl p-8 shadow-lg">
-        <h2 className="text-3xl font-bold">{t('welcome.headline')}</h2>
-        <p className="mt-2 text-accent-fg/80">{t('welcome.intro')}</p>
+      <div className="bg-accent-soft border border-line rounded-xl p-8">
+        <h2 className="text-3xl font-bold tracking-tight text-ink">{t('welcome.headline')}</h2>
+        <p className="mt-2 text-ink-muted">{t('welcome.intro')}</p>
         <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
           <Stat label={t('mode')} value={publicInfo?.mode ?? '...'} />
           <Stat label={t('origin')} value={publicInfo?.origin ?? '(미설정)'} truncate />
@@ -201,9 +201,9 @@ Human ──→ Edge/CDN ──→ origin (gateway는 204 또는 proxy)`}</pre>
 
 function Stat({ label, value, truncate }: { label: string; value: string; truncate?: boolean }) {
   return (
-    <div className="bg-accent-fg/10 rounded p-3">
-      <div className="text-xs text-accent-fg/80">{label}</div>
-      <div className={`font-mono mt-1 ${truncate ? 'truncate' : ''}`}>{value}</div>
+    <div className="bg-panel border border-line rounded-lg p-3">
+      <div className="text-xs text-ink-subtle">{label}</div>
+      <div className={`font-mono mt-1 text-ink ${truncate ? 'truncate' : ''}`}>{value}</div>
     </div>
   );
 }
