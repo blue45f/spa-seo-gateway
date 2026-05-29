@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { AuthGate } from '../components/AuthGate';
 import { RoutesEditor } from '../components/RoutesEditor';
+import { DetailSkeleton } from '../components/Skeleton';
 import { ApiError, api } from '../lib/api';
 import { useStore } from '../lib/store';
 import type { ScopedRoute, Site } from '../lib/types';
@@ -89,7 +90,7 @@ function SiteDetailBody() {
     return () => window.removeEventListener('keydown', handler);
   }, [site, saving]);
 
-  if (loading) return <p className="text-sm text-ink-subtle">loading...</p>;
+  if (loading) return <DetailSkeleton rows={5} />;
   if (missing) {
     return (
       <section className="space-y-4" data-testid="page-site-detail">
