@@ -198,13 +198,30 @@
     transition:
       background-color 140ms cubic-bezier(0.25, 1, 0.5, 1),
       border-color 140ms cubic-bezier(0.25, 1, 0.5, 1),
-      color 140ms cubic-bezier(0.25, 1, 0.5, 1);
+      color 140ms cubic-bezier(0.25, 1, 0.5, 1),
+      box-shadow 140ms cubic-bezier(0.25, 1, 0.5, 1),
+      transform 80ms cubic-bezier(0.25, 1, 0.5, 1);
   }
   .btn-primary:disabled,
   .btn-ghost:disabled,
   .btn-danger:disabled {
     opacity: 0.55;
     cursor: not-allowed;
+  }
+  /* unified focus ring — covers buttons whose call site has no ring utility.
+     Tailwind's utilities layer wins where a focus-visible:ring-accent IS present,
+     so both paths land on the same accent ring. */
+  .btn-primary:focus-visible,
+  .btn-ghost:focus-visible,
+  .btn-danger:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--color-accent);
+  }
+  /* tactile press — transform only (never layout); honored unless reduced-motion */
+  .btn-primary:active:not(:disabled),
+  .btn-ghost:active:not(:disabled),
+  .btn-danger:active:not(:disabled) {
+    transform: translateY(0.5px);
   }
   .btn-primary {
     background: var(--color-accent);
@@ -370,11 +387,21 @@
   .toast-enter,
   .toast-exit,
   .skeleton-pulse,
-  .nav-item {
+  .nav-item,
+  .btn-primary,
+  .btn-ghost,
+  .btn-danger {
     /* biome-ignore lint/complexity/noImportantStyles: must override Tailwind transition utilities for reduced-motion users */
     animation: none !important;
     /* biome-ignore lint/complexity/noImportantStyles: must override Tailwind transition utilities for reduced-motion users */
     transition: none !important;
+  }
+  /* no tactile press displacement for reduced-motion users */
+  .btn-primary:active,
+  .btn-ghost:active,
+  .btn-danger:active {
+    /* biome-ignore lint/complexity/noImportantStyles: must override the :active transform for reduced-motion users */
+    transform: none !important;
   }
   aside {
     /* biome-ignore lint/complexity/noImportantStyles: must override Tailwind transition utilities for reduced-motion users */
