@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { cloneElement, type ReactElement, useCallback, useEffect, useId, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { AuthGate } from '../components/AuthGate';
 import { RoutesEditor } from '../components/RoutesEditor';
@@ -199,13 +199,14 @@ function SiteDetailBody() {
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  // biome 의 noLabelWithoutControl 은 children 안의 input 을 추적하지 못한다.
-  // 시각 레이아웃은 유지하면서 outer 를 div 로 변경, span 도 div 로 유지해 동일 hierarchy.
+function Field({ label, children }: { label: string; children: ReactElement<{ id?: string }> }) {
+  const id = useId();
   return (
     <div className="block">
-      <div className="text-xs font-medium text-ink-muted">{label}</div>
-      <div className="mt-1">{children}</div>
+      <label htmlFor={id} className="text-xs font-medium text-ink-muted">
+        {label}
+      </label>
+      <div className="mt-1">{cloneElement(children, { id })}</div>
     </div>
   );
 }

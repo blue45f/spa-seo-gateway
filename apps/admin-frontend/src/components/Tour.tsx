@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useId, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStore } from '../lib/store';
 import { NavIcon } from './NavIcon';
@@ -63,6 +63,8 @@ export function Tour() {
   const startTour = useStore((s) => s.startTour);
   const t = useStore((s) => s.t);
   const navigate = useNavigate();
+  const titleId = useId();
+  const panelRef = useRef<HTMLDivElement>(null);
 
   // 첫 방문 시 자동 시작
   useEffect(() => {
@@ -72,6 +74,12 @@ export function Tour() {
     }
     return undefined;
   }, [tourSeen, tourStep, startTour]);
+
+  // 단계 전환 시 패널로 포커스 이동 (다이얼로그 접근성)
+  // biome-ignore lint/correctness/useExhaustiveDependencies: refocus the dialog panel on each step change
+  useEffect(() => {
+    panelRef.current?.focus();
+  }, [tourStep]);
 
   if (tourSeen || tourStep < 0 || tourStep >= STEPS.length) return null;
   const step = STEPS[tourStep];
@@ -83,7 +91,14 @@ export function Tour() {
       className="fixed inset-0 z-[90] bg-black/60 flex items-center justify-center p-4"
       data-testid="tour"
     >
-      <div className="bg-panel border border-line rounded-xl shadow-2xl max-w-md w-full p-6">
+      <div
+        ref={panelRef}
+        tabIndex={-1}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        className="bg-panel border border-line rounded-xl shadow-2xl max-w-md w-full p-6 focus-visible:outline-none"
+      >
         <div className="flex items-center gap-3 mb-3">
           <span
             aria-hidden="true"
@@ -95,14 +110,16 @@ export function Tour() {
             <div className="text-xs text-ink-subtle">
               {tourStep + 1} / {STEPS.length}
             </div>
-            <h3 className="font-bold text-lg">{title}</h3>
+            <h3 id={titleId} className="font-bold text-lg">
+              {title}
+            </h3>
           </div>
         </div>
         <p className="text-sm text-ink-muted">{body}</p>
         <div className="flex gap-2 mt-5">
           <button
             type="button"
-            className="text-sm text-ink-subtle hover:text-ink-muted"
+            className="text-sm text-ink-subtle hover:text-ink-muted rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
             onClick={endTour}
           >
             {t('tour.skip')}

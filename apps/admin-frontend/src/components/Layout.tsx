@@ -74,7 +74,7 @@ export function Layout() {
             href="https://github.com/blue45f/spa-seo-gateway"
             target="_blank"
             rel="noreferrer"
-            className="hover:text-ink"
+            className="rounded hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
           >
             github
           </a>

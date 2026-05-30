@@ -45,10 +45,16 @@ export function CommandPalette() {
       }}
       data-testid="cmd-palette"
     >
-      <div className="bg-panel border border-line rounded-lg shadow-2xl w-full max-w-md overflow-hidden">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={t('cmd.placeholder')}
+        className="bg-panel border border-line rounded-lg shadow-2xl w-full max-w-md overflow-hidden"
+      >
         <input
           ref={inputRef}
           type="text"
+          aria-label={t('cmd.placeholder')}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder={t('cmd.placeholder')}

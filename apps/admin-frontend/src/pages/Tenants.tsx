@@ -1,4 +1,12 @@
-import { type FormEvent, useCallback, useEffect, useState } from 'react';
+import {
+  cloneElement,
+  type FormEvent,
+  type ReactElement,
+  useCallback,
+  useEffect,
+  useId,
+  useState,
+} from 'react';
 import { Link } from 'react-router-dom';
 import { AuthGate } from '../components/AuthGate';
 import { EmptyState } from '../components/EmptyState';
@@ -176,7 +184,7 @@ function TenantsBody() {
                     </span>
                     <button
                       type="button"
-                      className="ml-2 text-ink-muted hover:text-ink underline"
+                      className="ml-2 text-ink-muted hover:text-ink underline rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                       onClick={() => copyKey(tn.apiKey)}
                     >
                       {t('tenants.copy')}
@@ -197,7 +205,7 @@ function TenantsBody() {
                     </button>
                     <button
                       type="button"
-                      className="text-xs text-err hover:text-err-fg"
+                      className="text-xs text-err hover:text-err-fg rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                       onClick={() => remove(tn.id)}
                     >
                       {t('tenants.delete')}
@@ -331,12 +339,14 @@ function TenantForm({
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  // biome 의 noLabelWithoutControl 은 children 안의 input 을 추적하지 못한다.
+function Field({ label, children }: { label: string; children: ReactElement<{ id?: string }> }) {
+  const id = useId();
   return (
     <div className="block">
-      <div className="text-xs font-medium text-ink-muted">{label}</div>
-      <div className="mt-1">{children}</div>
+      <label htmlFor={id} className="text-xs font-medium text-ink-muted">
+        {label}
+      </label>
+      <div className="mt-1">{cloneElement(children, { id })}</div>
     </div>
   );
 }

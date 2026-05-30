@@ -313,6 +313,16 @@
     color: var(--color-ink);
     border-color: var(--color-accent);
   }
+
+  /* native <details>/<summary> toggles — accent focus ring (A11y law) */
+  summary {
+    outline: none;
+  }
+  summary:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
 }
 
 @layer utilities {

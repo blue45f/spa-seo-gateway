@@ -149,6 +149,7 @@ export function RoutesEditor({ routes, onChange, labels, reorderable = true }: R
                     <input
                       type="text"
                       className="input w-full px-2 py-1 font-mono text-xs"
+                      aria-label={`${L.pattern} ${i + 1}`}
                       value={r.pattern}
                       onChange={(e) => update(i, { pattern: e.target.value })}
                       placeholder="^/products/[0-9]+"
@@ -158,6 +159,7 @@ export function RoutesEditor({ routes, onChange, labels, reorderable = true }: R
                     <input
                       type="number"
                       className="input w-full px-2 py-1 text-xs"
+                      aria-label={`${L.ttl} ${i + 1}`}
                       value={r.ttlMs ?? ''}
                       onChange={(e) =>
                         update(i, {
@@ -169,6 +171,7 @@ export function RoutesEditor({ routes, onChange, labels, reorderable = true }: R
                   <td className="px-3 py-2">
                     <select
                       className="input w-full px-2 py-1 text-xs"
+                      aria-label={`${L.waitUntil} ${i + 1}`}
                       value={r.waitUntil ?? ''}
                       onChange={(e) =>
                         update(i, {
@@ -187,6 +190,7 @@ export function RoutesEditor({ routes, onChange, labels, reorderable = true }: R
                     <input
                       type="text"
                       className="input w-full px-2 py-1 text-xs"
+                      aria-label={`${L.waitSelector} ${i + 1}`}
                       value={r.waitSelector ?? ''}
                       onChange={(e) => update(i, { waitSelector: e.target.value || undefined })}
                       placeholder="[data-loaded]"
@@ -196,6 +200,7 @@ export function RoutesEditor({ routes, onChange, labels, reorderable = true }: R
                     <input
                       type="number"
                       className="input w-full px-2 py-1 text-xs"
+                      aria-label={`${L.waitMs} ${i + 1}`}
                       value={r.waitMs ?? ''}
                       onChange={(e) =>
                         update(i, {
@@ -207,6 +212,7 @@ export function RoutesEditor({ routes, onChange, labels, reorderable = true }: R
                   <td className="px-3 py-2 text-center">
                     <input
                       type="checkbox"
+                      aria-label={`${L.ignore} ${i + 1}`}
                       checked={!!r.ignore}
                       onChange={(e) => update(i, { ignore: e.target.checked })}
                     />
@@ -214,7 +220,8 @@ export function RoutesEditor({ routes, onChange, labels, reorderable = true }: R
                   <td className="px-3 py-2 text-right">
                     <button
                       type="button"
-                      className="text-err hover:text-err-fg text-xs"
+                      className="text-err hover:text-err-fg text-xs rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                      aria-label={`${t('btn.delete')} ${L.pattern} ${i + 1}`}
                       onClick={() => remove(i)}
                     >
                       {t('btn.delete')}
