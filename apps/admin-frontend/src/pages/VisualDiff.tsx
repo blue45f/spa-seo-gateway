@@ -1,3 +1,4 @@
+import { CircleCheck } from 'lucide-react';
 import { type FormEvent, useState } from 'react';
 import { AuthGate } from '../components/AuthGate';
 import { ApiError, api } from '../lib/api';
@@ -143,7 +144,10 @@ function VisualDiffBody() {
             </div>
           </div>
           {result.baselineCreated ? (
-            <div className="text-xs text-ok-fg">{t('visual.created')}</div>
+            <div className="inline-flex items-center gap-1.5 text-xs text-ok-fg">
+              <CircleCheck className="h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden="true" />
+              {t('visual.created')}
+            </div>
           ) : null}
           <div className="text-xs text-ink-subtle">
             baseline path: <code>{result.baselinePath}</code>

@@ -12,18 +12,13 @@ function SeedToasts({
   items: Array<{ kind: 'success' | 'error' | 'warn' | 'info'; message: string }>;
 }) {
   useEffect(() => {
-    const icons: Record<string, string> = {
-      success: '✓',
-      error: '✗',
-      warn: '⚠',
-      info: 'ℹ️',
-    };
+    // ToastContainer derives the icon from `kind` (lucide CircleCheck/CircleX/…),
+    // so seeded toasts only need id/kind/message.
     useStore.setState({
       toasts: items.map((it, idx) => ({
         id: idx + 1,
         kind: it.kind,
         message: it.message,
-        icon: icons[it.kind],
       })),
     });
     return () => {

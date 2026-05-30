@@ -27,9 +27,9 @@ const ko: Strings = {
   'nav.audit': '감사 로그',
   'nav.audit.sub': 'HMAC 체인 + 변조 검출',
   'nav.sites': '사이트 관리',
-  'nav.sites.sub': 'CMS — 다중 사이트',
+  'nav.sites.sub': 'CMS · 다중 사이트',
   'nav.tenants': '테넌트 관리',
-  'nav.tenants.sub': 'SaaS — 다중 고객',
+  'nav.tenants.sub': 'SaaS · 다중 고객',
   'nav.api': 'API',
   'nav.api.sub': '엔드포인트 레퍼런스',
   'nav.library': '라이브러리',
@@ -147,9 +147,9 @@ const ko: Strings = {
     'URL 의 스크린샷을 캡처해 로컬 baseline 과 picture diff. 첫 실행은 baseline 으로 저장, 이후 실행부터 픽셀 단위 차이를 측정.',
   'visual.url': 'URL',
   'visual.mode': '모드',
-  'visual.mode.auto': 'auto — 없으면 baseline 저장',
-  'visual.mode.create': 'create — 새 baseline 강제 저장',
-  'visual.mode.compare': 'compare — 비교만',
+  'visual.mode.auto': 'auto: 없으면 baseline 저장',
+  'visual.mode.create': 'create: 새 baseline 강제 저장',
+  'visual.mode.compare': 'compare: 비교만',
   'visual.threshold': 'threshold (0~1)',
   'visual.fullPage': '전체 페이지 캡처',
   'visual.run': '캡처 + 비교',
@@ -158,7 +158,7 @@ const ko: Strings = {
   'visual.diffPx': 'diff pixels',
   'visual.size': '크기',
   'visual.duration': '소요',
-  'visual.created': '✓ 새 baseline 저장됨',
+  'visual.created': '새 baseline 저장됨',
 
   // AI
   'ai.title': 'AI 기반 schema.org JSON-LD 추론',
@@ -175,8 +175,8 @@ const ko: Strings = {
     '모든 admin 액션은 SHA-256 hash chain + 옵션 HMAC 서명으로 기록됩니다. verifyAuditChain() 으로 변조 즉시 검출.',
   'audit.refresh': '새로고침',
   'audit.verify': '체인 검증',
-  'audit.ok': '✓ 무결성 OK',
-  'audit.broken': '✗ 변조 감지',
+  'audit.ok': '무결성 OK',
+  'audit.broken': '변조 감지',
   'audit.empty': '기록된 감사 이벤트가 없습니다.',
 
   // API
@@ -186,7 +186,7 @@ const ko: Strings = {
   'library.title': '라이브러리로 사용',
 
   // Sites (CMS)
-  'sites.title': '사이트 관리 — CMS 모드',
+  'sites.title': '사이트 관리: CMS 모드',
   'sites.intro':
     '한 게이트웨이에서 여러 사이트를 host 헤더로 분기. 각 사이트는 자기 origin / routes / 캐시 네임스페이스를 갖는다.',
   'sites.add': '+ 새 사이트',
@@ -216,7 +216,7 @@ const ko: Strings = {
   'sites.detail.back': '← 목록으로',
 
   // Tenants (SaaS)
-  'tenants.title': '테넌트 관리 — SaaS 모드',
+  'tenants.title': '테넌트 관리: SaaS 모드',
   'tenants.intro': '외부 고객별 격리된 컨텍스트. apiKey 또는 host 로 식별하며 plan 별 한도를 적용.',
   'tenants.add': '+ 새 테넌트',
   'tenants.edit': '편집',
@@ -248,7 +248,7 @@ const ko: Strings = {
   'tenants.detail.rotate.confirm': 'API key 를 새로 발급할까요? 이전 키는 즉시 무효화됩니다.',
 
   // Help
-  'help.title': '도움말 — 자주 묻는 질문',
+  'help.title': '도움말: 자주 묻는 질문',
 
   // Tour
   'tour.skip': '건너뛰기',
@@ -290,9 +290,9 @@ const en: Strings = {
   'nav.audit': 'Audit Log',
   'nav.audit.sub': 'HMAC chain + tamper check',
   'nav.sites': 'Sites',
-  'nav.sites.sub': 'CMS — multi-site',
+  'nav.sites.sub': 'CMS · multi-site',
   'nav.tenants': 'Tenants',
-  'nav.tenants.sub': 'SaaS — multi-customer',
+  'nav.tenants.sub': 'SaaS · multi-customer',
   'nav.api': 'API',
   'nav.api.sub': 'Endpoint reference',
   'nav.library': 'Library',
@@ -339,7 +339,7 @@ const en: Strings = {
   // Welcome
   'welcome.headline': 'SPA SEO Gateway',
   'welcome.intro':
-    'React/Vue/Svelte SPAs delivered to bots as fully-rendered HTML on demand, while humans see the original SPA. Caching and SWR are bonus optimizations — the core is on-request real-time rendering.',
+    'React/Vue/Svelte SPAs delivered to bots as fully-rendered HTML on demand, while humans see the original SPA. Caching and SWR are bonus optimizations. The core is on-request real-time rendering.',
   'welcome.cards.bot': 'Bots get rendered HTML at request time',
   'welcome.cards.bot.body':
     'Identify bots via isbot (1,000+ UA patterns), then run the SPA in headless Chromium so data fetches / state / DOM all complete before the response.',
@@ -409,9 +409,9 @@ const en: Strings = {
     'Capture a screenshot, diff against the local baseline. First run saves the baseline; later runs measure pixel-level differences.',
   'visual.url': 'URL',
   'visual.mode': 'Mode',
-  'visual.mode.auto': 'auto — save baseline if missing',
-  'visual.mode.create': 'create — force new baseline',
-  'visual.mode.compare': 'compare — comparison only',
+  'visual.mode.auto': 'auto: save baseline if missing',
+  'visual.mode.create': 'create: force new baseline',
+  'visual.mode.compare': 'compare: comparison only',
   'visual.threshold': 'threshold (0~1)',
   'visual.fullPage': 'Full page',
   'visual.run': 'Capture + compare',
@@ -420,7 +420,7 @@ const en: Strings = {
   'visual.diffPx': 'diff pixels',
   'visual.size': 'size',
   'visual.duration': 'duration',
-  'visual.created': '✓ new baseline saved',
+  'visual.created': 'new baseline saved',
 
   // AI
   'ai.title': 'AI-driven schema.org JSON-LD inference',
@@ -429,7 +429,7 @@ const en: Strings = {
   'ai.run': 'Run inference',
   'ai.running': 'Inferring...',
   'ai.setup': 'Adapter quick setup',
-  'ai.empty': 'No suggestions returned — content may be sparse or type unclear.',
+  'ai.empty': 'No suggestions returned. Content may be sparse or type unclear.',
 
   // Audit
   'audit.title': 'Audit Log (HMAC chain)',
@@ -437,8 +437,8 @@ const en: Strings = {
     'Every admin action is recorded with a SHA-256 hash chain + optional HMAC signature. verifyAuditChain() detects tampering instantly.',
   'audit.refresh': 'Refresh',
   'audit.verify': 'Verify chain',
-  'audit.ok': '✓ integrity OK',
-  'audit.broken': '✗ tampering detected',
+  'audit.ok': 'integrity OK',
+  'audit.broken': 'tampering detected',
   'audit.empty': 'No audit events recorded yet.',
 
   // API
@@ -448,9 +448,9 @@ const en: Strings = {
   'library.title': 'Use as a library',
 
   // Sites (CMS)
-  'sites.title': 'Sites — CMS mode',
+  'sites.title': 'Sites: CMS mode',
   'sites.intro':
-    'One gateway, many sites — routed by Host header. Each site has its own origin, routes, and cache namespace.',
+    'One gateway, many sites, routed by Host header. Each site has its own origin, routes, and cache namespace.',
   'sites.add': '+ New site',
   'sites.edit': 'Edit',
   'sites.delete': 'Delete',
@@ -479,7 +479,7 @@ const en: Strings = {
   'sites.detail.back': '← Back to list',
 
   // Tenants (SaaS)
-  'tenants.title': 'Tenants — SaaS mode',
+  'tenants.title': 'Tenants: SaaS mode',
   'tenants.intro':
     'Isolated contexts per external customer. Identified by apiKey or host; per-plan quotas.',
   'tenants.add': '+ New tenant',
@@ -514,7 +514,7 @@ const en: Strings = {
     'Issue a new API key? The previous key is invalidated immediately.',
 
   // Help
-  'help.title': 'Help — frequently asked questions',
+  'help.title': 'Help: frequently asked questions',
 
   // Tour
   'tour.skip': 'Skip',

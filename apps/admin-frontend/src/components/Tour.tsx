@@ -10,7 +10,7 @@ const STEPS = [
     titleKo: '환영합니다',
     titleEn: 'Welcome',
     bodyKo: '여기는 게이트웨이의 한눈에 보기. 모드/origin/uptime 을 확인합니다.',
-    bodyEn: "A bird's eye view of the gateway — mode, origin, uptime.",
+    bodyEn: "A bird's eye view of the gateway: mode, origin, uptime.",
   },
   {
     id: 'routes',
@@ -50,7 +50,7 @@ const STEPS = [
     titleKo: '실시간 메트릭',
     titleEn: 'Live metrics',
     bodyKo: '5초마다 갱신. cache hit ratio, 에러 분류 확인.',
-    bodyEn: 'Refreshes every 5s — cache hit ratio, error breakdown.',
+    bodyEn: 'Refreshes every 5s: cache hit ratio, error breakdown.',
   },
 ];
 

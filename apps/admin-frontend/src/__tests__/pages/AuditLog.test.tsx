@@ -81,6 +81,6 @@ describe('AuditLog page', () => {
     renderWithRouter(<AuditLog />);
     await waitFor(() => screen.getByText('체인 검증'));
     fireEvent.click(screen.getByText('체인 검증'));
-    await waitFor(() => expect(screen.getAllByText('✓ 무결성 OK').length).toBeGreaterThan(0));
+    await waitFor(() => expect(screen.getAllByText('무결성 OK').length).toBeGreaterThan(0));
   });
 });

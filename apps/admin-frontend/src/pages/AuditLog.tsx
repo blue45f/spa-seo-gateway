@@ -1,3 +1,4 @@
+import { CircleCheck, CircleX } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { AuthGate } from '../components/AuthGate';
 import { EmptyState } from '../components/EmptyState';
@@ -86,7 +87,14 @@ function AuditLogBody() {
           {t('audit.verify')}
         </button>
         {verified !== null ? (
-          <span className={`ml-auto text-sm ${verified ? 'text-ok-fg' : 'text-err-fg'}`}>
+          <span
+            className={`ml-auto inline-flex items-center gap-1.5 text-sm ${verified ? 'text-ok-fg' : 'text-err-fg'}`}
+          >
+            {verified ? (
+              <CircleCheck className="h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden="true" />
+            ) : (
+              <CircleX className="h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden="true" />
+            )}
             {verified ? t('audit.ok') : `${t('audit.broken')} brokenAt=${brokenAt}`}
           </span>
         ) : null}

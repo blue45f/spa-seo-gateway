@@ -123,7 +123,7 @@ export function Sidebar({ publicMode }: SidebarProps) {
           onClick={() =>
             setThemeMode(themeMode === 'light' ? 'dark' : themeMode === 'dark' ? 'system' : 'light')
           }
-          aria-label={`Theme: ${themeMode} — click to change`}
+          aria-label={`Theme: ${themeMode}, click to change`}
         >
           <ThemeIcon aria-hidden="true" className="h-4 w-4" strokeWidth={1.75} />
           <span>{t(`theme.${themeMode}`)}</span>
@@ -132,7 +132,7 @@ export function Sidebar({ publicMode }: SidebarProps) {
           type="button"
           className="w-full text-left text-rail-ink-muted hover:text-rail-ink flex items-center gap-2 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
           onClick={toggleDensity}
-          aria-label={`Density: ${density} — click to toggle`}
+          aria-label={`Density: ${density}, click to toggle`}
         >
           <DensityIcon aria-hidden="true" className="h-4 w-4" strokeWidth={1.75} />
           <span>{density === 'compact' ? t('density.compact') : t('density.comfortable')}</span>
