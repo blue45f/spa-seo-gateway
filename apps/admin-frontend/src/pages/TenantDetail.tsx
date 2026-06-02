@@ -1,6 +1,7 @@
 import { cloneElement, type ReactElement, useCallback, useEffect, useId, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { AuthGate } from '../components/AuthGate';
+import { EmptyState } from '../components/EmptyState';
 import { RoutesEditor } from '../components/RoutesEditor';
 import { DetailSkeleton } from '../components/Skeleton';
 import { ApiError, api } from '../lib/api';
@@ -113,10 +114,14 @@ function TenantDetailBody() {
   if (missing) {
     return (
       <section className="space-y-4" data-testid="page-tenant-detail">
-        <Link to="/tenants" className="link text-sm">
-          {t('tenants.detail.back')}
-        </Link>
-        <p className="text-sm text-ink-subtle">{t('tenants.detail.notFound')}</p>
+        <EmptyState
+          title={t('tenants.detail.notFound')}
+          hint={
+            <Link to="/tenants" className="link">
+              {t('tenants.detail.back')}
+            </Link>
+          }
+        />
       </section>
     );
   }
@@ -206,6 +211,7 @@ function TenantDetailBody() {
           <label className="flex items-center gap-2 mt-6 text-sm">
             <input
               type="checkbox"
+              className="checkbox h-4 w-4"
               checked={tenant.enabled}
               onChange={(e) => setTenant({ ...tenant, enabled: e.target.checked })}
             />

@@ -102,9 +102,17 @@ function WarmBody() {
           <h3 className="font-semibold mb-3 text-ink">결과</h3>
           <dl className="grid grid-cols-2 md:grid-cols-5 gap-3">
             <Stat k="found" v={String(report.found)} />
-            <Stat k="warmed" v={String(report.warmed)} />
+            <Stat
+              k="warmed"
+              v={String(report.warmed)}
+              tone={report.warmed > 0 ? 'ok' : undefined}
+            />
             <Stat k="skipped" v={String(report.skipped)} />
-            <Stat k="errors" v={String(report.errors)} />
+            <Stat
+              k="errors"
+              v={String(report.errors)}
+              tone={report.errors > 0 ? 'err' : undefined}
+            />
             <Stat k="durationMs" v={String(report.durationMs)} />
           </dl>
           <div className="text-xs text-ink-subtle mt-3 truncate">
@@ -116,11 +124,12 @@ function WarmBody() {
   );
 }
 
-function Stat({ k, v }: { k: string; v: string }) {
+function Stat({ k, v, tone }: { k: string; v: string; tone?: 'ok' | 'err' }) {
+  const toneClass = tone === 'err' ? 'text-err-fg' : tone === 'ok' ? 'text-ok-fg' : 'text-ink';
   return (
     <div className="bg-panel-2 rounded p-3">
       <div className="text-xs text-ink-subtle">{k}</div>
-      <div className="font-mono text-lg">{v}</div>
+      <div className={`font-mono text-lg ${toneClass}`}>{v}</div>
     </div>
   );
 }

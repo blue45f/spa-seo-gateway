@@ -114,7 +114,11 @@ function RenderTestBody() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
             <div className="bg-panel-2 rounded p-3">
               <div className="text-xs text-ink-subtle">status</div>
-              <div className="font-mono text-lg">{result.status}</div>
+              <div
+                className={`font-mono text-lg ${result.status >= 400 ? 'text-err-fg' : result.status >= 300 ? 'text-warn-fg' : result.status >= 200 ? 'text-ok-fg' : 'text-ink'}`}
+              >
+                {result.status}
+              </div>
             </div>
             <div className="bg-panel-2 rounded p-3">
               <div className="text-xs text-ink-subtle">duration</div>
@@ -126,7 +130,13 @@ function RenderTestBody() {
             </div>
             <div className="bg-panel-2 rounded p-3">
               <div className="text-xs text-ink-subtle">x-cache</div>
-              <div className="font-mono text-lg">{result.headers['x-cache'] ?? '-'}</div>
+              <div className="mt-1">
+                <span
+                  className={`badge font-mono ${(result.headers['x-cache'] ?? '') === 'HIT' ? 'badge--ok' : 'badge--neutral'}`}
+                >
+                  {result.headers['x-cache'] ?? '-'}
+                </span>
+              </div>
             </div>
           </div>
           <details className="text-sm">

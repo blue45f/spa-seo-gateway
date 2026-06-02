@@ -53,6 +53,7 @@ function MetricsBody() {
           <label className="flex items-center gap-1">
             <input
               type="checkbox"
+              className="checkbox h-4 w-4"
               checked={autoRefresh}
               onChange={(e) => setAutoRefresh(e.target.checked)}
             />

@@ -104,6 +104,7 @@ function VisualDiffBody() {
             <label className="mt-2 flex items-center gap-2 text-sm">
               <input
                 type="checkbox"
+                className="checkbox h-4 w-4"
                 aria-label="fullPage"
                 checked={fullPage}
                 onChange={(e) => setFullPage(e.target.checked)}

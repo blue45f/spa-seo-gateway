@@ -150,7 +150,10 @@ const ko: Strings = {
   'lighthouse.title': 'Lighthouse 점수',
   'lighthouse.url.label': '대상 URL',
   'lighthouse.run': '측정 실행',
-  'lighthouse.cached': '(캐시된 결과)',
+  'lighthouse.cached': '캐시된 결과',
+  'lighthouse.band.good': '양호',
+  'lighthouse.band.needs': '개선 필요',
+  'lighthouse.band.poor': '미흡',
   'lighthouse.scores.performance': 'Performance',
   'lighthouse.scores.accessibility': 'Accessibility',
   'lighthouse.scores.seo': 'SEO',
@@ -183,6 +186,8 @@ const ko: Strings = {
   'ai.running': '추론 중...',
   'ai.setup': '어댑터 빠른 설정',
   'ai.empty': '추론된 schema 가 없습니다. 본문이 짧거나 타입이 불명확할 수 있습니다.',
+  'ai.empty.hint':
+    '본문이 짧거나 타입이 불명확하면 제안이 없을 수 있습니다. 더 본문이 풍부한 페이지 URL 을 입력해 보세요.',
 
   // Audit
   'audit.title': '감사 로그 (HMAC chain)',
@@ -427,7 +432,10 @@ const en: Strings = {
   'lighthouse.title': 'Lighthouse scores',
   'lighthouse.url.label': 'Target URL',
   'lighthouse.run': 'Measure',
-  'lighthouse.cached': '(cached)',
+  'lighthouse.cached': 'cached',
+  'lighthouse.band.good': 'good',
+  'lighthouse.band.needs': 'needs improvement',
+  'lighthouse.band.poor': 'poor',
   'lighthouse.scores.performance': 'Performance',
   'lighthouse.scores.accessibility': 'Accessibility',
   'lighthouse.scores.seo': 'SEO',
@@ -460,6 +468,8 @@ const en: Strings = {
   'ai.running': 'Inferring...',
   'ai.setup': 'Adapter quick setup',
   'ai.empty': 'No suggestions returned. Content may be sparse or type unclear.',
+  'ai.empty.hint':
+    'Sparse content or an unclear type can yield no suggestions. Try a URL with richer body content.',
 
   // Audit
   'audit.title': 'Audit Log (HMAC chain)',

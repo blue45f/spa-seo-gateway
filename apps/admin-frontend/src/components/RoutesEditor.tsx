@@ -212,6 +212,7 @@ export function RoutesEditor({ routes, onChange, labels, reorderable = true }: R
                   <td className="px-3 py-2 text-center">
                     <input
                       type="checkbox"
+                      className="checkbox h-4 w-4"
                       aria-label={`${L.ignore} ${i + 1}`}
                       checked={!!r.ignore}
                       onChange={(e) => update(i, { ignore: e.target.checked })}

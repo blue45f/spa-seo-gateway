@@ -321,6 +321,7 @@ function TenantForm({
         <label className="flex items-center gap-2">
           <input
             type="checkbox"
+            className="checkbox h-4 w-4"
             checked={draft.enabled}
             onChange={(e) => update('enabled', e.target.checked)}
           />

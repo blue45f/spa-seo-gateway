@@ -1,7 +1,7 @@
 import { type FormEvent, useState } from 'react';
 import { AuthGate } from '../components/AuthGate';
 import { ApiError, api } from '../lib/api';
-import { lighthouseScoreColor } from '../lib/format';
+import { lighthouseScoreBand, lighthouseScoreColor } from '../lib/format';
 import { useStore } from '../lib/store';
 import type { LighthouseResult, LighthouseScores } from '../lib/types';
 
@@ -76,22 +76,33 @@ function LighthouseBody() {
             <div>
               <code className="text-sm">{result.url}</code>
               {result.cached ? (
-                <span className="ml-2 text-xs text-ok-fg">{t('lighthouse.cached')}</span>
+                <span className="ml-2 badge badge--neutral">{t('lighthouse.cached')}</span>
               ) : null}
             </div>
             <span className="text-xs text-ink-subtle">{result.durationMs}ms</span>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {labels.map((l) => (
-              <div key={l.key} className="bg-panel-2 rounded p-4 text-center">
-                <div className="text-xs text-ink-subtle">{l.label}</div>
-                <div
-                  className={`mt-2 text-3xl font-bold ${lighthouseScoreColor(result.scores[l.key])}`}
-                >
-                  {Math.round(result.scores[l.key])}
+            {labels.map((l) => {
+              const score = result.scores[l.key];
+              const band = lighthouseScoreBand(score);
+              return (
+                <div key={l.key} className="bg-panel-2 rounded p-4 text-center">
+                  <div className="text-xs text-ink-subtle">{l.label}</div>
+                  <div
+                    className={`mt-2 font-mono text-2xl font-semibold ${lighthouseScoreColor(score)}`}
+                  >
+                    {Math.round(score)}
+                  </div>
+                  {band ? (
+                    <span
+                      className={`badge mt-2 ${band === 'good' ? 'badge--ok' : band === 'needs' ? 'badge--warn' : 'badge--err'}`}
+                    >
+                      {t(`lighthouse.band.${band}`)}
+                    </span>
+                  ) : null}
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       ) : null}

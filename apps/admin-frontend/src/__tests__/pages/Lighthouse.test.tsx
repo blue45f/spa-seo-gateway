@@ -39,6 +39,6 @@ describe('Lighthouse page', () => {
     expect(screen.getByText('80')).toBeInTheDocument();
     expect(screen.getByText('100')).toBeInTheDocument();
     expect(screen.getByText('70')).toBeInTheDocument();
-    expect(screen.getByText(/\(캐시된 결과\)/)).toBeInTheDocument();
+    expect(screen.getByText('캐시된 결과')).toBeInTheDocument();
   });
 });
