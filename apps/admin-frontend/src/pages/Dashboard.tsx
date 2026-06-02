@@ -1,10 +1,16 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { AuthGate } from '../components/AuthGate';
 import { EmptyState } from '../components/EmptyState';
+import { Figure } from '../components/Figure';
 import { CardGridSkeleton } from '../components/Skeleton';
+import { Sparkline } from '../components/Sparkline';
 import { api, errorMessage } from '../lib/api';
 import { useStore } from '../lib/store';
 import type { SiteInfo } from '../lib/types';
+
+/** 추세선이 의미를 갖도록 최근 갱신 N회의 표본만 보관. */
+const TREND_CAP = 24;
+const intFmt = (n: number) => String(Math.round(n));
 
 export function Dashboard() {
   return (
@@ -19,12 +25,20 @@ function DashboardBody() {
   const setError = useStore((s) => s.setGlobalError);
   const [info, setInfo] = useState<SiteInfo | null>(null);
   const [loading, setLoading] = useState(false);
+  // 갱신마다 누적 실패 합계를 적재해 추세선을 만든다(최근 TREND_CAP 회).
+  const [failTrend, setFailTrend] = useState<number[]>([]);
+  const trendRef = useRef<number[]>([]);
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
       const r = await api<SiteInfo>('GET', '/admin/api/site');
       setInfo(r);
+      const totalFails = r.breakers
+        ? Object.values(r.breakers).reduce((sum, b) => sum + (b.failures ?? 0), 0)
+        : 0;
+      trendRef.current = [...trendRef.current, totalFails].slice(-TREND_CAP);
+      setFailTrend(trendRef.current);
       setError('');
     } catch (e) {
       const msg = errorMessage(e);
@@ -81,12 +95,16 @@ function DashboardBody() {
         </div>
         <div className="flex-1 p-5">
           <div className="text-[11px] uppercase tracking-[0.12em] text-ink-subtle">routes</div>
-          <div className="font-mono text-2xl text-ink mt-2">{String(info.site?.routes ?? 0)}</div>
+          <div className="font-mono text-2xl text-ink mt-2">
+            <Figure value={info.site?.routes ?? 0} format={intFmt} />
+          </div>
           <div className="text-xs text-ink-muted mt-1.5">{t('dashboard.routes.detail')}</div>
         </div>
         <div className="flex-1 p-5">
           <div className="text-[11px] uppercase tracking-[0.12em] text-ink-subtle">cache</div>
-          <div className="font-mono text-2xl text-ink mt-2">{ttlMin}m TTL</div>
+          <div className="font-mono text-2xl text-ink mt-2">
+            <Figure value={ttlMin} format={intFmt} />m TTL
+          </div>
           <div className="text-xs text-ink-muted mt-2 flex items-center gap-2 flex-wrap">
             <span className="font-mono">{swrMin}m SWR</span>
             <span className={`badge ${info.cache?.redisEnabled ? 'badge--ok' : 'badge--neutral'}`}>
@@ -97,9 +115,15 @@ function DashboardBody() {
       </div>
 
       <div className="panel p-5">
-        <h3 className="font-semibold tracking-tight text-ink mb-3">
-          {t('dashboard.breakers.title')}
-        </h3>
+        <div className="flex items-center justify-between gap-3 mb-3">
+          <h3 className="font-semibold tracking-tight text-ink">{t('dashboard.breakers.title')}</h3>
+          {breakerHosts.length > 0 && failTrend.length > 1 ? (
+            <div className="flex items-center gap-1.5 text-ink-subtle shrink-0">
+              <span className="sr-only">{t('dashboard.breakers.failTrend')}</span>
+              <Sparkline values={failTrend} />
+            </div>
+          ) : null}
+        </div>
         {breakerHosts.length > 0 ? (
           <div className="overflow-x-auto -mx-5 px-5">
             <table className="w-full text-sm">

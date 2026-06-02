@@ -1,9 +1,16 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AuthGate } from '../components/AuthGate';
+import { Figure } from '../components/Figure';
 import { CardGridSkeleton } from '../components/Skeleton';
+import { Sparkline } from '../components/Sparkline';
 import { errorMessage, fetchText } from '../lib/api';
 import { type ParsedMetrics, parsePrometheus, summarize } from '../lib/metrics';
 import { useStore } from '../lib/store';
+
+/** 추세선이 의미를 갖도록 최근 폴링 N회의 표본만 보관. */
+const TREND_CAP = 24;
+const intFmt = (n: number) => String(Math.round(n));
+const pctFmt = (n: number) => `${n.toFixed(1)}%`;
 
 export function Metrics() {
   return (
@@ -20,6 +27,9 @@ function MetricsBody() {
   const [raw, setRaw] = useState('');
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [updated, setUpdated] = useState('');
+  // 폴링마다 hit ratio(%) 를 적재해 헤드라인 옆 추세선을 만든다(최근 TREND_CAP 회).
+  const [hitTrend, setHitTrend] = useState<number[]>([]);
+  const trendRef = useRef<number[]>([]);
 
   const ctrlRef = useRef<AbortController | null>(null);
 
@@ -32,7 +42,12 @@ function MetricsBody() {
       const text = await fetchText('/metrics', ctrl.signal);
       if (ctrl.signal.aborted) return;
       setRaw(text);
-      setParsed(summarize(parsePrometheus(text)));
+      const next = summarize(parsePrometheus(text));
+      setParsed(next);
+      if (next.cards.hitRatioValue != null) {
+        trendRef.current = [...trendRef.current, next.cards.hitRatioValue].slice(-TREND_CAP);
+        setHitTrend(trendRef.current);
+      }
       setUpdated(new Date().toLocaleTimeString());
       setError('');
     } catch (e) {
@@ -79,8 +94,20 @@ function MetricsBody() {
             />
             {t('metrics.autoRefresh')}
           </label>
-          <span className="text-xs text-ink-subtle">
-            {t('metrics.lastUpdated')}: {updated || '...'}
+          {/* 시각적 계기 표시 — 자동 갱신이 5초마다 시각을 바꾸므로 라이브 영역으로 두지
+              않는다(SR 과다 알림 방지). 갱신 박동은 aria-hidden 도트가 운반. */}
+          <span className="flex items-center gap-1.5 text-xs text-ink-subtle">
+            {autoRefresh ? (
+              <span
+                key={updated}
+                className="live-dot inline-block h-1.5 w-1.5 rounded-full bg-ok"
+                title={t('metrics.live')}
+                aria-hidden="true"
+              />
+            ) : null}
+            <span className="font-mono">
+              {t('metrics.lastUpdated')}: {updated || '...'}
+            </span>
           </span>
           <button type="button" className="btn-ghost px-3 py-1.5" onClick={load}>
             {t('btn.refresh')}
@@ -94,14 +121,30 @@ function MetricsBody() {
           <div className="text-[11px] uppercase tracking-[0.12em] text-ink-subtle">
             cache hit ratio
           </div>
-          <div className="font-mono text-2xl text-ink mt-2">{parsed.cards.hitRatio}</div>
+          <div className="flex items-end justify-between gap-3 mt-2">
+            <div className="font-mono text-2xl text-ink leading-none">
+              {parsed.cards.hitRatioValue != null ? (
+                <Figure value={parsed.cards.hitRatioValue} format={pctFmt} />
+              ) : (
+                parsed.cards.hitRatio
+              )}
+            </div>
+            {hitTrend.length > 1 ? (
+              <span className="text-ink-subtle shrink-0 pb-0.5">
+                <span className="sr-only">{t('metrics.hitTrend')}</span>
+                <Sparkline values={hitTrend} width={84} height={24} />
+              </span>
+            ) : null}
+          </div>
           <div className="text-xs text-ink-muted mt-1.5 font-mono">
             hit {parsed.cards.cacheHits} / miss {parsed.cards.cacheMisses}
           </div>
         </div>
         <div className="flex-1 p-5">
           <div className="text-[11px] uppercase tracking-[0.12em] text-ink-subtle">inflight</div>
-          <div className="font-mono text-2xl text-ink mt-2">{String(parsed.cards.inflight)}</div>
+          <div className="font-mono text-2xl text-ink mt-2">
+            <Figure value={parsed.cards.inflight} format={intFmt} />
+          </div>
           <div className="text-xs text-ink-muted mt-1.5">{t('metrics.inflight.detail')}</div>
         </div>
       </div>
