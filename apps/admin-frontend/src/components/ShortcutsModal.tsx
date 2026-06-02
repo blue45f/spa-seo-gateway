@@ -32,7 +32,7 @@ export function ShortcutsModal() {
         className="bg-panel border border-line rounded-lg shadow-2xl p-6 max-w-md focus-visible:outline-none"
       >
         <h3 id={titleId} className="font-semibold text-lg mb-3">
-          키보드 단축키 / Shortcuts
+          {t('shortcuts.title')}
         </h3>
         <table className="w-full text-sm">
           <tbody className="divide-y divide-line">

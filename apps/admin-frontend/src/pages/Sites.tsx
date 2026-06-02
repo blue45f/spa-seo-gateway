@@ -138,10 +138,7 @@ function SitesBody() {
 
       {sites.length === 0 ? (
         <div className="panel">
-          <EmptyState
-            title={t('sites.empty')}
-            hint="사이트를 추가하면 host별 origin · routes · 캐시 설정을 관리할 수 있습니다."
-          />
+          <EmptyState title={t('sites.empty')} hint={t('sites.empty.hint')} />
         </div>
       ) : (
         <div className="panel overflow-x-auto">

@@ -80,9 +80,7 @@ function CacheBody() {
 
       <div className="panel p-5 space-y-3">
         <h3 className="font-semibold text-ink">{t('cache.clear.label')}</h3>
-        <p className="text-sm text-ink-muted">
-          배포 후 또는 대규모 데이터 변경 시 사용. 다음 요청부터는 cold render.
-        </p>
+        <p className="text-sm text-ink-muted">{t('cache.clear.desc')}</p>
         <button
           type="button"
           disabled={busy}

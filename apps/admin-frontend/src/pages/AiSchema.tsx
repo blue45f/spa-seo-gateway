@@ -118,9 +118,7 @@ setAiSchemaAdapter(createAnthropicSchemaAdapter({
 }));`}</pre>
         </div>
         <div>
-          <div className="text-xs font-medium text-ink-muted mb-1">
-            OpenAI / Groq / Ollama (호환 엔드포인트)
-          </div>
+          <div className="text-xs font-medium text-ink-muted mb-1">{t('ai.providers')}</div>
           <pre className="panel-inset text-xs p-3 overflow-auto">{`npm install @heejun/spa-seo-gateway-openai
 
 import { createOpenAiSchemaAdapter } from '@heejun/spa-seo-gateway-openai';

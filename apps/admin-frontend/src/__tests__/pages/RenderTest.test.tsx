@@ -20,7 +20,7 @@ afterEach(() => {
 describe('RenderTest page', () => {
   it('shows bot UA quick-fill buttons', () => {
     renderWithRouter(<RenderTest />);
-    expect(screen.getByText(/Googlebot \(데스크톱\)/)).toBeInTheDocument();
+    expect(screen.getByText(/Googlebot \(Desktop\)/)).toBeInTheDocument();
     expect(screen.getByText(/Bingbot/)).toBeInTheDocument();
   });
 

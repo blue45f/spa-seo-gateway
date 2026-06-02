@@ -7,11 +7,11 @@ import type { RenderTestResult } from '../lib/types';
 
 const BOT_UAS = [
   {
-    name: 'Googlebot (데스크톱)',
+    name: 'Googlebot (Desktop)',
     value: 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
   },
   {
-    name: 'Googlebot (모바일)',
+    name: 'Googlebot (Mobile)',
     value:
       'Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Mobile Safari/537.36 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
   },
@@ -140,7 +140,7 @@ function RenderTestBody() {
             </div>
           </div>
           <details className="text-sm">
-            <summary className="cursor-pointer font-semibold">응답 헤더</summary>
+            <summary className="cursor-pointer font-semibold">{t('test.responseHeaders')}</summary>
             <pre className="panel-inset mt-2 text-xs p-3 overflow-auto">
               {JSON.stringify(result.headers, null, 2)}
             </pre>

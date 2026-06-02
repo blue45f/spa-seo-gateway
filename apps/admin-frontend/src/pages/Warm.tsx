@@ -50,9 +50,7 @@ function WarmBody() {
   return (
     <section className="space-y-4" data-testid="page-warm">
       <h2 className="text-lg font-semibold tracking-tight text-ink">{t('warm.title')}</h2>
-      <p className="text-sm text-ink-muted">
-        sitemap.xml URL 입력 → 재귀 sitemap-index 파싱 + 동시 N개 워밍. cold start 제거에 효과적.
-      </p>
+      <p className="text-sm text-ink-muted">{t('warm.intro')}</p>
 
       <form onSubmit={run} className="panel p-5 space-y-3">
         <label className="block">
@@ -99,7 +97,7 @@ function WarmBody() {
 
       {report ? (
         <div className="panel p-5 text-sm">
-          <h3 className="font-semibold mb-3 text-ink">결과</h3>
+          <h3 className="font-semibold mb-3 text-ink">{t('warm.result')}</h3>
           <dl className="grid grid-cols-2 md:grid-cols-5 gap-3">
             <Stat k="found" v={String(report.found)} />
             <Stat

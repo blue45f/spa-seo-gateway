@@ -139,10 +139,7 @@ function AuditLogBody() {
             {events.length === 0 ? (
               <tr>
                 <td colSpan={6}>
-                  <EmptyState
-                    title={t('audit.empty')}
-                    hint="설정 변경 · 캐시 무효화 같은 관리자 작업이 발생하면 여기에 기록됩니다."
-                  />
+                  <EmptyState title={t('audit.empty')} hint={t('audit.empty.hint')} />
                 </td>
               </tr>
             ) : null}

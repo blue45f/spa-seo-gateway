@@ -47,7 +47,11 @@ function LighthouseBody() {
     <section className="space-y-4" data-testid="page-lighthouse">
       <h2 className="text-lg font-semibold tracking-tight text-ink">{t('lighthouse.title')}</h2>
       <p className="text-sm text-ink-muted">
-        peer-installed <code>lighthouse</code> + <code>chrome-launcher</code> 가 필요합니다.
+        {t('lighthouse.peerDep.pre')}
+        <code>lighthouse</code>
+        {t('lighthouse.peerDep.mid')}
+        <code>chrome-launcher</code>
+        {t('lighthouse.peerDep.post')}
       </p>
 
       <form onSubmit={run} className="panel p-5 space-y-3">

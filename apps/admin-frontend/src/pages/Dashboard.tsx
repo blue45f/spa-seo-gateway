@@ -46,12 +46,7 @@ function DashboardBody() {
         </section>
       );
     }
-    return (
-      <EmptyState
-        title={t('dashboard.empty')}
-        hint="게이트웨이가 시작되면 mode · routes · cache 와 호스트별 서킷 브레이커 상태가 여기 표시됩니다."
-      />
-    );
+    return <EmptyState title={t('dashboard.empty')} hint={t('dashboard.empty.hint')} />;
   }
 
   const ttlMin = Math.floor((info.cache?.ttlMs ?? 0) / 60_000);
@@ -61,7 +56,7 @@ function DashboardBody() {
   return (
     <section className="space-y-5" data-testid="page-dashboard">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold tracking-tight text-ink">현재 게이트웨이 상태</h2>
+        <h2 className="text-lg font-semibold tracking-tight text-ink">{t('dashboard.title')}</h2>
         <button
           type="button"
           className="btn-ghost px-3 py-1.5 text-sm"
@@ -81,13 +76,13 @@ function DashboardBody() {
           </div>
           <div className="font-mono text-2xl text-ink mt-2">{info.mode}</div>
           <div className="text-xs text-ink-muted mt-1.5 font-mono truncate">
-            {info.origin || '(origin 미설정)'}
+            {info.origin || t('dashboard.origin.unset')}
           </div>
         </div>
         <div className="flex-1 p-5">
           <div className="text-[11px] uppercase tracking-[0.12em] text-ink-subtle">routes</div>
           <div className="font-mono text-2xl text-ink mt-2">{String(info.site?.routes ?? 0)}</div>
-          <div className="text-xs text-ink-muted mt-1.5">런타임 활성</div>
+          <div className="text-xs text-ink-muted mt-1.5">{t('dashboard.routes.detail')}</div>
         </div>
         <div className="flex-1 p-5">
           <div className="text-[11px] uppercase tracking-[0.12em] text-ink-subtle">cache</div>
@@ -102,7 +97,9 @@ function DashboardBody() {
       </div>
 
       <div className="panel p-5">
-        <h3 className="font-semibold tracking-tight text-ink mb-3">Circuit breakers (호스트별)</h3>
+        <h3 className="font-semibold tracking-tight text-ink mb-3">
+          {t('dashboard.breakers.title')}
+        </h3>
         {breakerHosts.length > 0 ? (
           <div className="overflow-x-auto -mx-5 px-5">
             <table className="w-full text-sm">
@@ -134,8 +131,8 @@ function DashboardBody() {
           </div>
         ) : (
           <EmptyState
-            title="아직 추적된 호스트가 없습니다"
-            hint="봇 요청이 오리진 호스트로 라우팅되면 실패율 기반 상태(closed · half-open · open)가 집계됩니다."
+            title={t('dashboard.breakers.empty.title')}
+            hint={t('dashboard.breakers.empty.hint')}
           />
         )}
       </div>

@@ -82,13 +82,13 @@ function MetricsBody() {
         <div className="flex-1 p-5">
           <div className="text-[11px] uppercase tracking-[0.12em] text-ink-subtle">inflight</div>
           <div className="font-mono text-2xl text-ink mt-2">{String(parsed.cards.inflight)}</div>
-          <div className="text-xs text-ink-muted mt-1.5">현재 렌더 중</div>
+          <div className="text-xs text-ink-muted mt-1.5">{t('metrics.inflight.detail')}</div>
         </div>
       </div>
 
       {parsed.renderHist.length > 0 ? (
         <div className="panel p-5">
-          <h3 className="font-semibold mb-3 text-ink">렌더 지연 히스토그램 (per outcome/host)</h3>
+          <h3 className="font-semibold mb-3 text-ink">{t('metrics.histogram.title')}</h3>
           <LatencyBars rows={parsed.renderHist} />
           <div className="overflow-x-auto -mx-5 px-5">
             <table className="w-full text-sm">
@@ -119,7 +119,7 @@ function MetricsBody() {
 
       {Object.keys(parsed.errors).length > 0 ? (
         <div className="panel p-5">
-          <h3 className="font-semibold mb-3 text-ink">에러 분류</h3>
+          <h3 className="font-semibold mb-3 text-ink">{t('metrics.errors.title')}</h3>
           <table className="w-full text-sm">
             <tbody className="divide-y divide-line">
               {Object.entries(parsed.errors)
@@ -136,7 +136,7 @@ function MetricsBody() {
       ) : null}
 
       <details className="text-sm">
-        <summary className="cursor-pointer">/metrics 원본 (Prometheus exposition)</summary>
+        <summary className="cursor-pointer">{t('metrics.raw.summary')}</summary>
         <pre className="panel-inset mt-2 text-xs p-3 overflow-auto max-h-96">
           {raw || '(empty)'}
         </pre>

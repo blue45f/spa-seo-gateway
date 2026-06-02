@@ -142,10 +142,7 @@ function TenantsBody() {
 
       {tenants.length === 0 ? (
         <div className="panel">
-          <EmptyState
-            title={t('tenants.empty')}
-            hint="테넌트를 추가하면 apiKey · host 로 식별되는 고객별 origin · routes 설정을 관리할 수 있습니다."
-          />
+          <EmptyState title={t('tenants.empty')} hint={t('tenants.empty.hint')} />
         </div>
       ) : (
         <div className="panel overflow-x-auto">

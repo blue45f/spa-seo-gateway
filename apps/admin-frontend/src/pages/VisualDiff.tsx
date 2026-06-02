@@ -44,7 +44,7 @@ function VisualDiffBody() {
       );
       setResult(r.result);
       pushToast(
-        r.result.baselineCreated ? 'baseline 저장됨' : `diff ${r.result.diffPercent.toFixed(2)}%`,
+        r.result.baselineCreated ? t('visual.created') : `diff ${r.result.diffPercent.toFixed(2)}%`,
         'success',
       );
     } catch (e) {

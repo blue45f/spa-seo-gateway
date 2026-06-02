@@ -370,6 +370,37 @@ const ko: Strings = {
   'help.links.benchmarks': '벤치마크 시나리오',
   'help.links.migration': 'v1.5 → v1.7 마이그레이션',
 
+  // Page bodies
+  'dashboard.title': '현재 게이트웨이 상태',
+  'dashboard.empty.hint':
+    '게이트웨이가 시작되면 mode · routes · cache 와 호스트별 서킷 브레이커 상태가 여기 표시됩니다.',
+  'dashboard.origin.unset': '(origin 미설정)',
+  'dashboard.routes.detail': '런타임 활성',
+  'dashboard.breakers.title': 'Circuit breakers (호스트별)',
+  'dashboard.breakers.empty.title': '아직 추적된 호스트가 없습니다',
+  'dashboard.breakers.empty.hint':
+    '봇 요청이 오리진 호스트로 라우팅되면 실패율 기반 상태(closed · half-open · open)가 집계됩니다.',
+  'sites.empty.hint': '사이트를 추가하면 host별 origin · routes · 캐시 설정을 관리할 수 있습니다.',
+  'tenants.empty.hint':
+    '테넌트를 추가하면 apiKey · host 로 식별되는 고객별 origin · routes 설정을 관리할 수 있습니다.',
+  'audit.empty.hint': '설정 변경 · 캐시 무효화 같은 관리자 작업이 발생하면 여기에 기록됩니다.',
+  'cache.clear.desc': '배포 후 또는 대규모 데이터 변경 시 사용. 다음 요청부터는 cold render.',
+  'lighthouse.peerDep.pre': 'peer-installed ',
+  'lighthouse.peerDep.mid': ' + ',
+  'lighthouse.peerDep.post': ' 가 필요합니다.',
+  'ai.providers': 'OpenAI / Groq / Ollama (호환 엔드포인트)',
+  'routes.persist.title': 'seo-gateway.config.json 에 영구 저장',
+  'metrics.inflight.detail': '현재 렌더 중',
+  'metrics.histogram.title': '렌더 지연 히스토그램 (per outcome/host)',
+  'metrics.errors.title': '에러 분류',
+  'metrics.raw.summary': '/metrics 원본 (Prometheus exposition)',
+  'warm.intro':
+    'sitemap.xml URL 입력 → 재귀 sitemap-index 파싱 + 동시 N개 워밍. cold start 제거에 효과적.',
+  'warm.result': '결과',
+  'test.responseHeaders': '응답 헤더',
+  'shortcuts.title': '키보드 단축키',
+  'a11y.skipToContent': '메인 콘텐츠로 건너뛰기',
+
   // Tour
   'tour.skip': '건너뛰기',
   'tour.next': '다음 →',
@@ -756,6 +787,38 @@ const en: Strings = {
   'help.links.concurrency': 'Concurrency model',
   'help.links.benchmarks': 'Benchmark scenarios',
   'help.links.migration': 'v1.5 → v1.7 migration',
+
+  // Page bodies
+  'dashboard.title': 'Current gateway status',
+  'dashboard.empty.hint':
+    'Once the gateway starts, mode · routes · cache and per-host circuit-breaker status appear here.',
+  'dashboard.origin.unset': '(origin unset)',
+  'dashboard.routes.detail': 'active at runtime',
+  'dashboard.breakers.title': 'Circuit breakers (per host)',
+  'dashboard.breakers.empty.title': 'No hosts tracked yet',
+  'dashboard.breakers.empty.hint':
+    'Once bot requests route to an origin host, failure-rate states (closed · half-open · open) accumulate here.',
+  'sites.empty.hint': 'Add a site to manage per-host origin · routes · cache settings.',
+  'tenants.empty.hint':
+    'Add a tenant to manage per-customer origin · routes, identified by apiKey · host.',
+  'audit.empty.hint': 'Admin actions like config changes · cache invalidations are recorded here.',
+  'cache.clear.desc':
+    'Use after a deploy or a large data change. The next requests are cold renders.',
+  'lighthouse.peerDep.pre': 'peer-installed ',
+  'lighthouse.peerDep.mid': ' + ',
+  'lighthouse.peerDep.post': ' are required.',
+  'ai.providers': 'OpenAI / Groq / Ollama (compatible endpoints)',
+  'routes.persist.title': 'Persist to seo-gateway.config.json',
+  'metrics.inflight.detail': 'rendering now',
+  'metrics.histogram.title': 'Render latency histogram (per outcome/host)',
+  'metrics.errors.title': 'Error breakdown',
+  'metrics.raw.summary': '/metrics raw (Prometheus exposition)',
+  'warm.intro':
+    'Enter a sitemap.xml URL: recursive sitemap-index parsing + N concurrent warms. Effective at removing cold starts.',
+  'warm.result': 'Result',
+  'test.responseHeaders': 'Response headers',
+  'shortcuts.title': 'Keyboard shortcuts',
+  'a11y.skipToContent': 'Skip to main content',
 
   // Tour
   'tour.skip': 'Skip',

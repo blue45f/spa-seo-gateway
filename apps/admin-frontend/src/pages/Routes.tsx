@@ -111,7 +111,7 @@ function RoutesBody() {
           type="button"
           className="btn-primary px-3 py-2 text-sm"
           onClick={() => save(true)}
-          title="seo-gateway.config.json 에 영구 저장"
+          title={t('routes.persist.title')}
         >
           {t('btn.save-disk')}
         </button>
