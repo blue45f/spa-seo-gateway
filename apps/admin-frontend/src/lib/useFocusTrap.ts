@@ -29,7 +29,8 @@ export function useFocusTrap(ref: RefObject<HTMLElement | null>, active: boolean
       const last = focusables[focusables.length - 1];
       const current = document.activeElement;
       if (e.shiftKey) {
-        if (current === first || !node.contains(current)) {
+        // 컨테이너 자체(진입 포커스)거나 첫 요소면 마지막으로 순환 — 배경 이탈 방지
+        if (current === node || current === first || !node.contains(current)) {
           e.preventDefault();
           last.focus();
         }

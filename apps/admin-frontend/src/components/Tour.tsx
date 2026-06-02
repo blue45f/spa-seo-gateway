@@ -82,11 +82,13 @@ export function Tour() {
     return undefined;
   }, [tourSeen, tourStep, startTour]);
 
-  // 단계 전환 시 패널로 포커스 이동 (다이얼로그 접근성)
-  // biome-ignore lint/correctness/useExhaustiveDependencies: refocus the dialog panel on each step change
+  // 단계 전환 + (재)오픈 시 패널로 포커스 이동 (다이얼로그 접근성).
+  // tourSeen 만 바뀌며 같은 step 으로 다시 열려도 키보드 진입점이 생기도록 tourVisible 도 본다.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: tourStep is an intentional refocus trigger
   useEffect(() => {
+    if (!tourVisible) return;
     panelRef.current?.focus();
-  }, [tourStep]);
+  }, [tourStep, tourVisible]);
 
   // Escape 로 투어 종료 — 다른 모달들과 일관 (Modal.tsx 패턴)
   useEffect(() => {

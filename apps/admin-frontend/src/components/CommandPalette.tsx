@@ -92,7 +92,8 @@ export function CommandPalette() {
           onKeyDown={(e) => {
             if (e.key === 'ArrowDown') {
               e.preventDefault();
-              setActive((i) => Math.min(i + 1, filtered.length - 1));
+              // 빈 결과(length 0)에서도 -1 로 내려가지 않게 하한 0 클램프
+              setActive((i) => Math.max(0, Math.min(i + 1, filtered.length - 1)));
             } else if (e.key === 'ArrowUp') {
               e.preventDefault();
               setActive((i) => Math.max(i - 1, 0));
@@ -123,7 +124,11 @@ export function CommandPalette() {
               type="button"
               id={`cmd-opt-${n.id}`}
               role="option"
+              // 가상 포커스(aria-activedescendant) 모델 — 옵션은 Tab 순서에서 제외하고
+              // 포커스는 input 에 유지. mousedown 의 포커스 탈취도 막는다.
+              tabIndex={-1}
               aria-selected={i === active}
+              onMouseDown={(e) => e.preventDefault()}
               onClick={() => select(i)}
               onMouseMove={() => setActive(i)}
               className={`w-full text-left px-4 py-2 flex items-center gap-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-inset ${i === active ? 'bg-accent-soft' : 'hover:bg-accent-soft'}`}
