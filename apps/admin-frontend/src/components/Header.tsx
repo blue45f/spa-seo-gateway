@@ -29,18 +29,14 @@ export function Header() {
   return (
     <header className="bg-panel border-b border-line px-6 py-3 flex items-center justify-between gap-4 pl-16 md:pl-6">
       <div className="min-w-0">
-        <h1 className="font-semibold tracking-tight text-ink truncate">
+        <h1 className="text-xl font-semibold tracking-tight text-ink truncate">
           {item ? t(item.labelKey) : ''}
         </h1>
         <p className="text-xs text-ink-subtle truncate">{item ? t(item.subtitleKey) : ''}</p>
       </div>
       {showLogin ? <LoginForm /> : null}
       {authed ? (
-        <button
-          type="button"
-          className="shrink-0 px-3 py-1.5 text-sm rounded-md border border-line bg-panel-2 text-ink-muted hover:text-ink hover:border-line-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-panel)]"
-          onClick={logout}
-        >
+        <button type="button" className="btn-ghost shrink-0 px-3 py-1.5 text-sm" onClick={logout}>
           {t('auth.logout')}
         </button>
       ) : null}

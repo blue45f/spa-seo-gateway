@@ -85,7 +85,7 @@ function TenantsBody() {
   async function save(tenant: Tenant) {
     try {
       await api('POST', '/admin/api/tenants', tenant);
-      pushToast(`테넌트 저장됨: ${tenant.id}`, 'success');
+      pushToast(`${t('toast.tenant.saved')}: ${tenant.id}`, 'success');
       setEditing(null);
       await load();
     } catch (e) {
@@ -98,7 +98,7 @@ function TenantsBody() {
     if (!confirm(t('tenants.delete.confirm'))) return;
     try {
       await api('DELETE', `/admin/api/tenants/${encodeURIComponent(id)}`);
-      pushToast(`테넌트 삭제됨: ${id}`, 'success');
+      pushToast(`${t('toast.tenant.deleted')}: ${id}`, 'success');
       await load();
     } catch (e) {
       const msg = e instanceof ApiError ? e.message : (e as Error).message;
@@ -111,7 +111,7 @@ function TenantsBody() {
       await navigator.clipboard?.writeText(key);
       pushToast(t('tenants.copied'), 'success');
     } catch {
-      pushToast('clipboard 접근 거부됨', 'warn');
+      pushToast(t('toast.clipboard.denied'), 'warn');
     }
   }
 
@@ -170,7 +170,7 @@ function TenantsBody() {
                     </Link>
                   </td>
                   <td className="px-3 py-2">{tn.name}</td>
-                  <td className="px-3 py-2 truncate max-w-xs">
+                  <td className="px-3 py-2 truncate max-w-xs font-mono text-xs">
                     <a href={tn.origin} target="_blank" rel="noreferrer" className="link">
                       {tn.origin}
                     </a>
@@ -321,6 +321,7 @@ function TenantForm({
         <label className="flex items-center gap-2">
           <input
             type="checkbox"
+            className="checkbox h-4 w-4"
             checked={draft.enabled}
             onChange={(e) => update('enabled', e.target.checked)}
           />
