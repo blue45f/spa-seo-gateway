@@ -22,6 +22,10 @@ export type ApiOptions = {
   asText?: boolean;
   /** 헤더 토큰 — legacy 호환 */
   token?: string;
+  /** 요청 타임아웃(ms). 기본 15s — 멎은 게이트웨이가 UI 를 영원히 매달지 않게. */
+  timeoutMs?: number;
+  /** 외부 AbortSignal — 호출부가 직접 취소(예: 컴포넌트 unmount/요청 교체). */
+  signal?: AbortSignal;
 };
 
 export async function api<T>(
@@ -33,12 +37,31 @@ export async function api<T>(
   const headers: Record<string, string> = { 'content-type': 'application/json' };
   if (opts.token && !opts.publicEndpoint) headers['x-admin-token'] = opts.token;
 
-  const res = await fetch(path, {
-    method,
-    headers,
-    body: body !== undefined ? JSON.stringify(body) : undefined,
-    credentials: 'same-origin',
-  });
+  const ctrl = new AbortController();
+  let timedOut = false;
+  const timer = setTimeout(() => {
+    timedOut = true;
+    ctrl.abort();
+  }, opts.timeoutMs ?? 15_000);
+  opts.signal?.addEventListener('abort', () => ctrl.abort());
+  let res: Response;
+  try {
+    res = await fetch(path, {
+      method,
+      headers,
+      body: body !== undefined ? JSON.stringify(body) : undefined,
+      credentials: 'same-origin',
+      signal: ctrl.signal,
+    });
+  } catch (e) {
+    // 타임아웃은 408 로 표면화, 외부 취소(unmount 등)는 그대로 전파해 호출부가 무시할 수 있게.
+    if (e instanceof DOMException && e.name === 'AbortError' && timedOut) {
+      throw new ApiError('timeout', 408);
+    }
+    throw e;
+  } finally {
+    clearTimeout(timer);
+  }
 
   if (opts.asText) {
     const text = await res.text();
@@ -59,8 +82,24 @@ export async function api<T>(
   return data as T;
 }
 
-export async function fetchText(path: string): Promise<string> {
-  const res = await fetch(path, { credentials: 'same-origin' });
-  if (!res.ok) throw new ApiError(`${res.status} ${res.statusText}`, res.status);
-  return await res.text();
+export async function fetchText(path: string, signal?: AbortSignal): Promise<string> {
+  const ctrl = new AbortController();
+  let timedOut = false;
+  const timer = setTimeout(() => {
+    timedOut = true;
+    ctrl.abort();
+  }, 15_000);
+  signal?.addEventListener('abort', () => ctrl.abort());
+  try {
+    const res = await fetch(path, { credentials: 'same-origin', signal: ctrl.signal });
+    if (!res.ok) throw new ApiError(`${res.status} ${res.statusText}`, res.status);
+    return await res.text();
+  } catch (e) {
+    if (e instanceof DOMException && e.name === 'AbortError' && timedOut) {
+      throw new ApiError('timeout', 408);
+    }
+    throw e;
+  } finally {
+    clearTimeout(timer);
+  }
 }
