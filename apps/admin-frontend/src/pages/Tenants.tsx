@@ -1,17 +1,11 @@
-import {
-  cloneElement,
-  type FormEvent,
-  type ReactElement,
-  useCallback,
-  useEffect,
-  useId,
-  useState,
-} from 'react';
+import { type FormEvent, useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AuthGate } from '../components/AuthGate';
 import { EmptyState } from '../components/EmptyState';
+import { Field } from '../components/Field';
 import { Modal } from '../components/Modal';
-import { ApiError, api } from '../lib/api';
+import { api, errorMessage } from '../lib/api';
+import { generateApiKey } from '../lib/apikey';
 import { useStore } from '../lib/store';
 import type { Tenant, TenantPlan } from '../lib/types';
 
@@ -41,21 +35,6 @@ const PLAN_PILL: Record<TenantPlan, string> = {
   enterprise: 'badge badge--warn',
 };
 
-/** secure-ish API key — 32 hex chars (128 bits). */
-export function generateApiKey(): string {
-  if (typeof globalThis.crypto?.getRandomValues === 'function') {
-    const buf = new Uint8Array(20);
-    globalThis.crypto.getRandomValues(buf);
-    return `tk_live_${Array.from(buf)
-      .map((b) => b.toString(16).padStart(2, '0'))
-      .join('')}`;
-  }
-  // 폴백 — 테스트 환경
-  let s = 'tk_live_';
-  for (let i = 0; i < 32; i++) s += Math.floor(Math.random() * 16).toString(16);
-  return s;
-}
-
 function TenantsBody() {
   const t = useStore((s) => s.t);
   const setError = useStore((s) => s.setGlobalError);
@@ -71,7 +50,7 @@ function TenantsBody() {
       setTenants(r.tenants ?? []);
       setError('');
     } catch (e) {
-      const msg = e instanceof ApiError ? e.message : (e as Error).message;
+      const msg = errorMessage(e);
       setError(msg);
     } finally {
       setLoading(false);
@@ -89,7 +68,7 @@ function TenantsBody() {
       setEditing(null);
       await load();
     } catch (e) {
-      const msg = e instanceof ApiError ? e.message : (e as Error).message;
+      const msg = errorMessage(e);
       pushToast(msg, 'error');
     }
   }
@@ -101,7 +80,7 @@ function TenantsBody() {
       pushToast(`${t('toast.tenant.deleted')}: ${id}`, 'success');
       await load();
     } catch (e) {
-      const msg = e instanceof ApiError ? e.message : (e as Error).message;
+      const msg = errorMessage(e);
       pushToast(msg, 'error');
     }
   }
@@ -334,17 +313,5 @@ function TenantForm({
         </div>
       </form>
     </Modal>
-  );
-}
-
-function Field({ label, children }: { label: string; children: ReactElement<{ id?: string }> }) {
-  const id = useId();
-  return (
-    <div className="block">
-      <label htmlFor={id} className="text-xs font-medium text-ink-muted">
-        {label}
-      </label>
-      <div className="mt-1">{cloneElement(children, { id })}</div>
-    </div>
   );
 }

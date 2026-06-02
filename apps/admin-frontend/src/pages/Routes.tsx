@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { AuthGate } from '../components/AuthGate';
 import { RoutesEditor } from '../components/RoutesEditor';
-import { ApiError, api } from '../lib/api';
+import { api, errorMessage } from '../lib/api';
+import { cleanRoutes } from '../lib/routes';
 import { useStore } from '../lib/store';
 import type { ScopedRoute } from '../lib/types';
 
@@ -37,7 +38,7 @@ function RoutesBody() {
       );
       setError('');
     } catch (e) {
-      const msg = e instanceof ApiError ? e.message : (e as Error).message;
+      const msg = errorMessage(e);
       setError(msg);
     } finally {
       setLoading(false);
@@ -53,20 +54,11 @@ function RoutesBody() {
       if (saving) return; // 버튼/⌘S 동시 호출로 인한 중복 PUT 방지
       setSaving(true);
       try {
-        const cleaned = routes
-          .filter((r) => r.pattern)
-          .map((r) => ({
-            pattern: r.pattern,
-            ...(r.ttlMs ? { ttlMs: Number(r.ttlMs) } : {}),
-            ...(r.waitUntil ? { waitUntil: r.waitUntil } : {}),
-            ...(r.waitSelector ? { waitSelector: r.waitSelector } : {}),
-            ...(r.waitMs ? { waitMs: Number(r.waitMs) } : {}),
-            ...(r.ignore ? { ignore: true } : {}),
-          }));
+        const cleaned = cleanRoutes(routes);
         await api('PUT', '/admin/api/routes', { routes: cleaned, persist });
         pushToast(persist ? t('btn.save-disk') : t('btn.save-memory'), 'success');
       } catch (e) {
-        const msg = e instanceof ApiError ? e.message : (e as Error).message;
+        const msg = errorMessage(e);
         setError(msg);
         pushToast(msg, 'error');
       } finally {

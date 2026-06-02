@@ -1,9 +1,10 @@
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { generateApiKey } from '../../lib/apikey';
 import { useStore } from '../../lib/store';
 import type { Tenant } from '../../lib/types';
-import { generateApiKey, Tenants } from '../../pages/Tenants';
+import { Tenants } from '../../pages/Tenants';
 import { renderWithRouter, resetStore } from '../test-utils';
 
 const originalFetch = globalThis.fetch;

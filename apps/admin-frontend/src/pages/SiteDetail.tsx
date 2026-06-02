@@ -1,18 +1,12 @@
-import {
-  cloneElement,
-  type ReactElement,
-  useCallback,
-  useEffect,
-  useId,
-  useRef,
-  useState,
-} from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { AuthGate } from '../components/AuthGate';
 import { EmptyState } from '../components/EmptyState';
+import { Field } from '../components/Field';
 import { RoutesEditor } from '../components/RoutesEditor';
 import { DetailSkeleton } from '../components/Skeleton';
-import { ApiError, api } from '../lib/api';
+import { api, errorMessage } from '../lib/api';
+import { cleanRoutes } from '../lib/routes';
 import { useStore } from '../lib/store';
 import type { ScopedRoute, Site } from '../lib/types';
 
@@ -55,7 +49,7 @@ function SiteDetailBody() {
       setError('');
     } catch (e) {
       if ((e as Error).name === 'AbortError') return;
-      const msg = e instanceof ApiError ? e.message : (e as Error).message;
+      const msg = errorMessage(e);
       setError(msg);
     } finally {
       if (!ctrl.signal.aborted) setLoading(false);
@@ -71,24 +65,12 @@ function SiteDetailBody() {
     if (!site) return;
     setSaving(true);
     try {
-      const cleaned = {
-        ...site,
-        routes: site.routes
-          .filter((r) => r.pattern)
-          .map((r) => ({
-            pattern: r.pattern,
-            ...(r.ttlMs ? { ttlMs: Number(r.ttlMs) } : {}),
-            ...(r.waitUntil ? { waitUntil: r.waitUntil } : {}),
-            ...(r.waitSelector ? { waitSelector: r.waitSelector } : {}),
-            ...(r.waitMs ? { waitMs: Number(r.waitMs) } : {}),
-            ...(r.ignore ? { ignore: true } : {}),
-          })),
-      };
+      const cleaned = { ...site, routes: cleanRoutes(site.routes) };
       await api('POST', '/admin/api/sites', cleaned);
       pushToast(`${t('toast.site.saved')}: ${site.id}`, 'success');
       await load();
     } catch (e) {
-      const msg = e instanceof ApiError ? e.message : (e as Error).message;
+      const msg = errorMessage(e);
       pushToast(msg, 'error');
     } finally {
       setSaving(false);
@@ -221,17 +203,5 @@ function SiteDetailBody() {
         />
       </div>
     </section>
-  );
-}
-
-function Field({ label, children }: { label: string; children: ReactElement<{ id?: string }> }) {
-  const id = useId();
-  return (
-    <div className="block">
-      <label htmlFor={id} className="text-xs font-medium text-ink-muted">
-        {label}
-      </label>
-      <div className="mt-1">{cloneElement(children, { id })}</div>
-    </div>
   );
 }

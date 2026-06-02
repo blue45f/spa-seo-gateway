@@ -1,17 +1,10 @@
-import {
-  cloneElement,
-  type FormEvent,
-  type ReactElement,
-  useCallback,
-  useEffect,
-  useId,
-  useState,
-} from 'react';
+import { type FormEvent, useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AuthGate } from '../components/AuthGate';
 import { EmptyState } from '../components/EmptyState';
+import { Field } from '../components/Field';
 import { Modal } from '../components/Modal';
-import { ApiError, api } from '../lib/api';
+import { api, errorMessage } from '../lib/api';
 import { useStore } from '../lib/store';
 import type { Site } from '../lib/types';
 
@@ -47,7 +40,7 @@ function SitesBody() {
       setSites(r.sites ?? []);
       setError('');
     } catch (e) {
-      const msg = e instanceof ApiError ? e.message : (e as Error).message;
+      const msg = errorMessage(e);
       setError(msg);
     } finally {
       setLoading(false);
@@ -65,7 +58,7 @@ function SitesBody() {
       setEditing(null);
       await load();
     } catch (e) {
-      const msg = e instanceof ApiError ? e.message : (e as Error).message;
+      const msg = errorMessage(e);
       pushToast(msg, 'error');
     }
   }
@@ -77,7 +70,7 @@ function SitesBody() {
       pushToast(`${t('toast.site.deleted')}: ${id}`, 'success');
       await load();
     } catch (e) {
-      const msg = e instanceof ApiError ? e.message : (e as Error).message;
+      const msg = errorMessage(e);
       pushToast(msg, 'error');
     }
   }
@@ -89,7 +82,7 @@ function SitesBody() {
       await api('POST', `/admin/api/sites/${encodeURIComponent(id)}/cache/invalidate`, { url });
       pushToast(`${t('toast.url.invalidated')}: ${url}`, 'success');
     } catch (e) {
-      const msg = e instanceof ApiError ? e.message : (e as Error).message;
+      const msg = errorMessage(e);
       pushToast(msg, 'error');
     }
   }
@@ -106,7 +99,7 @@ function SitesBody() {
         'success',
       );
     } catch (e) {
-      const msg = e instanceof ApiError ? e.message : (e as Error).message;
+      const msg = errorMessage(e);
       pushToast(msg, 'error');
     }
   }
@@ -320,17 +313,5 @@ function SiteForm({
         </div>
       </form>
     </Modal>
-  );
-}
-
-function Field({ label, children }: { label: string; children: ReactElement<{ id?: string }> }) {
-  const id = useId();
-  return (
-    <div className="block">
-      <label htmlFor={id} className="text-xs font-medium text-ink-muted">
-        {label}
-      </label>
-      <div className="mt-1">{cloneElement(children, { id })}</div>
-    </div>
   );
 }

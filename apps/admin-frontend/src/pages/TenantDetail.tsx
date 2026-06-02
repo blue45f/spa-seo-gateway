@@ -1,21 +1,15 @@
-import {
-  cloneElement,
-  type ReactElement,
-  useCallback,
-  useEffect,
-  useId,
-  useRef,
-  useState,
-} from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { AuthGate } from '../components/AuthGate';
 import { EmptyState } from '../components/EmptyState';
+import { Field } from '../components/Field';
 import { RoutesEditor } from '../components/RoutesEditor';
 import { DetailSkeleton } from '../components/Skeleton';
-import { ApiError, api } from '../lib/api';
+import { api, errorMessage } from '../lib/api';
+import { generateApiKey } from '../lib/apikey';
+import { cleanRoutes } from '../lib/routes';
 import { useStore } from '../lib/store';
 import type { ScopedRoute, Tenant, TenantPlan } from '../lib/types';
-import { generateApiKey } from './Tenants';
 
 const PLANS: TenantPlan[] = ['free', 'pro', 'enterprise'];
 
@@ -58,7 +52,7 @@ function TenantDetailBody() {
       setError('');
     } catch (e) {
       if ((e as Error).name === 'AbortError') return;
-      const msg = e instanceof ApiError ? e.message : (e as Error).message;
+      const msg = errorMessage(e);
       setError(msg);
     } finally {
       if (!ctrl.signal.aborted) setLoading(false);
@@ -74,24 +68,12 @@ function TenantDetailBody() {
     if (!tenant) return;
     setSaving(true);
     try {
-      const cleaned = {
-        ...tenant,
-        routes: tenant.routes
-          .filter((r) => r.pattern)
-          .map((r) => ({
-            pattern: r.pattern,
-            ...(r.ttlMs ? { ttlMs: Number(r.ttlMs) } : {}),
-            ...(r.waitUntil ? { waitUntil: r.waitUntil } : {}),
-            ...(r.waitSelector ? { waitSelector: r.waitSelector } : {}),
-            ...(r.waitMs ? { waitMs: Number(r.waitMs) } : {}),
-            ...(r.ignore ? { ignore: true } : {}),
-          })),
-      };
+      const cleaned = { ...tenant, routes: cleanRoutes(tenant.routes) };
       await api('POST', '/admin/api/tenants', cleaned);
       pushToast(`${t('toast.tenant.saved')}: ${tenant.id}`, 'success');
       await load();
     } catch (e) {
-      const msg = e instanceof ApiError ? e.message : (e as Error).message;
+      const msg = errorMessage(e);
       pushToast(msg, 'error');
     } finally {
       setSaving(false);
@@ -243,17 +225,5 @@ function TenantDetailBody() {
         />
       </div>
     </section>
-  );
-}
-
-function Field({ label, children }: { label: string; children: ReactElement<{ id?: string }> }) {
-  const id = useId();
-  return (
-    <div className="block">
-      <label htmlFor={id} className="text-xs font-medium text-ink-muted">
-        {label}
-      </label>
-      <div className="mt-1">{cloneElement(children, { id })}</div>
-    </div>
   );
 }
