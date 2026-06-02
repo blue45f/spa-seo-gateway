@@ -284,6 +284,47 @@ const ko: Strings = {
 
   // Help
   'help.title': '도움말: 자주 묻는 질문',
+  'help.intro': '처음 접하는 분들이 흔히 만나는 상황과 해결법.',
+  'help.guides': '더 자세한 가이드',
+  'help.faq.q1': '어드민 UI 가 401 / 404 만 띄워요',
+  'help.faq.a1':
+    'ADMIN_TOKEN 환경변수를 설정하고 게이트웨이를 재시작하세요. 그 후 우측 상단의 입력 박스에 토큰을 넣고 [로그인].',
+  'help.faq.q2': '봇 요청은 잘 되는데 사람은 모두 204 만 받아요',
+  'help.faq.a2':
+    'render-only 모드는 봇만 렌더, 사람에겐 204 만 반환합니다. CDN/리버스프록시에서 봇 분기 후 게이트웨이로 보내야 합니다. 자체 프록시를 원하면 GATEWAY_MODE=proxy + ORIGIN_URL 설정.',
+  'help.faq.q3': 'soft 404 가 잘못 트리거 돼요 (정상 페이지인데 404로 캐싱됨)',
+  'help.faq.a3':
+    'QUALITY_CHECK=false 로 quality gate 를 끄거나 MIN_TEXT_LENGTH 를 낮춰보세요. 보다 정밀한 제어는 라우트 페이지에서 해당 URL 패턴에 ttlMs 를 명시적으로 지정.',
+  'help.faq.q4': '풀이 가득 차서 요청이 큐잉돼요',
+  'help.faq.a4':
+    'POOL_MAX 를 늘리거나 (기본 8 → 16~32), 캐시 TTL 을 늘려 cold render 빈도를 줄이세요. 워밍 탭에서 sitemap 으로 미리 채우는 것도 효과적.',
+  'help.faq.q5': 'Redis 연결 에러 로그가 떠요',
+  'help.faq.a5':
+    'REDIS_CACHE_ENABLED=true 인데 REDIS_URL 이 잘못되었거나 Redis 가 다운된 상태. 게이트웨이는 자동으로 메모리 캐시로 강등되어 동작은 계속합니다.',
+  'help.faq.q6': '특정 페이지에 라우트 오버라이드가 적용 안 돼요',
+  'help.faq.a6':
+    '라우트 탭의 정규식이 URL 의 pathname + search 와 매칭되는지 확인. 위에서 아래로 첫 매칭이 승리하니 더 구체적인 패턴을 위로 두세요.',
+  'help.faq.q7': 'CMS / SaaS 모드에서 어떻게 사이트/테넌트를 추가하나요',
+  'help.faq.a7':
+    'API 탭의 /admin/api/sites 또는 /admin/api/tenants POST 항목 참고. 자세한 가이드는 docs/CMS-MODE.md / docs/MULTI-TENANT.md.',
+  'help.faq.q8': '메트릭 페이지가 비어있어요',
+  'help.faq.a8':
+    '아직 처리한 요청이 없으면 메트릭이 모이지 않습니다. 렌더 테스트에서 한두 개 렌더해 본 뒤 다시 보세요.',
+  'help.faq.q9': 'Visual diff baseline 을 어떻게 갱신하나요?',
+  'help.faq.a9':
+    'mode 를 "create" 로 두고 한 번 캡처하면 새 baseline 으로 덮어쓰기. CI 에선 PR 머지 후에만 갱신을 권장.',
+  'help.faq.q10': 'AI Schema 가 501 응답을 줍니다',
+  'help.faq.a10':
+    'setAiSchemaAdapter() 로 어댑터를 주입하지 않은 상태입니다. @heejun/spa-seo-gateway-anthropic 또는 -openai 패키지를 시작 코드에서 등록하세요.',
+  'help.links.gettingStarted': '5분 시작 가이드',
+  'help.links.configuration': '전체 설정 레퍼런스',
+  'help.links.deployment': '배포 (Docker / K8s / CDN)',
+  'help.links.multiTenant': 'SaaS 모드 (다중 테넌트)',
+  'help.links.cmsMode': 'CMS 모드 (다중 사이트)',
+  'help.links.architecture': '내부 아키텍처',
+  'help.links.concurrency': '동시성 모델',
+  'help.links.benchmarks': '벤치마크 시나리오',
+  'help.links.migration': 'v1.5 → v1.7 마이그레이션',
 
   // Tour
   'tour.skip': '건너뛰기',
@@ -585,6 +626,47 @@ const en: Strings = {
 
   // Help
   'help.title': 'Help: frequently asked questions',
+  'help.intro': 'Common situations new operators run into, and how to resolve them.',
+  'help.guides': 'More guides',
+  'help.faq.q1': 'The admin UI only shows 401 / 404',
+  'help.faq.a1':
+    'Set the ADMIN_TOKEN env var and restart the gateway, then enter the token in the top-right box and sign in.',
+  'help.faq.q2': 'Bots work but humans all get 204',
+  'help.faq.a2':
+    'render-only mode renders for bots and returns 204 to humans. Branch bots at your CDN / reverse proxy and forward them to the gateway. For a built-in proxy, set GATEWAY_MODE=proxy + ORIGIN_URL.',
+  'help.faq.q3': 'soft 404 triggers incorrectly (a valid page is cached as 404)',
+  'help.faq.a3':
+    'Turn the quality gate off with QUALITY_CHECK=false, or lower MIN_TEXT_LENGTH. For finer control, set an explicit ttlMs on the URL pattern in the Routes page.',
+  'help.faq.q4': 'The pool fills up and requests queue',
+  'help.faq.a4':
+    'Raise POOL_MAX (default 8, try 16-32) or raise the cache TTL to cut cold renders. Pre-filling from a sitemap in the Warm tab also helps.',
+  'help.faq.q5': 'Redis connection errors show in the logs',
+  'help.faq.a5':
+    'REDIS_CACHE_ENABLED=true but REDIS_URL is wrong or Redis is down. The gateway falls back to the memory cache automatically and keeps running.',
+  'help.faq.q6': 'A route override is not applying to a specific page',
+  'help.faq.a6':
+    'Check that the Routes regex matches the URL pathname + search. First match from top to bottom wins, so put more specific patterns higher.',
+  'help.faq.q7': 'How do I add sites / tenants in CMS / SaaS mode?',
+  'help.faq.a7':
+    'See the /admin/api/sites or /admin/api/tenants POST entries in the API tab. Full guides: docs/CMS-MODE.md / docs/MULTI-TENANT.md.',
+  'help.faq.q8': 'The Metrics page is empty',
+  'help.faq.a8':
+    'Metrics only accumulate once requests have been processed. Render one or two URLs in Render Test, then check again.',
+  'help.faq.q9': 'How do I update the Visual diff baseline?',
+  'help.faq.a9':
+    'Set mode to "create" and capture once to overwrite the baseline. In CI, update only after a PR merges.',
+  'help.faq.q10': 'AI Schema returns 501',
+  'help.faq.a10':
+    'No adapter was injected via setAiSchemaAdapter(). Register the @heejun/spa-seo-gateway-anthropic or -openai package in your startup code.',
+  'help.links.gettingStarted': 'Getting started (5 min)',
+  'help.links.configuration': 'Full configuration reference',
+  'help.links.deployment': 'Deployment (Docker / K8s / CDN)',
+  'help.links.multiTenant': 'SaaS mode (multi-tenant)',
+  'help.links.cmsMode': 'CMS mode (multi-site)',
+  'help.links.architecture': 'Internal architecture',
+  'help.links.concurrency': 'Concurrency model',
+  'help.links.benchmarks': 'Benchmark scenarios',
+  'help.links.migration': 'v1.5 → v1.7 migration',
 
   // Tour
   'tour.skip': 'Skip',
