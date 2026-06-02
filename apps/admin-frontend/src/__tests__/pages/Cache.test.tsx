@@ -1,4 +1,4 @@
-import { fireEvent, screen } from '@testing-library/react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { useStore } from '../../lib/store';
@@ -40,6 +40,18 @@ describe('Cache page', () => {
     const init = fetchMock.mock.calls[0]?.[1] as RequestInit;
     const body = JSON.parse(init.body as string);
     expect(body.url).toBe('https://x.com/y');
+  });
+
+  it('surfaces an API error to the global banner and an error toast', async () => {
+    // 공유 catch 계약: errorMessage -> setGlobalError + pushToast(kind:'error')
+    globalThis.fetch = mockJsonFetch({ error: 'boom' }, 500);
+    const user = userEvent.setup();
+    renderWithRouter(<Cache />);
+    await user.type(screen.getByPlaceholderText(/example.com\/posts/), 'https://x.com/y');
+    await user.click(screen.getByText('URL 무효화'));
+    await waitFor(() => expect(useStore.getState().globalError).toBe('boom'));
+    const toasts = useStore.getState().toasts;
+    expect(toasts.some((t) => t.kind === 'error' && t.message === 'boom')).toBe(true);
   });
 
   it('clear all triggers confirm', () => {

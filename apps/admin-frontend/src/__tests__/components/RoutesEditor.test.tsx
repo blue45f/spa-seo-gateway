@@ -5,14 +5,32 @@ import { RoutesEditor } from '../../components/RoutesEditor';
 import type { ScopedRoute } from '../../lib/types';
 import { renderWithRouter, resetStore } from '../test-utils';
 
-function ControlledEditor({ initial = [] as ScopedRoute[] }) {
+function ControlledEditor({
+  initial = [] as ScopedRoute[],
+  reorderable = true,
+}: {
+  initial?: ScopedRoute[];
+  reorderable?: boolean;
+}) {
   const [routes, setRoutes] = useState<ScopedRoute[]>(initial);
   return (
     <>
-      <RoutesEditor routes={routes} onChange={setRoutes} />
+      <RoutesEditor routes={routes} onChange={setRoutes} reorderable={reorderable} />
       <pre data-testid="state">{JSON.stringify(routes)}</pre>
     </>
   );
+}
+
+/** jsdom 은 DataTransfer 를 구현하지 않으므로 드래그 핸들러가 만지는 필드만 스텁. */
+function dt() {
+  return {
+    effectAllowed: '',
+    dropEffect: '',
+    setData() {},
+    getData() {
+      return '';
+    },
+  };
 }
 
 beforeEach(() => {
@@ -80,5 +98,48 @@ describe('RoutesEditor', () => {
     fireEvent.click(checkbox);
     const state = JSON.parse(screen.getByTestId('state').textContent || '[]');
     expect(state[0].ignore).toBe(true);
+  });
+
+  it('drag-and-drop reorders rows (move row 0 → 1)', () => {
+    renderWithRouter(<ControlledEditor initial={[{ pattern: '^/a' }, { pattern: '^/b' }]} />);
+    const [, rowA, rowB] = screen.getAllByRole('row'); // [0]=header
+    const dataTransfer = dt();
+    fireEvent.dragStart(rowA!, { dataTransfer });
+    fireEvent.dragOver(rowB!, { dataTransfer });
+    fireEvent.drop(rowB!, { dataTransfer });
+    const state = JSON.parse(screen.getByTestId('state').textContent || '[]');
+    expect(state.map((r: ScopedRoute) => r.pattern)).toEqual(['^/b', '^/a']);
+  });
+
+  it('dropping a row onto itself leaves order unchanged', () => {
+    renderWithRouter(<ControlledEditor initial={[{ pattern: '^/a' }, { pattern: '^/b' }]} />);
+    const [, rowA] = screen.getAllByRole('row');
+    const dataTransfer = dt();
+    fireEvent.dragStart(rowA!, { dataTransfer });
+    fireEvent.drop(rowA!, { dataTransfer });
+    const state = JSON.parse(screen.getByTestId('state').textContent || '[]');
+    expect(state.map((r: ScopedRoute) => r.pattern)).toEqual(['^/a', '^/b']);
+  });
+
+  it('reorderable=false disables dragging and ignores drops', () => {
+    renderWithRouter(
+      <ControlledEditor initial={[{ pattern: '^/a' }, { pattern: '^/b' }]} reorderable={false} />,
+    );
+    const [, rowA, rowB] = screen.getAllByRole('row');
+    expect(rowA).not.toHaveAttribute('draggable', 'true');
+    const dataTransfer = dt();
+    fireEvent.dragStart(rowA!, { dataTransfer });
+    fireEvent.drop(rowB!, { dataTransfer });
+    const state = JSON.parse(screen.getByTestId('state').textContent || '[]');
+    expect(state.map((r: ScopedRoute) => r.pattern)).toEqual(['^/a', '^/b']);
+  });
+
+  it('adding a row focuses the new row pattern input', () => {
+    renderWithRouter(<ControlledEditor initial={[{ pattern: '^/a' }]} />);
+    const addBtn = screen.getAllByRole('button').find((b) => /add|추가/i.test(b.textContent ?? ''));
+    fireEvent.click(addBtn!);
+    // 마지막(새) 행의 pattern 입력이 포커스됨 — value 가 빈 새 행
+    const inputs = screen.getAllByPlaceholderText('^/products/[0-9]+') as HTMLInputElement[];
+    expect(document.activeElement).toBe(inputs[inputs.length - 1]);
   });
 });
