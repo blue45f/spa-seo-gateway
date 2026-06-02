@@ -139,7 +139,7 @@ function TenantDetailBody() {
           </button>
           <button
             type="button"
-            className="btn-primary px-3 py-2 text-sm font-medium disabled:opacity-60"
+            className="btn-primary px-3 py-2 text-sm font-medium"
             onClick={save}
             disabled={saving}
           >
@@ -199,11 +199,7 @@ function TenantDetailBody() {
               <button type="button" className="btn-ghost px-3 py-2 text-sm" onClick={copyKey}>
                 {t('tenants.copy')}
               </button>
-              <button
-                type="button"
-                className="px-3 py-2 rounded bg-warn-bg text-warn-fg text-sm"
-                onClick={rotateApiKey}
-              >
+              <button type="button" className="btn-ghost px-3 py-2 text-sm" onClick={rotateApiKey}>
                 {t('tenants.detail.rotate')}
               </button>
             </div>

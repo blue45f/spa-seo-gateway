@@ -45,7 +45,7 @@ export function LoginForm() {
         type="submit"
         disabled={submitting || !token.trim()}
         aria-busy={submitting}
-        className="btn-primary px-3 py-1.5 text-sm font-medium disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 dark:focus-visible:ring-offset-[var(--color-surface)]"
+        className="btn-primary px-3 py-1.5 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 dark:focus-visible:ring-offset-[var(--color-surface)]"
       >
         {submitting ? '…' : t('auth.login')}
       </button>

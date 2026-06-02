@@ -84,23 +84,23 @@ function MetricsBody() {
           <h3 className="font-semibold mb-3 text-ink">렌더 지연 히스토그램 (per outcome/host)</h3>
           <LatencyBars rows={parsed.renderHist} />
           <table className="w-full text-sm">
-            <thead className="text-xs uppercase text-ink-subtle">
+            <thead className="bg-panel-2 text-xs uppercase text-ink-muted">
               <tr>
-                <th className="text-left py-2">key</th>
-                <th className="text-right py-2">p50</th>
-                <th className="text-right py-2">p95</th>
-                <th className="text-right py-2">p99</th>
-                <th className="text-right py-2">count</th>
+                <th className="text-left px-3 py-2">key</th>
+                <th className="text-right px-3 py-2">p50</th>
+                <th className="text-right px-3 py-2">p95</th>
+                <th className="text-right px-3 py-2">p99</th>
+                <th className="text-right px-3 py-2">count</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-line">
               {parsed.renderHist.map((r) => (
                 <tr key={r.key}>
-                  <td className="py-2 font-mono text-xs">{r.key}</td>
-                  <td className="py-2 text-right font-mono">{pp(r.p50)}</td>
-                  <td className="py-2 text-right font-mono">{pp(r.p95)}</td>
-                  <td className="py-2 text-right font-mono">{pp(r.p99)}</td>
-                  <td className="py-2 text-right font-mono">{r.count}</td>
+                  <td className="px-3 py-2 font-mono text-xs">{r.key}</td>
+                  <td className="px-3 py-2 text-right font-mono">{pp(r.p50)}</td>
+                  <td className="px-3 py-2 text-right font-mono">{pp(r.p95)}</td>
+                  <td className="px-3 py-2 text-right font-mono">{pp(r.p99)}</td>
+                  <td className="px-3 py-2 text-right font-mono">{r.count}</td>
                 </tr>
               ))}
             </tbody>
