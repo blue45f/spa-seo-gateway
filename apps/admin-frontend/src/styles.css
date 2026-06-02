@@ -137,8 +137,12 @@
     background: var(--color-accent-soft);
     color: var(--color-ink);
   }
-  /* 기계 데이터는 tabular-nums 로 정렬 — instrument 시그니처 */
-  .font-mono {
+  /* 기계 데이터는 tabular-nums 로 정렬 — instrument 시그니처.
+     bare <code>/<kbd>/<samp> 도 같은 시그니처를 받도록 포함. */
+  .font-mono,
+  code,
+  kbd,
+  samp {
     font-variant-numeric: tabular-nums;
     font-feature-settings: "ss01", "zero";
   }

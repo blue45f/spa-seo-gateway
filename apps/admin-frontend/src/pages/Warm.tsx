@@ -115,7 +115,7 @@ function WarmBody() {
             />
             <Stat k="durationMs" v={String(report.durationMs)} />
           </dl>
-          <div className="text-xs text-ink-subtle mt-3 truncate">
+          <div className="text-xs text-ink-subtle mt-3 truncate" title={report.sitemap}>
             sitemap: <code>{report.sitemap}</code>
           </div>
         </div>

@@ -122,9 +122,9 @@ function AuditLogBody() {
                 <td className="px-3 py-2 font-mono text-xs whitespace-nowrap">
                   {e.ts?.slice(11, 19) ?? '-'}
                 </td>
-                <td className="px-3 py-2">{e.actor}</td>
+                <td className="px-3 py-2 font-mono text-xs">{e.actor}</td>
                 <td className="px-3 py-2 font-mono text-xs">{e.action}</td>
-                <td className="px-3 py-2 truncate max-w-xs">{e.target ?? '-'}</td>
+                <td className="px-3 py-2 font-mono text-xs truncate max-w-xs">{e.target ?? '-'}</td>
                 <td className="px-3 py-2">
                   <span className={`badge ${e.outcome === 'ok' ? 'badge--ok' : 'badge--err'}`}>
                     {e.outcome}

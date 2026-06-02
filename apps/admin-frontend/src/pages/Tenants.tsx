@@ -170,7 +170,7 @@ function TenantsBody() {
                     </Link>
                   </td>
                   <td className="px-3 py-2">{tn.name}</td>
-                  <td className="px-3 py-2 truncate max-w-xs">
+                  <td className="px-3 py-2 truncate max-w-xs font-mono text-xs">
                     <a href={tn.origin} target="_blank" rel="noreferrer" className="link">
                       {tn.origin}
                     </a>
