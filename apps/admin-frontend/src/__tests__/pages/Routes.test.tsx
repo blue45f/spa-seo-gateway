@@ -81,4 +81,32 @@ describe('Routes page', () => {
     expect(body.persist).toBe(false);
     expect(body.routes[0].pattern).toBe('^/blog/');
   });
+
+  it('Cmd/Ctrl+S saves to memory (preventDefault + persist:false) and cleans up on unmount', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ ok: true, routes: ROUTES }), {
+        status: 200,
+        headers: { 'content-type': 'application/json' },
+      }),
+    );
+    globalThis.fetch = fetchMock;
+    const { unmount } = renderWithRouter(<RoutesPage />);
+    await waitFor(() => expect(screen.getByDisplayValue('^/blog/')).toBeInTheDocument());
+
+    // preventDefault 가 호출되면 fireEvent 가 false 를 반환 — 브라우저 기본 저장 다이얼로그 차단 검증
+    const notPrevented = fireEvent.keyDown(window, { key: 's', metaKey: true });
+    expect(notPrevented).toBe(false);
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+    const putCall = fetchMock.mock.calls.find(
+      (c) => (c[1] as RequestInit | undefined)?.method === 'PUT',
+    );
+    expect(JSON.parse((putCall?.[1] as RequestInit).body as string).persist).toBe(false);
+
+    // 언마운트 후 리스너 누수 없음 — 단축키가 더 이상 fetch 를 트리거하지 않아야
+    unmount();
+    const after = fetchMock.mock.calls.length;
+    fireEvent.keyDown(window, { key: 's', metaKey: true });
+    expect(fetchMock.mock.calls.length).toBe(after);
+  });
 });
