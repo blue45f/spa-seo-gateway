@@ -72,7 +72,7 @@ function AuditLogBody() {
       <div className="flex flex-wrap gap-2 items-center">
         <button
           type="button"
-          className="btn-primary px-3 py-1.5 text-sm font-medium disabled:opacity-60"
+          className="btn-primary px-3 py-1.5 text-sm font-medium"
           onClick={load}
           disabled={busy}
         >
@@ -80,7 +80,7 @@ function AuditLogBody() {
         </button>
         <button
           type="button"
-          className="btn-ghost px-3 py-1.5 text-sm font-medium disabled:opacity-60"
+          className="btn-ghost px-3 py-1.5 text-sm font-medium"
           onClick={verify}
           disabled={busy}
         >
@@ -122,9 +122,9 @@ function AuditLogBody() {
                 <td className="px-3 py-2 font-mono text-xs whitespace-nowrap">
                   {e.ts?.slice(11, 19) ?? '-'}
                 </td>
-                <td className="px-3 py-2">{e.actor}</td>
+                <td className="px-3 py-2 font-mono text-xs">{e.actor}</td>
                 <td className="px-3 py-2 font-mono text-xs">{e.action}</td>
-                <td className="px-3 py-2 truncate max-w-xs">{e.target ?? '-'}</td>
+                <td className="px-3 py-2 font-mono text-xs truncate max-w-xs">{e.target ?? '-'}</td>
                 <td className="px-3 py-2">
                   <span className={`badge ${e.outcome === 'ok' ? 'badge--ok' : 'badge--err'}`}>
                     {e.outcome}

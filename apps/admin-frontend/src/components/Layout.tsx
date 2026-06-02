@@ -92,7 +92,7 @@ function GlobalErrorBanner() {
     <div
       role="alert"
       data-testid="global-error"
-      className="bg-err-bg border border-err text-err-fg rounded-lg px-4 py-3 text-sm flex items-start gap-3"
+      className="alert alert--err flex items-start gap-3"
     >
       <span className="flex-1">{error}</span>
       <button
