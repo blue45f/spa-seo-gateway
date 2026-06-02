@@ -17,6 +17,8 @@ export type RenderHistRow = {
 export type ParsedMetrics = {
   cards: {
     hitRatio: string;
+    /** 0–100 백분율 숫자(표본 없으면 null) — 카운트업/추세선용. 표시 문자열은 hitRatio 가 운반. */
+    hitRatioValue: number | null;
     cacheHits: string;
     cacheMisses: string;
     inflight: number;
@@ -52,8 +54,10 @@ export function summarize(samples: Sample[]): ParsedMetrics {
       else if (s.labels.event === 'miss') misses += s.value;
     }
   }
+  const ratio = hits + misses > 0 ? (hits / (hits + misses)) * 100 : null;
   const cards = {
-    hitRatio: hits + misses > 0 ? `${((hits / (hits + misses)) * 100).toFixed(1)}%` : '–',
+    hitRatio: ratio != null ? `${ratio.toFixed(1)}%` : '–',
+    hitRatioValue: ratio,
     cacheHits: hits.toFixed(0),
     cacheMisses: misses.toFixed(0),
     inflight: samples.find((s) => s.name === 'gateway_inflight_renders')?.value ?? 0,

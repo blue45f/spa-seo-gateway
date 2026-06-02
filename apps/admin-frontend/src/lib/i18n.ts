@@ -140,6 +140,7 @@ const ko: Strings = {
   'cache.clear.label': '전체 캐시 초기화',
   'cache.clear.confirm': '캐시 전체를 삭제할까요? 다음 요청부터는 cold render 로 시작됩니다.',
   'cache.cleared': '캐시 전체 삭제됨',
+  'cache.lastResult': '마지막 결과',
 
   // Warm
   'warm.title': '사전 워밍 (sitemap)',
@@ -380,6 +381,9 @@ const ko: Strings = {
   'dashboard.breakers.empty.title': '아직 추적된 호스트가 없습니다',
   'dashboard.breakers.empty.hint':
     '봇 요청이 오리진 호스트로 라우팅되면 실패율 기반 상태(closed · half-open · open)가 집계됩니다.',
+  'dashboard.breakers.failTrend': '누적 실패 추세 (최근 갱신)',
+  'metrics.hitTrend': 'hit ratio 추세 (최근 갱신)',
+  'metrics.live': '실시간',
   'sites.empty.hint': '사이트를 추가하면 host별 origin · routes · 캐시 설정을 관리할 수 있습니다.',
   'tenants.empty.hint':
     '테넌트를 추가하면 apiKey · host 로 식별되는 고객별 origin · routes 설정을 관리할 수 있습니다.',
@@ -553,6 +557,7 @@ const en: Strings = {
   'cache.clear.label': 'Clear all caches',
   'cache.clear.confirm': 'Clear all caches? Subsequent requests will start cold.',
   'cache.cleared': 'All caches cleared',
+  'cache.lastResult': 'Last result',
 
   // Warm
   'warm.title': 'Pre-warm (sitemap)',
@@ -798,6 +803,9 @@ const en: Strings = {
   'dashboard.breakers.empty.title': 'No hosts tracked yet',
   'dashboard.breakers.empty.hint':
     'Once bot requests route to an origin host, failure-rate states (closed · half-open · open) accumulate here.',
+  'dashboard.breakers.failTrend': 'Total failures trend (recent refreshes)',
+  'metrics.hitTrend': 'Hit ratio trend (recent refreshes)',
+  'metrics.live': 'Live',
   'sites.empty.hint': 'Add a site to manage per-host origin · routes · cache settings.',
   'tenants.empty.hint':
     'Add a tenant to manage per-customer origin · routes, identified by apiKey · host.',

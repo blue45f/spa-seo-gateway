@@ -91,7 +91,21 @@ function CacheBody() {
         </button>
       </div>
 
-      {lastResult ? <div className="alert alert--ok">{lastResult}</div> : null}
+      {/* 마지막 작업 결과 — 명시적 액션 1회에만 갱신되는 polite 라이브 영역(자동 폴링 없음).
+          라벨 + tabular-nums 로 키/카운트가 계기처럼 읽힌다.
+          (즉시성 높은 성공/실패 알림은 토스트가 assertive/polite 로 별도 운반) */}
+      <div role="status" aria-live="polite" aria-atomic="true">
+        {lastResult ? (
+          <div className="alert alert--ok flex items-baseline gap-2">
+            <span className="text-[11px] uppercase tracking-[0.12em] opacity-70 shrink-0">
+              {t('cache.lastResult')}
+            </span>
+            <span className="text-sm break-all" style={{ fontVariantNumeric: 'tabular-nums' }}>
+              {lastResult}
+            </span>
+          </div>
+        ) : null}
+      </div>
     </section>
   );
 }
