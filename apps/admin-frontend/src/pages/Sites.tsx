@@ -32,6 +32,11 @@ function SitesBody() {
   const [sites, setSites] = useState<Site[]>([]);
   const [loading, setLoading] = useState(false);
   const [editing, setEditing] = useState<Site | null>(null);
+  // 행 단위 in-flight 액션 — 같은 행의 중복/동시 요청 차단 + 진행 표시 (전역 loading 재사용 금지)
+  const [pending, setPending] = useState<{
+    id: string;
+    action: 'warm' | 'remove' | 'invalidate';
+  } | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -64,7 +69,9 @@ function SitesBody() {
   }
 
   async function remove(id: string) {
+    if (pending) return;
     if (!confirm(t('sites.delete.confirm'))) return;
+    setPending({ id, action: 'remove' });
     try {
       await api('DELETE', `/admin/api/sites/${encodeURIComponent(id)}`);
       pushToast(`${t('toast.site.deleted')}: ${id}`, 'success');
@@ -72,22 +79,30 @@ function SitesBody() {
     } catch (e) {
       const msg = errorMessage(e);
       pushToast(msg, 'error');
+    } finally {
+      setPending(null);
     }
   }
 
   async function invalidate(id: string) {
+    if (pending) return;
     const url = prompt(t('sites.invalidate.prompt'));
     if (!url) return;
+    setPending({ id, action: 'invalidate' });
     try {
       await api('POST', `/admin/api/sites/${encodeURIComponent(id)}/cache/invalidate`, { url });
       pushToast(`${t('toast.url.invalidated')}: ${url}`, 'success');
     } catch (e) {
       const msg = errorMessage(e);
       pushToast(msg, 'error');
+    } finally {
+      setPending(null);
     }
   }
 
   async function warm(id: string) {
+    if (pending) return;
+    setPending({ id, action: 'warm' });
     try {
       const r = await api<{ ok: true; report: { warmed: number; errors: number } }>(
         'POST',
@@ -101,6 +116,8 @@ function SitesBody() {
     } catch (e) {
       const msg = errorMessage(e);
       pushToast(msg, 'error');
+    } finally {
+      setPending(null);
     }
   }
 
@@ -177,17 +194,22 @@ function SitesBody() {
                   <td className="px-3 py-2 text-right space-x-2 whitespace-nowrap">
                     <button
                       type="button"
-                      className="text-xs text-ink-muted hover:text-ink rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                      className="text-xs text-ink-muted hover:text-ink rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent disabled:opacity-50"
                       onClick={() => invalidate(s.id)}
+                      disabled={pending?.id === s.id}
                     >
                       {t('sites.invalidate')}
                     </button>
                     <button
                       type="button"
-                      className="text-xs text-ink-muted hover:text-ink rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                      className="text-xs text-ink-muted hover:text-ink rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent disabled:opacity-50"
                       onClick={() => warm(s.id)}
+                      disabled={pending?.id === s.id}
+                      aria-busy={pending?.id === s.id && pending.action === 'warm'}
                     >
-                      {t('sites.warm')}
+                      {pending?.id === s.id && pending.action === 'warm'
+                        ? t('btn.running')
+                        : t('sites.warm')}
                     </button>
                     <button
                       type="button"
@@ -198,8 +220,9 @@ function SitesBody() {
                     </button>
                     <button
                       type="button"
-                      className="text-xs text-err hover:text-err-fg rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                      className="text-xs text-err hover:text-err-fg rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent disabled:opacity-50"
                       onClick={() => remove(s.id)}
+                      disabled={pending?.id === s.id}
                     >
                       {t('sites.delete')}
                     </button>
@@ -223,10 +246,11 @@ function SiteForm({
 }: {
   site: Site;
   onCancel(): void;
-  onSave(s: Site): void;
+  onSave(s: Site): Promise<void>;
 }) {
   const t = useStore((s) => s.t);
   const [draft, setDraft] = useState<Site>(site);
+  const [submitting, setSubmitting] = useState(false);
 
   function update<K extends keyof Site>(key: K, value: Site[K]) {
     setDraft((d) => ({ ...d, [key]: value }));
@@ -239,11 +263,18 @@ function SiteForm({
     }));
   }
 
-  function submit(e: FormEvent) {
+  async function submit(e: FormEvent) {
     e.preventDefault();
+    if (submitting) return; // 중복 제출 방지
     if (!/^[a-z0-9_-]+$/.test(draft.id)) return;
     if (!draft.name || !draft.origin) return;
-    onSave(draft);
+    setSubmitting(true);
+    try {
+      await onSave(draft);
+    } finally {
+      // save 는 실패 시 모달을 열어두므로(재시도) 항상 버튼을 되살린다
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -304,11 +335,21 @@ function SiteForm({
           {t('sites.form.enabled')}
         </label>
         <div className="flex gap-2 justify-end pt-3 border-t border-line">
-          <button type="button" className="btn-ghost px-3 py-2 text-sm" onClick={onCancel}>
+          <button
+            type="button"
+            className="btn-ghost px-3 py-2 text-sm"
+            onClick={onCancel}
+            disabled={submitting}
+          >
             {t('btn.cancel')}
           </button>
-          <button type="submit" className="btn-primary px-3 py-2 text-sm font-medium">
-            {t('sites.form.save')}
+          <button
+            type="submit"
+            className="btn-primary px-3 py-2 text-sm font-medium"
+            disabled={submitting}
+            aria-busy={submitting}
+          >
+            {submitting ? t('btn.running') : t('sites.form.save')}
           </button>
         </div>
       </form>

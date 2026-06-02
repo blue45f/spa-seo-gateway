@@ -42,6 +42,8 @@ function TenantsBody() {
   const [tenants, setTenants] = useState<Tenant[]>([]);
   const [loading, setLoading] = useState(false);
   const [editing, setEditing] = useState<Tenant | null>(null);
+  // 삭제 in-flight 인 행 id — 중복 클릭/동시 DELETE 차단 (전역 loading 재사용 금지)
+  const [removingId, setRemovingId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -74,7 +76,9 @@ function TenantsBody() {
   }
 
   async function remove(id: string) {
+    if (removingId) return;
     if (!confirm(t('tenants.delete.confirm'))) return;
+    setRemovingId(id);
     try {
       await api('DELETE', `/admin/api/tenants/${encodeURIComponent(id)}`);
       pushToast(`${t('toast.tenant.deleted')}: ${id}`, 'success');
@@ -82,6 +86,8 @@ function TenantsBody() {
     } catch (e) {
       const msg = errorMessage(e);
       pushToast(msg, 'error');
+    } finally {
+      setRemovingId(null);
     }
   }
 
@@ -181,10 +187,11 @@ function TenantsBody() {
                     </button>
                     <button
                       type="button"
-                      className="text-xs text-err hover:text-err-fg rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                      className="text-xs text-err hover:text-err-fg rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent disabled:opacity-50"
                       onClick={() => remove(tn.id)}
+                      disabled={removingId === tn.id}
                     >
-                      {t('tenants.delete')}
+                      {removingId === tn.id ? t('btn.running') : t('tenants.delete')}
                     </button>
                   </td>
                 </tr>
@@ -208,21 +215,29 @@ function TenantForm({
 }: {
   tenant: Tenant;
   onCancel(): void;
-  onSave(t: Tenant): void;
+  onSave(t: Tenant): Promise<void>;
 }) {
   const t = useStore((s) => s.t);
   const [draft, setDraft] = useState<Tenant>(tenant);
+  const [submitting, setSubmitting] = useState(false);
 
   function update<K extends keyof Tenant>(key: K, value: Tenant[K]) {
     setDraft((d) => ({ ...d, [key]: value }));
   }
 
-  function submit(e: FormEvent) {
+  async function submit(e: FormEvent) {
     e.preventDefault();
+    if (submitting) return; // 중복 제출 방지
     if (!/^[a-z0-9_-]+$/.test(draft.id)) return;
     if (draft.apiKey.length < 20) return;
     if (!draft.name || !draft.origin) return;
-    onSave(draft);
+    setSubmitting(true);
+    try {
+      await onSave(draft);
+    } finally {
+      // save 는 실패 시 모달을 열어두므로(재시도) 항상 버튼을 되살린다
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -304,11 +319,21 @@ function TenantForm({
           {t('tenants.form.enabled')}
         </label>
         <div className="flex gap-2 justify-end pt-3 border-t border-line">
-          <button type="button" className="btn-ghost px-3 py-2 text-sm" onClick={onCancel}>
+          <button
+            type="button"
+            className="btn-ghost px-3 py-2 text-sm"
+            onClick={onCancel}
+            disabled={submitting}
+          >
             {t('btn.cancel')}
           </button>
-          <button type="submit" className="btn-primary px-3 py-2 text-sm font-medium">
-            {t('tenants.form.save')}
+          <button
+            type="submit"
+            className="btn-primary px-3 py-2 text-sm font-medium"
+            disabled={submitting}
+            aria-busy={submitting}
+          >
+            {submitting ? t('btn.running') : t('tenants.form.save')}
           </button>
         </div>
       </form>
