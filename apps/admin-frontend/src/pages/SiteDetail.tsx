@@ -1,6 +1,7 @@
 import { cloneElement, type ReactElement, useCallback, useEffect, useId, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { AuthGate } from '../components/AuthGate';
+import { EmptyState } from '../components/EmptyState';
 import { RoutesEditor } from '../components/RoutesEditor';
 import { DetailSkeleton } from '../components/Skeleton';
 import { ApiError, api } from '../lib/api';
@@ -65,7 +66,7 @@ function SiteDetailBody() {
           })),
       };
       await api('POST', '/admin/api/sites', cleaned);
-      pushToast(`사이트 저장됨: ${site.id}`, 'success');
+      pushToast(`${t('toast.site.saved')}: ${site.id}`, 'success');
       await load();
     } catch (e) {
       const msg = e instanceof ApiError ? e.message : (e as Error).message;
@@ -94,10 +95,14 @@ function SiteDetailBody() {
   if (missing) {
     return (
       <section className="space-y-4" data-testid="page-site-detail">
-        <Link to="/sites" className="link text-sm">
-          {t('sites.detail.back')}
-        </Link>
-        <p className="text-sm text-ink-subtle">{t('sites.detail.notFound')}</p>
+        <EmptyState
+          title={t('sites.detail.notFound')}
+          hint={
+            <Link to="/sites" className="link">
+              {t('sites.detail.back')}
+            </Link>
+          }
+        />
       </section>
     );
   }
@@ -115,7 +120,7 @@ function SiteDetailBody() {
           </button>
           <button
             type="button"
-            className="btn-primary px-3 py-2 text-sm font-medium disabled:opacity-60"
+            className="btn-primary px-3 py-2 text-sm font-medium"
             onClick={save}
             disabled={saving}
           >
@@ -180,6 +185,7 @@ function SiteDetailBody() {
           <label className="flex items-center gap-2 mt-6 text-sm">
             <input
               type="checkbox"
+              className="checkbox h-4 w-4"
               checked={site.enabled}
               onChange={(e) => setSite({ ...site, enabled: e.target.checked })}
             />

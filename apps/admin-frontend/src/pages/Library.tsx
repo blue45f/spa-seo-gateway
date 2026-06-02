@@ -111,7 +111,7 @@ function Block({ title, children }: { title: string; children: React.ReactNode }
   return (
     <div className="panel p-5">
       <h3 className="font-semibold text-ink mb-3">{title}</h3>
-      <div className="text-xs [&>pre]:bg-panel-2 [&>pre]:p-3 [&>pre]:rounded [&>pre]:overflow-auto [&>pre]:font-mono space-y-2">
+      <div className="text-xs [&>pre]:bg-panel-2 [&>pre]:border [&>pre]:border-line [&>pre]:p-3 [&>pre]:rounded-lg [&>pre]:overflow-auto [&>pre]:font-mono space-y-2">
         {children}
       </div>
     </div>
