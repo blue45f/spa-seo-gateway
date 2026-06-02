@@ -57,7 +57,8 @@ export function Layout() {
           className="flex-1 p-6 max-w-7xl w-full mx-auto space-y-6 focus:outline-none"
         >
           <GlobalErrorBanner />
-          <ErrorBoundary>
+          {/* key on pathname so a crashed page's latched fallback resets when navigating away */}
+          <ErrorBoundary key={location.pathname}>
             <Suspense
               fallback={
                 <p role="status" aria-live="polite" className="text-sm text-ink-subtle">
