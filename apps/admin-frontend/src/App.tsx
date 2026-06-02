@@ -47,7 +47,6 @@ export function App() {
   const setAuthed = useStore((s) => s.setAuthed);
   const setAdminEnabled = useStore((s) => s.setAdminEnabled);
   const theme = useStore((s) => s.theme);
-  const cmdOpen = useStore((s) => s.cmdPaletteOpen);
   const openCmd = useStore((s) => s.openCmd);
   const closeCmd = useStore((s) => s.closeCmd);
   const closeShortcuts = useStore((s) => s.closeShortcuts);
@@ -92,7 +91,8 @@ export function App() {
       const meta = e.metaKey || e.ctrlKey;
       if (meta && e.key.toLowerCase() === 'k') {
         e.preventDefault();
-        if (cmdOpen) closeCmd();
+        // 팔레트 열림 상태는 핸들러 내부에서 지연 조회 — 토글마다 리스너를 재구독하지 않기 위해
+        if (useStore.getState().cmdPaletteOpen) closeCmd();
         else openCmd();
         return;
       }
@@ -104,7 +104,7 @@ export function App() {
     }
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [cmdOpen, openCmd, closeCmd, openShortcuts, closeShortcuts]);
+  }, [openCmd, closeCmd, openShortcuts, closeShortcuts]);
 
   return (
     <>
