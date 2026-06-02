@@ -44,6 +44,21 @@ const ko: Strings = {
   'auth.authenticated': '인증됨',
   'auth.unauthenticated': '미인증',
   'auth.required': '인증이 필요한 페이지입니다. 우측 상단 토큰 입력 후 로그인 하세요.',
+  'auth.disabled': 'admin 비활성화됨. 환경변수 ADMIN_TOKEN 을 설정하고 게이트웨이를 재시작하세요.',
+
+  // Toast
+  'toast.site.saved': '사이트 저장됨',
+  'toast.site.deleted': '사이트 삭제됨',
+  'toast.tenant.saved': '테넌트 저장됨',
+  'toast.tenant.deleted': '테넌트 삭제됨',
+  'toast.url.invalidated': 'URL 무효화 완료',
+  'toast.warm.done': '워밍 완료',
+  'toast.clipboard.denied': 'clipboard 접근 거부됨',
+  'toast.visual.failed': '시각 회귀 실패',
+  'toast.ai.suggestions': 'schema 제안',
+  'toast.ai.failed': 'AI schema 추론 실패. 어댑터 설정을 확인하세요.',
+  'toast.apikey.changed': 'API key 변경됨. 저장 버튼을 눌러야 적용됩니다.',
+  'toast.routes.reordered': '라우트 순서 변경',
 
   // Theme / lang
   'theme.dark': '다크 모드',
@@ -88,6 +103,21 @@ const ko: Strings = {
   'welcome.cards.shield.body':
     'SSRF DNS 검사, host별 circuit breaker, soft 404 자동 감지, 자동 브라우저 재시작, rate limit, 호스트 화이트리스트.',
   'welcome.quickstart': '빠른 시작',
+  'welcome.origin.unset': '(미설정)',
+  'welcome.qs1':
+    '좌측 메뉴에서 원하는 작업을 선택. 인증이 필요한 페이지는 우측 상단에 토큰 입력 박스가 표시됩니다.',
+  'welcome.qs2': ' 에서 URL 한 개를 즉시 렌더해 동작 확인.',
+  'welcome.qs3': ' 에서 URL 패턴별 캐시 TTL / waitUntil / ignore 정의.',
+  'welcome.qs4': ' 으로 sitemap 으로부터 미리 캐시 채우기.',
+  'welcome.qs5': ' 에서 실시간 처리량 / 지연 / 에러 모니터링.',
+  'welcome.architecture': '아키텍처 한눈에',
+  'welcome.resources': '리소스',
+  'welcome.links.gettingStarted': '설치 가이드',
+  'welcome.links.configuration': '전체 설정 레퍼런스',
+  'welcome.links.multiTenant': 'SaaS 모드 (다중 테넌트)',
+  'welcome.links.cmsMode': 'CMS 모드 (다중 사이트)',
+  'welcome.links.deployment': '배포 가이드 (Docker/K8s/CDN)',
+  'welcome.links.architecture': '아키텍처',
 
   // Dashboard
   'dashboard.empty': '아직 인증되지 않았거나 데이터가 없습니다.',
@@ -135,7 +165,10 @@ const ko: Strings = {
   'lighthouse.title': 'Lighthouse 점수',
   'lighthouse.url.label': '대상 URL',
   'lighthouse.run': '측정 실행',
-  'lighthouse.cached': '(캐시된 결과)',
+  'lighthouse.cached': '캐시된 결과',
+  'lighthouse.band.good': '양호',
+  'lighthouse.band.needs': '개선 필요',
+  'lighthouse.band.poor': '미흡',
   'lighthouse.scores.performance': 'Performance',
   'lighthouse.scores.accessibility': 'Accessibility',
   'lighthouse.scores.seo': 'SEO',
@@ -168,6 +201,8 @@ const ko: Strings = {
   'ai.running': '추론 중...',
   'ai.setup': '어댑터 빠른 설정',
   'ai.empty': '추론된 schema 가 없습니다. 본문이 짧거나 타입이 불명확할 수 있습니다.',
+  'ai.empty.hint':
+    '본문이 짧거나 타입이 불명확하면 제안이 없을 수 있습니다. 더 본문이 풍부한 페이지 URL 을 입력해 보세요.',
 
   // Audit
   'audit.title': '감사 로그 (HMAC chain)',
@@ -307,6 +342,21 @@ const en: Strings = {
   'auth.authenticated': 'Authenticated',
   'auth.unauthenticated': 'Not signed in',
   'auth.required': 'Authentication required. Enter the admin token in the top bar to sign in.',
+  'auth.disabled': 'Admin disabled. Set the ADMIN_TOKEN env var and restart the gateway.',
+
+  // Toast
+  'toast.site.saved': 'Site saved',
+  'toast.site.deleted': 'Site deleted',
+  'toast.tenant.saved': 'Tenant saved',
+  'toast.tenant.deleted': 'Tenant deleted',
+  'toast.url.invalidated': 'URL invalidated',
+  'toast.warm.done': 'Warming done',
+  'toast.clipboard.denied': 'Clipboard access denied',
+  'toast.visual.failed': 'Visual regression failed',
+  'toast.ai.suggestions': 'schema suggestions',
+  'toast.ai.failed': 'AI schema inference failed. Check the adapter setup.',
+  'toast.apikey.changed': 'API key changed. Click Save to apply.',
+  'toast.routes.reordered': 'Route reordered',
 
   // Theme / lang
   'theme.dark': 'Dark mode',
@@ -350,6 +400,21 @@ const en: Strings = {
   'welcome.cards.shield.body':
     'SSRF DNS guard, per-host circuit breaker, automatic soft-404 detection, browser auto-restart, rate limit, host allow-list.',
   'welcome.quickstart': 'Quick start',
+  'welcome.origin.unset': '(unset)',
+  'welcome.qs1':
+    'Pick a task from the left nav. Pages that need auth show a token box in the top bar.',
+  'welcome.qs2': ': render a single URL to verify it works.',
+  'welcome.qs3': ': define cache TTL / waitUntil / ignore per URL pattern.',
+  'welcome.qs4': ': pre-fill the cache from a sitemap.',
+  'welcome.qs5': ': monitor live throughput, latency, and errors.',
+  'welcome.architecture': 'Architecture at a glance',
+  'welcome.resources': 'Resources',
+  'welcome.links.gettingStarted': 'Getting started',
+  'welcome.links.configuration': 'Full configuration reference',
+  'welcome.links.multiTenant': 'SaaS mode (multi-tenant)',
+  'welcome.links.cmsMode': 'CMS mode (multi-site)',
+  'welcome.links.deployment': 'Deployment (Docker/K8s/CDN)',
+  'welcome.links.architecture': 'Architecture',
 
   // Dashboard
   'dashboard.empty': 'Not authenticated yet, or no data.',
@@ -397,7 +462,10 @@ const en: Strings = {
   'lighthouse.title': 'Lighthouse scores',
   'lighthouse.url.label': 'Target URL',
   'lighthouse.run': 'Measure',
-  'lighthouse.cached': '(cached)',
+  'lighthouse.cached': 'cached',
+  'lighthouse.band.good': 'good',
+  'lighthouse.band.needs': 'needs improvement',
+  'lighthouse.band.poor': 'poor',
   'lighthouse.scores.performance': 'Performance',
   'lighthouse.scores.accessibility': 'Accessibility',
   'lighthouse.scores.seo': 'SEO',
@@ -430,6 +498,8 @@ const en: Strings = {
   'ai.running': 'Inferring...',
   'ai.setup': 'Adapter quick setup',
   'ai.empty': 'No suggestions returned. Content may be sparse or type unclear.',
+  'ai.empty.hint':
+    'Sparse content or an unclear type can yield no suggestions. Try a URL with richer body content.',
 
   // Audit
   'audit.title': 'Audit Log (HMAC chain)',

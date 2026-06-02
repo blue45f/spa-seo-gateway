@@ -7,7 +7,7 @@ export function MobileMenu() {
   return (
     <button
       type="button"
-      className="md:hidden fixed top-3 left-3 z-50 p-2 rounded bg-rail text-rail-ink shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
+      className="md:hidden fixed top-3 left-3 z-50 grid place-items-center min-h-[44px] min-w-[44px] rounded bg-rail text-rail-ink shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
       onClick={toggle}
       aria-label={open ? 'Close menu' : 'Open menu'}
       aria-expanded={open}

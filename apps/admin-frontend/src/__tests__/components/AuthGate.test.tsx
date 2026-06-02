@@ -26,7 +26,7 @@ describe('AuthGate', () => {
         <div data-testid="protected">secret</div>
       </AuthGate>,
     );
-    expect(screen.getByText('admin disabled')).toBeInTheDocument();
+    expect(screen.getByText(/admin 비활성화/)).toBeInTheDocument();
     expect(screen.queryByTestId('protected')).not.toBeInTheDocument();
   });
 
