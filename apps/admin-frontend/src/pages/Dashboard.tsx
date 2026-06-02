@@ -64,7 +64,7 @@ function DashboardBody() {
         <h2 className="text-lg font-semibold tracking-tight text-ink">현재 게이트웨이 상태</h2>
         <button
           type="button"
-          className="px-3 py-1.5 text-sm rounded-md border border-line bg-panel-2 text-ink-muted hover:text-ink hover:border-line-strong disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+          className="btn-ghost px-3 py-1.5 text-sm"
           onClick={load}
           disabled={loading}
         >
@@ -104,32 +104,34 @@ function DashboardBody() {
       <div className="panel p-5">
         <h3 className="font-semibold tracking-tight text-ink mb-3">Circuit breakers (호스트별)</h3>
         {breakerHosts.length > 0 ? (
-          <table className="w-full text-sm">
-            <thead className="text-[11px] uppercase tracking-wider text-ink-subtle">
-              <tr className="border-b border-line">
-                <th className="text-left font-medium py-2">host</th>
-                <th className="text-left font-medium py-2">state</th>
-                <th className="text-right font-medium py-2">failures</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-line">
-              {breakerHosts.map(([host, b]) => (
-                <tr key={host}>
-                  <td className="py-2.5 font-mono text-xs text-ink">{host}</td>
-                  <td className="py-2.5">
-                    <span
-                      className={`badge ${b.state === 'open' ? 'badge--err' : b.state === 'half-open' ? 'badge--warn' : 'badge--ok'}`}
-                    >
-                      {b.state}
-                    </span>
-                  </td>
-                  <td className="py-2.5 font-mono text-xs text-right text-ink-muted">
-                    {b.failures}
-                  </td>
+          <div className="overflow-x-auto -mx-5 px-5">
+            <table className="w-full text-sm">
+              <thead className="text-[11px] uppercase tracking-wider text-ink-subtle">
+                <tr className="border-b border-line">
+                  <th className="text-left font-medium py-2">host</th>
+                  <th className="text-left font-medium py-2">state</th>
+                  <th className="text-right font-medium py-2">failures</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-line">
+                {breakerHosts.map(([host, b]) => (
+                  <tr key={host}>
+                    <td className="py-2.5 font-mono text-xs text-ink">{host}</td>
+                    <td className="py-2.5">
+                      <span
+                        className={`badge ${b.state === 'open' ? 'badge--err' : b.state === 'half-open' ? 'badge--warn' : 'badge--ok'}`}
+                      >
+                        {b.state}
+                      </span>
+                    </td>
+                    <td className="py-2.5 font-mono text-xs text-right text-ink-muted">
+                      {b.failures}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         ) : (
           <EmptyState
             title="아직 추적된 호스트가 없습니다"

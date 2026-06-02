@@ -55,7 +55,7 @@ export function Modal({ open, onClose, title, children, size = 'lg' }: ModalProp
       aria-modal="true"
       aria-labelledby={titleId}
       data-testid="modal"
-      className="fixed inset-0 z-[70] bg-black/50 flex items-start justify-center pt-12 px-4"
+      className="fixed inset-0 z-[70] bg-scrim flex items-start justify-center pt-12 px-4"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
