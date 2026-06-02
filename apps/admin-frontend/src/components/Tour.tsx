@@ -88,7 +88,7 @@ export function Tour() {
 
   return (
     <div
-      className="fixed inset-0 z-[90] bg-black/60 flex items-center justify-center p-4"
+      className="fixed inset-0 z-[90] bg-scrim-strong flex items-center justify-center p-4"
       data-testid="tour"
     >
       <div

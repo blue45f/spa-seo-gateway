@@ -68,43 +68,52 @@ function MetricsBody() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <Card
-          label="cache hit ratio"
-          value={parsed.cards.hitRatio}
-          detail={`hit ${parsed.cards.cacheHits} / miss ${parsed.cards.cacheMisses}`}
-        />
-        <Card label="inflight" value={String(parsed.cards.inflight)} detail="현재 렌더 중" />
-        <Card label="cache hits" value={parsed.cards.cacheHits} detail="누적" />
-        <Card label="cache misses" value={parsed.cards.cacheMisses} detail="누적" />
+      {/* 동일 4-카드 그리드가 아닌, hit ratio 를 헤드라인으로 둔 내부 위계 단일 패널 */}
+      <div className="panel divide-y divide-line sm:flex sm:divide-y-0 sm:divide-x">
+        <div className="flex-1 p-5 min-w-0">
+          <div className="text-[11px] uppercase tracking-[0.12em] text-ink-subtle">
+            cache hit ratio
+          </div>
+          <div className="font-mono text-2xl text-ink mt-2">{parsed.cards.hitRatio}</div>
+          <div className="text-xs text-ink-muted mt-1.5 font-mono">
+            hit {parsed.cards.cacheHits} / miss {parsed.cards.cacheMisses}
+          </div>
+        </div>
+        <div className="flex-1 p-5">
+          <div className="text-[11px] uppercase tracking-[0.12em] text-ink-subtle">inflight</div>
+          <div className="font-mono text-2xl text-ink mt-2">{String(parsed.cards.inflight)}</div>
+          <div className="text-xs text-ink-muted mt-1.5">현재 렌더 중</div>
+        </div>
       </div>
 
       {parsed.renderHist.length > 0 ? (
         <div className="panel p-5">
           <h3 className="font-semibold mb-3 text-ink">렌더 지연 히스토그램 (per outcome/host)</h3>
           <LatencyBars rows={parsed.renderHist} />
-          <table className="w-full text-sm">
-            <thead className="bg-panel-2 text-xs uppercase text-ink-muted">
-              <tr>
-                <th className="text-left px-3 py-2">key</th>
-                <th className="text-right px-3 py-2">p50</th>
-                <th className="text-right px-3 py-2">p95</th>
-                <th className="text-right px-3 py-2">p99</th>
-                <th className="text-right px-3 py-2">count</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-line">
-              {parsed.renderHist.map((r) => (
-                <tr key={r.key}>
-                  <td className="px-3 py-2 font-mono text-xs">{r.key}</td>
-                  <td className="px-3 py-2 text-right font-mono">{pp(r.p50)}</td>
-                  <td className="px-3 py-2 text-right font-mono">{pp(r.p95)}</td>
-                  <td className="px-3 py-2 text-right font-mono">{pp(r.p99)}</td>
-                  <td className="px-3 py-2 text-right font-mono">{r.count}</td>
+          <div className="overflow-x-auto -mx-5 px-5">
+            <table className="w-full text-sm">
+              <thead className="bg-panel-2 text-xs uppercase text-ink-muted">
+                <tr>
+                  <th className="text-left px-3 py-2">key</th>
+                  <th className="text-right px-3 py-2">p50</th>
+                  <th className="text-right px-3 py-2">p95</th>
+                  <th className="text-right px-3 py-2">p99</th>
+                  <th className="text-right px-3 py-2">count</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-line">
+                {parsed.renderHist.map((r) => (
+                  <tr key={r.key}>
+                    <td className="px-3 py-2 font-mono text-xs">{r.key}</td>
+                    <td className="px-3 py-2 text-right font-mono">{pp(r.p50)}</td>
+                    <td className="px-3 py-2 text-right font-mono">{pp(r.p95)}</td>
+                    <td className="px-3 py-2 text-right font-mono">{pp(r.p99)}</td>
+                    <td className="px-3 py-2 text-right font-mono">{r.count}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       ) : null}
 
@@ -133,16 +142,6 @@ function MetricsBody() {
         </pre>
       </details>
     </section>
-  );
-}
-
-function Card({ label, value, detail }: { label: string; value: string; detail: string }) {
-  return (
-    <div className="panel p-4">
-      <div className="text-xs text-ink-subtle uppercase tracking-wider">{label}</div>
-      <div className="font-mono text-2xl mt-1">{value}</div>
-      <div className="text-xs text-ink-subtle mt-2">{detail}</div>
-    </div>
   );
 }
 
