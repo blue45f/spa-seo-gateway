@@ -24,4 +24,13 @@ describe('Tour', () => {
     fireEvent.click(screen.getAllByRole('button')[0]!);
     expect(useStore.getState().tourSeen).toBe(true);
   });
+
+  it('ends the tour on Escape', () => {
+    useStore.setState({ tourSeen: false, tourStep: 0 });
+    renderWithRouter(<Tour />);
+    expect(screen.getByTestId('tour')).toBeInTheDocument();
+    fireEvent.keyDown(window, { key: 'Escape' });
+    expect(useStore.getState().tourSeen).toBe(true);
+    expect(screen.queryByTestId('tour')).not.toBeInTheDocument();
+  });
 });

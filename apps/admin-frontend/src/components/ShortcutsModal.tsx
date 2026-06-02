@@ -1,5 +1,7 @@
 import { useEffect, useId, useRef } from 'react';
 import { useStore } from '../lib/store';
+import { useFocusRestore } from '../lib/useFocusRestore';
+import { useFocusTrap } from '../lib/useFocusTrap';
 
 export function ShortcutsModal() {
   const open = useStore((s) => s.shortcutsOpen);
@@ -7,6 +9,9 @@ export function ShortcutsModal() {
   const t = useStore((s) => s.t);
   const titleId = useId();
   const panelRef = useRef<HTMLDivElement>(null);
+
+  useFocusRestore(open);
+  useFocusTrap(panelRef, open);
 
   useEffect(() => {
     if (open) panelRef.current?.focus();

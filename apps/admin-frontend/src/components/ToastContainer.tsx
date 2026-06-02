@@ -21,12 +21,9 @@ export function ToastContainer() {
   const removeToast = useStore((s) => s.removeToast);
 
   return (
-    <div
-      className="fixed bottom-4 right-4 z-[100] space-y-2"
-      role="status"
-      aria-live="polite"
-      data-testid="toast-container"
-    >
+    // 순수 위치 컨테이너 — live-region 은 토스트별로 둔다(중첩 금지). 각 토스트의 role
+    // (error→alert/assertive, 그 외→status/polite)이 자체적으로 SR 알림 정중함을 운반.
+    <div className="fixed bottom-4 right-4 z-[100] space-y-2" data-testid="toast-container">
       {toasts.map((t) => {
         const Icon = KIND_ICON[t.kind] ?? Info;
         return (
