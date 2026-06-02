@@ -1,12 +1,15 @@
 import { resolve } from 'node:path';
+import babel from '@rolldown/plugin-babel';
 import tailwindcss from '@tailwindcss/vite';
-import react from '@vitejs/plugin-react';
+import react, { reactCompilerPreset } from '@vitejs/plugin-react';
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   // Fastify 가 /admin/ui 아래에서 서빙 — 자산도 같은 prefix 로 절대경로 발급.
   base: '/admin/ui/',
-  plugins: [react(), tailwindcss()],
+  // React Compiler (React 19.2 native): babel preset wires babel-plugin-react-compiler
+  // through @rolldown/plugin-babel so admin-frontend components auto-memoize.
+  plugins: [react(), babel({ presets: [reactCompilerPreset()] }), tailwindcss()],
   resolve: {
     alias: {
       '@heejun/spa-seo-gateway-core': resolve(__dirname, '../../packages/core/src/index.ts'),
