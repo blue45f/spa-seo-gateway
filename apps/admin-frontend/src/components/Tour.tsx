@@ -1,6 +1,8 @@
 import { useEffect, useId, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStore } from '../lib/store';
+import { useFocusRestore } from '../lib/useFocusRestore';
+import { useFocusTrap } from '../lib/useFocusTrap';
 import { NavIcon } from './NavIcon';
 
 const STEPS = [
@@ -65,6 +67,11 @@ export function Tour() {
   const navigate = useNavigate();
   const titleId = useId();
   const panelRef = useRef<HTMLDivElement>(null);
+  const tourVisible = !tourSeen && tourStep >= 0 && tourStep < STEPS.length;
+
+  // 트리거로 포커스 복원 + Tab 포커스 트랩 (공유 훅)
+  useFocusRestore(tourVisible);
+  useFocusTrap(panelRef, tourVisible);
 
   // 첫 방문 시 자동 시작
   useEffect(() => {
@@ -81,7 +88,17 @@ export function Tour() {
     panelRef.current?.focus();
   }, [tourStep]);
 
-  if (tourSeen || tourStep < 0 || tourStep >= STEPS.length) return null;
+  // Escape 로 투어 종료 — 다른 모달들과 일관 (Modal.tsx 패턴)
+  useEffect(() => {
+    if (!tourVisible) return undefined;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') endTour();
+    }
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [tourVisible, endTour]);
+
+  if (!tourVisible) return null;
   const step = STEPS[tourStep];
   const title = lang === 'ko' ? step.titleKo : step.titleEn;
   const body = lang === 'ko' ? step.bodyKo : step.bodyEn;

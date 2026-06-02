@@ -1,6 +1,8 @@
 import { X } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useEffect, useId, useRef } from 'react';
+import { useFocusRestore } from '../lib/useFocusRestore';
+import { useFocusTrap } from '../lib/useFocusTrap';
 
 type ModalProps = {
   open: boolean;
@@ -20,7 +22,10 @@ const SIZE_CLASS: Record<NonNullable<ModalProps['size']>, string> = {
 export function Modal({ open, onClose, title, children, size = 'lg' }: ModalProps) {
   const titleId = useId();
   const dialogRef = useRef<HTMLDivElement>(null);
-  const previouslyFocusedRef = useRef<HTMLElement | null>(null);
+
+  // 트리거로 포커스 복원 + Tab 포커스 트랩 (공유 훅).
+  useFocusRestore(open);
+  useFocusTrap(dialogRef, open);
 
   // Escape 키로 닫기 — open 일 때만 등록.
   useEffect(() => {
@@ -32,18 +37,15 @@ export function Modal({ open, onClose, title, children, size = 'lg' }: ModalProp
     return () => window.removeEventListener('keydown', onKey);
   }, [open, onClose]);
 
-  // body scroll 잠금 + 이전 focus 복원.
+  // body scroll 잠금 + 다이얼로그 진입 포커스.
   useEffect(() => {
     if (!open || typeof document === 'undefined') return;
-    previouslyFocusedRef.current = document.activeElement as HTMLElement | null;
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     // 다이얼로그 자체에 포커스 — 키보드 사용자에게 진입점 제공.
     dialogRef.current?.focus();
     return () => {
       document.body.style.overflow = prevOverflow;
-      // 모달 닫힐 때 트리거 요소로 포커스 복원.
-      previouslyFocusedRef.current?.focus?.();
     };
   }, [open]);
 

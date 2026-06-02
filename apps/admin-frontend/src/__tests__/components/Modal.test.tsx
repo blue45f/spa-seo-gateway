@@ -86,4 +86,25 @@ describe('Modal', () => {
     fireEvent.click(closeBtn);
     expect(screen.queryByTestId('modal')).not.toBeInTheDocument();
   });
+
+  it('traps Tab focus: from the last focusable it wraps to the first', () => {
+    render(<Harness />);
+    const closeBtn = screen.getByLabelText('Close dialog');
+    const input = screen.getByTestId('dialog-input');
+    // input is the last focusable; Tab should wrap to the close button (first).
+    input.focus();
+    expect(document.activeElement).toBe(input);
+    fireEvent.keyDown(input, { key: 'Tab' });
+    expect(document.activeElement).toBe(closeBtn);
+  });
+
+  it('traps Shift+Tab focus: from the first focusable it wraps to the last', () => {
+    render(<Harness />);
+    const closeBtn = screen.getByLabelText('Close dialog');
+    const input = screen.getByTestId('dialog-input');
+    closeBtn.focus();
+    expect(document.activeElement).toBe(closeBtn);
+    fireEvent.keyDown(closeBtn, { key: 'Tab', shiftKey: true });
+    expect(document.activeElement).toBe(input);
+  });
 });
