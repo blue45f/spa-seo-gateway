@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useStore } from '../lib/store';
 import type { ScopedRoute } from '../lib/types';
 
@@ -31,6 +31,17 @@ export function RoutesEditor({ routes, onChange, labels, reorderable = true }: R
   const pushToast = useStore((s) => s.pushToast);
   const [filter, setFilter] = useState('');
   const [dragSrc, setDragSrc] = useState<number | null>(null);
+  // 행 추가 시 새 행의 pattern 입력으로 포커스 이동 — 키보드 사용자가 테이블 전체를 Tab 하지 않게.
+  const lastPatternRef = useRef<HTMLInputElement>(null);
+  const prevLen = useRef(routes.length);
+
+  useEffect(() => {
+    // 길이가 늘었고(=추가) 필터가 비어 새 빈 행이 실제로 렌더될 때만 포커스.
+    if (routes.length > prevLen.current && filter.trim() === '') {
+      lastPatternRef.current?.focus();
+    }
+    prevLen.current = routes.length;
+  }, [routes.length, filter]);
 
   const L = {
     pattern: labels?.pattern ?? t('routes.col.pattern'),
@@ -147,6 +158,7 @@ export function RoutesEditor({ routes, onChange, labels, reorderable = true }: R
                   <td className="px-3 py-2 text-ink-subtle select-none">{i + 1}</td>
                   <td className="px-3 py-2">
                     <input
+                      ref={i === routes.length - 1 ? lastPatternRef : undefined}
                       type="text"
                       className="input w-full px-2 py-1 font-mono text-xs"
                       aria-label={`${L.pattern} ${i + 1}`}
