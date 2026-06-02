@@ -1,4 +1,12 @@
-import { cloneElement, type ReactElement, useCallback, useEffect, useId, useState } from 'react';
+import {
+  cloneElement,
+  type ReactElement,
+  useCallback,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+} from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { AuthGate } from '../components/AuthGate';
 import { EmptyState } from '../components/EmptyState';
@@ -30,25 +38,36 @@ function TenantDetailBody() {
   const [saving, setSaving] = useState(false);
   const [missing, setMissing] = useState(false);
 
+  const ctrlRef = useRef<AbortController | null>(null);
+
   const load = useCallback(async () => {
+    // 이전 요청 취소 — /tenants/A → /tenants/B 네비게이션 시 A 응답이 B 를 덮어쓰지 않게.
+    ctrlRef.current?.abort();
+    const ctrl = new AbortController();
+    ctrlRef.current = ctrl;
     setLoading(true);
     setMissing(false);
     try {
-      const r = await api<{ ok: true; tenants: Tenant[] }>('GET', '/admin/api/tenants');
+      const r = await api<{ ok: true; tenants: Tenant[] }>('GET', '/admin/api/tenants', undefined, {
+        signal: ctrl.signal,
+      });
+      if (ctrl.signal.aborted) return;
       const found = (r.tenants ?? []).find((tn) => tn.id === id);
       if (!found) setMissing(true);
       else setTenant(found);
       setError('');
     } catch (e) {
+      if ((e as Error).name === 'AbortError') return;
       const msg = e instanceof ApiError ? e.message : (e as Error).message;
       setError(msg);
     } finally {
-      setLoading(false);
+      if (!ctrl.signal.aborted) setLoading(false);
     }
   }, [id, setError]);
 
   useEffect(() => {
     void load();
+    return () => ctrlRef.current?.abort();
   }, [load]);
 
   async function save() {

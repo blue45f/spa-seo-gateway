@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { AuthGate } from '../components/AuthGate';
 import { CardGridSkeleton } from '../components/Skeleton';
 import { fetchText } from '../lib/api';
@@ -21,26 +21,46 @@ function MetricsBody() {
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [updated, setUpdated] = useState('');
 
+  const ctrlRef = useRef<AbortController | null>(null);
+
   const load = useCallback(async () => {
+    // 이전 요청을 취소해, 느린 응답이 더 새 데이터를 덮어쓰는 레이스를 막는다.
+    ctrlRef.current?.abort();
+    const ctrl = new AbortController();
+    ctrlRef.current = ctrl;
     try {
-      const text = await fetchText('/metrics');
+      const text = await fetchText('/metrics', ctrl.signal);
+      if (ctrl.signal.aborted) return;
       setRaw(text);
       setParsed(summarize(parsePrometheus(text)));
       setUpdated(new Date().toLocaleTimeString());
       setError('');
     } catch (e) {
+      if ((e as Error).name === 'AbortError') return; // 교체/언마운트 취소는 무시
       setError((e as Error).message);
     }
   }, [setError]);
 
+  // 초기 로드 + unmount 시 진행 중 요청 취소
   useEffect(() => {
     void load();
+    return () => ctrlRef.current?.abort();
   }, [load]);
 
+  // 5s 자동 갱신 — 숨김 탭에선 스킵, 복귀 시 즉시 갱신
   useEffect(() => {
     if (!autoRefresh) return undefined;
-    const id = setInterval(() => void load(), 5000);
-    return () => clearInterval(id);
+    const id = setInterval(() => {
+      if (document.visibilityState === 'visible') void load();
+    }, 5000);
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') void load();
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => {
+      clearInterval(id);
+      document.removeEventListener('visibilitychange', onVisible);
+    };
   }, [autoRefresh, load]);
 
   if (!parsed) return <CardGridSkeleton count={3} />;

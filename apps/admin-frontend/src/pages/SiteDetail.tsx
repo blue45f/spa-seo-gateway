@@ -1,4 +1,12 @@
-import { cloneElement, type ReactElement, useCallback, useEffect, useId, useState } from 'react';
+import {
+  cloneElement,
+  type ReactElement,
+  useCallback,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+} from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { AuthGate } from '../components/AuthGate';
 import { EmptyState } from '../components/EmptyState';
@@ -27,25 +35,36 @@ function SiteDetailBody() {
   const [saving, setSaving] = useState(false);
   const [missing, setMissing] = useState(false);
 
+  const ctrlRef = useRef<AbortController | null>(null);
+
   const load = useCallback(async () => {
+    // 이전 요청 취소 — /sites/A → /sites/B 네비게이션 시 A 응답이 B 를 덮어쓰지 않게.
+    ctrlRef.current?.abort();
+    const ctrl = new AbortController();
+    ctrlRef.current = ctrl;
     setLoading(true);
     setMissing(false);
     try {
-      const r = await api<{ ok: true; sites: Site[] }>('GET', '/admin/api/sites');
+      const r = await api<{ ok: true; sites: Site[] }>('GET', '/admin/api/sites', undefined, {
+        signal: ctrl.signal,
+      });
+      if (ctrl.signal.aborted) return;
       const found = (r.sites ?? []).find((s) => s.id === id);
       if (!found) setMissing(true);
       else setSite(found);
       setError('');
     } catch (e) {
+      if ((e as Error).name === 'AbortError') return;
       const msg = e instanceof ApiError ? e.message : (e as Error).message;
       setError(msg);
     } finally {
-      setLoading(false);
+      if (!ctrl.signal.aborted) setLoading(false);
     }
   }, [id, setError]);
 
   useEffect(() => {
     void load();
+    return () => ctrlRef.current?.abort();
   }, [load]);
 
   async function save() {
