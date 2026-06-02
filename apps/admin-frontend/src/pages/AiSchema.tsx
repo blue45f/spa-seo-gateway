@@ -2,7 +2,7 @@ import { type FormEvent, useState } from 'react';
 import { AuthGate } from '../components/AuthGate';
 import { EmptyState } from '../components/EmptyState';
 import { DetailSkeleton } from '../components/Skeleton';
-import { ApiError, api } from '../lib/api';
+import { api, errorMessage } from '../lib/api';
 import { confidenceColor } from '../lib/format';
 import { useStore } from '../lib/store';
 import type { SchemaSuggestion } from '../lib/types';
@@ -40,7 +40,7 @@ function AiSchemaBody() {
       if ((r.suggestions ?? []).length === 0) pushToast(t('ai.empty'), 'warn');
       else pushToast(`${r.suggestions.length} ${t('toast.ai.suggestions')}`, 'success');
     } catch (e) {
-      const msg = e instanceof ApiError ? e.message : (e as Error).message;
+      const msg = errorMessage(e);
       setError(msg);
       pushToast(t('toast.ai.failed'), 'error');
     } finally {

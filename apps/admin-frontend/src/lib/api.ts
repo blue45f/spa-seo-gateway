@@ -15,6 +15,20 @@ export class ApiError extends Error {
   }
 }
 
+/**
+ * 알 수 없는 throw 값에서 사람이 읽을 메시지를 안전하게 추출.
+ * `ApiError extends Error` 이므로 별도 분기 불필요. `as Error` 캐스팅은 비-Error throw 시
+ * undefined 를 내 토스트/배너가 빈칸이 되므로 쓰지 않는다.
+ */
+export function errorMessage(e: unknown): string {
+  if (e instanceof Error) return e.message;
+  if (typeof e === 'string') return e;
+  if (e && typeof e === 'object' && 'message' in e) {
+    return String((e as { message: unknown }).message);
+  }
+  return String(e);
+}
+
 export type ApiOptions = {
   /** Welcome / API explorer / Library / Help 같이 인증 없이 호출 가능한 endpoint 표시. */
   publicEndpoint?: boolean;

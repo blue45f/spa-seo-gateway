@@ -1,6 +1,6 @@
 import { type FormEvent, useState } from 'react';
 import { AuthGate } from '../components/AuthGate';
-import { ApiError, api } from '../lib/api';
+import { api, errorMessage } from '../lib/api';
 import { useStore } from '../lib/store';
 
 export function Cache() {
@@ -30,7 +30,7 @@ function CacheBody() {
       setLastResult(`삭제됨: key=${r.key}`);
       pushToast(t('toast.url.invalidated'), 'success');
     } catch (e) {
-      const msg = e instanceof ApiError ? e.message : (e as Error).message;
+      const msg = errorMessage(e);
       setError(msg);
       pushToast(msg, 'error');
     } finally {
@@ -46,7 +46,7 @@ function CacheBody() {
       setLastResult(`${t('cache.cleared')} (${r.cleared} entries)`);
       pushToast(t('cache.cleared'), 'success');
     } catch (e) {
-      const msg = e instanceof ApiError ? e.message : (e as Error).message;
+      const msg = errorMessage(e);
       setError(msg);
       pushToast(msg, 'error');
     } finally {

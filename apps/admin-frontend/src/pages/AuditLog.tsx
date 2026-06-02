@@ -2,7 +2,7 @@ import { CircleCheck, CircleX } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { AuthGate } from '../components/AuthGate';
 import { EmptyState } from '../components/EmptyState';
-import { ApiError, api } from '../lib/api';
+import { api, errorMessage } from '../lib/api';
 import { useStore } from '../lib/store';
 import type { AuditEvent } from '../lib/types';
 
@@ -30,7 +30,7 @@ function AuditLogBody() {
       setEvents(r.events ?? []);
       setError('');
     } catch (e) {
-      const msg = e instanceof ApiError ? e.message : (e as Error).message;
+      const msg = errorMessage(e);
       setError(msg);
     } finally {
       setBusy(false);
@@ -55,7 +55,7 @@ function AuditLogBody() {
         r.verified ? 'success' : 'error',
       );
     } catch (e) {
-      const msg = e instanceof ApiError ? e.message : (e as Error).message;
+      const msg = errorMessage(e);
       setError(msg);
     } finally {
       setBusy(false);

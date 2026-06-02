@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { AuthGate } from '../components/AuthGate';
 import { EmptyState } from '../components/EmptyState';
 import { CardGridSkeleton } from '../components/Skeleton';
-import { ApiError, api } from '../lib/api';
+import { api, errorMessage } from '../lib/api';
 import { useStore } from '../lib/store';
 import type { SiteInfo } from '../lib/types';
 
@@ -27,7 +27,7 @@ function DashboardBody() {
       setInfo(r);
       setError('');
     } catch (e) {
-      const msg = e instanceof ApiError ? e.message : (e as Error).message;
+      const msg = errorMessage(e);
       setError(msg);
     } finally {
       setLoading(false);

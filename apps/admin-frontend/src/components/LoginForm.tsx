@@ -1,5 +1,5 @@
 import { type FormEvent, useState } from 'react';
-import { ApiError, api } from '../lib/api';
+import { api, errorMessage } from '../lib/api';
 import { useStore } from '../lib/store';
 
 export function LoginForm() {
@@ -22,7 +22,7 @@ export function LoginForm() {
       setToken('');
       pushToast(t('auth.authenticated', 'authenticated'), 'success');
     } catch (e) {
-      const msg = e instanceof ApiError ? e.message : (e as Error).message;
+      const msg = errorMessage(e);
       setGlobalError(msg);
       pushToast(msg, 'error');
     } finally {

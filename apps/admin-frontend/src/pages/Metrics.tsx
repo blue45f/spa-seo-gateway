@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AuthGate } from '../components/AuthGate';
 import { CardGridSkeleton } from '../components/Skeleton';
-import { fetchText } from '../lib/api';
+import { errorMessage, fetchText } from '../lib/api';
 import { type ParsedMetrics, parsePrometheus, summarize } from '../lib/metrics';
 import { useStore } from '../lib/store';
 
@@ -37,7 +37,7 @@ function MetricsBody() {
       setError('');
     } catch (e) {
       if ((e as Error).name === 'AbortError') return; // 교체/언마운트 취소는 무시
-      setError((e as Error).message);
+      setError(errorMessage(e));
     }
   }, [setError]);
 
