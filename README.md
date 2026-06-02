@@ -62,7 +62,7 @@ spa-seo-gateway/
 │   └── openai/        @heejun/spa-seo-gateway-openai       — OpenAI/Groq/Ollama 어댑터 (옵션)
 ├── apps/
 │   ├── gateway/       실행 가능한 단일 바이너리
-│   ├── admin-frontend Vite + React 19 + Tailwind v4 admin SPA — admin-ui 가 빌드 산출물을 서빙
+│   ├── admin-frontend Vite + React 19 (React Compiler) + Tailwind v4 admin SPA — admin-ui 가 빌드 산출물을 서빙
 │   └── demo/          Vercel 데모용 정적 빌드 (admin-frontend 의 SPA + 배너)
 └── docs/                                            — 운영/아키텍처 가이드
 ```
