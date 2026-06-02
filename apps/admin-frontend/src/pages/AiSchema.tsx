@@ -1,6 +1,9 @@
 import { type FormEvent, useState } from 'react';
 import { AuthGate } from '../components/AuthGate';
+import { EmptyState } from '../components/EmptyState';
+import { DetailSkeleton } from '../components/Skeleton';
 import { ApiError, api } from '../lib/api';
+import { confidenceColor } from '../lib/format';
 import { useStore } from '../lib/store';
 import type { SchemaSuggestion } from '../lib/types';
 
@@ -19,11 +22,13 @@ function AiSchemaBody() {
   const [url, setUrl] = useState('');
   const [running, setRunning] = useState(false);
   const [suggestions, setSuggestions] = useState<SchemaSuggestion[]>([]);
+  const [hasRun, setHasRun] = useState(false);
 
   async function run(e: FormEvent) {
     e.preventDefault();
     if (!url.trim() || running) return;
     setRunning(true);
+    setHasRun(true);
     setSuggestions([]);
     try {
       const r = await api<{ ok: true; suggestions: SchemaSuggestion[] }>(
@@ -33,11 +38,11 @@ function AiSchemaBody() {
       );
       setSuggestions(r.suggestions ?? []);
       if ((r.suggestions ?? []).length === 0) pushToast(t('ai.empty'), 'warn');
-      else pushToast(`${r.suggestions.length}개 schema 제안`, 'success');
+      else pushToast(`${r.suggestions.length} ${t('toast.ai.suggestions')}`, 'success');
     } catch (e) {
       const msg = e instanceof ApiError ? e.message : (e as Error).message;
       setError(msg);
-      pushToast('AI schema 실패 — 어댑터 설정 확인', 'error');
+      pushToast(t('toast.ai.failed'), 'error');
     } finally {
       setRunning(false);
     }
@@ -64,31 +69,39 @@ function AiSchemaBody() {
         <button
           type="submit"
           disabled={running || !url.trim()}
-          className="btn-primary px-4 py-2 text-sm font-medium disabled:opacity-60"
+          className="btn-primary px-4 py-2 text-sm font-medium"
         >
           {running ? t('ai.running') : t('ai.run')}
         </button>
       </form>
 
-      {suggestions.map((s, i) => (
-        <div
-          // biome-ignore lint/suspicious/noArrayIndexKey: AI suggestions are append-only and never reorder within a session
-          key={`${s.type}-${i}`}
-          className="panel p-3 text-sm"
-        >
-          <div className="flex items-center gap-2 mb-2">
-            <span className="badge badge--ok">{s.type}</span>
-            <span className="text-xs text-ink-subtle">confidence:</span>
-            <span className="font-mono text-xs">{(s.confidence * 100).toFixed(0)}%</span>
+      {running ? (
+        <DetailSkeleton rows={3} />
+      ) : hasRun && suggestions.length === 0 ? (
+        <EmptyState data-testid="ai-empty" title={t('ai.empty')} hint={t('ai.empty.hint')} />
+      ) : (
+        suggestions.map((s, i) => (
+          <div
+            // biome-ignore lint/suspicious/noArrayIndexKey: AI suggestions are append-only and never reorder within a session
+            key={`${s.type}-${i}`}
+            className="panel p-3 text-sm"
+          >
+            <div className="flex items-center gap-2 mb-2">
+              <span className="badge badge--neutral">{s.type}</span>
+              <span className="text-xs text-ink-subtle">confidence:</span>
+              <span className={`font-mono text-xs ${confidenceColor(s.confidence)}`}>
+                {(s.confidence * 100).toFixed(0)}%
+              </span>
+            </div>
+            {s.rationale ? (
+              <div className="text-xs text-ink-muted italic mb-2">{s.rationale}</div>
+            ) : null}
+            <pre className="panel-inset text-xs p-2 overflow-auto">
+              {JSON.stringify(s.jsonLd, null, 2)}
+            </pre>
           </div>
-          {s.rationale ? (
-            <div className="text-xs text-ink-muted italic mb-2">{s.rationale}</div>
-          ) : null}
-          <pre className="panel-inset text-xs p-2 overflow-auto">
-            {JSON.stringify(s.jsonLd, null, 2)}
-          </pre>
-        </div>
-      ))}
+        ))
+      )}
 
       <div className="panel p-5 text-sm space-y-3">
         <h3 className="font-semibold mb-2 text-ink">{t('ai.setup')}</h3>
