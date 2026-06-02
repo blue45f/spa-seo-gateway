@@ -103,6 +103,21 @@ const ko: Strings = {
   'welcome.cards.shield.body':
     'SSRF DNS 검사, host별 circuit breaker, soft 404 자동 감지, 자동 브라우저 재시작, rate limit, 호스트 화이트리스트.',
   'welcome.quickstart': '빠른 시작',
+  'welcome.origin.unset': '(미설정)',
+  'welcome.qs1':
+    '좌측 메뉴에서 원하는 작업을 선택. 인증이 필요한 페이지는 우측 상단에 토큰 입력 박스가 표시됩니다.',
+  'welcome.qs2': ' 에서 URL 한 개를 즉시 렌더해 동작 확인.',
+  'welcome.qs3': ' 에서 URL 패턴별 캐시 TTL / waitUntil / ignore 정의.',
+  'welcome.qs4': ' 으로 sitemap 으로부터 미리 캐시 채우기.',
+  'welcome.qs5': ' 에서 실시간 처리량 / 지연 / 에러 모니터링.',
+  'welcome.architecture': '아키텍처 한눈에',
+  'welcome.resources': '리소스',
+  'welcome.links.gettingStarted': '설치 가이드',
+  'welcome.links.configuration': '전체 설정 레퍼런스',
+  'welcome.links.multiTenant': 'SaaS 모드 (다중 테넌트)',
+  'welcome.links.cmsMode': 'CMS 모드 (다중 사이트)',
+  'welcome.links.deployment': '배포 가이드 (Docker/K8s/CDN)',
+  'welcome.links.architecture': '아키텍처',
 
   // Dashboard
   'dashboard.empty': '아직 인증되지 않았거나 데이터가 없습니다.',
@@ -385,6 +400,21 @@ const en: Strings = {
   'welcome.cards.shield.body':
     'SSRF DNS guard, per-host circuit breaker, automatic soft-404 detection, browser auto-restart, rate limit, host allow-list.',
   'welcome.quickstart': 'Quick start',
+  'welcome.origin.unset': '(unset)',
+  'welcome.qs1':
+    'Pick a task from the left nav. Pages that need auth show a token box in the top bar.',
+  'welcome.qs2': ': render a single URL to verify it works.',
+  'welcome.qs3': ': define cache TTL / waitUntil / ignore per URL pattern.',
+  'welcome.qs4': ': pre-fill the cache from a sitemap.',
+  'welcome.qs5': ': monitor live throughput, latency, and errors.',
+  'welcome.architecture': 'Architecture at a glance',
+  'welcome.resources': 'Resources',
+  'welcome.links.gettingStarted': 'Getting started',
+  'welcome.links.configuration': 'Full configuration reference',
+  'welcome.links.multiTenant': 'SaaS mode (multi-tenant)',
+  'welcome.links.cmsMode': 'CMS mode (multi-site)',
+  'welcome.links.deployment': 'Deployment (Docker/K8s/CDN)',
+  'welcome.links.architecture': 'Architecture',
 
   // Dashboard
   'dashboard.empty': 'Not authenticated yet, or no data.',
