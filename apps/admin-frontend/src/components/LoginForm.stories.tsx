@@ -38,7 +38,7 @@ export const Default: Story = {
 
 /**
  * In production the submit button is disabled until the token is non-empty.
- * This story documents that initial state — the button shows as `disabled:opacity-60`.
+ * This story documents that initial state: the button shows the `.btn-primary:disabled` state.
  */
 export const DisabledInitially: Story = {
   render: () => (

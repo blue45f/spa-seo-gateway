@@ -120,7 +120,7 @@ function SiteDetailBody() {
           </button>
           <button
             type="button"
-            className="btn-primary px-3 py-2 text-sm font-medium disabled:opacity-60"
+            className="btn-primary px-3 py-2 text-sm font-medium"
             onClick={save}
             disabled={saving}
           >

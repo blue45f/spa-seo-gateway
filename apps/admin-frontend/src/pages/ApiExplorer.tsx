@@ -238,13 +238,11 @@ export function ApiExplorer() {
                 {e.method}
               </span>
               <code className="font-mono text-sm">{e.path}</code>
-              <span className="ml-auto text-xs px-2 py-0.5 rounded bg-panel-2 text-ink-muted">
-                {e.auth}
-              </span>
+              <span className="badge badge--neutral ml-auto">{e.auth}</span>
             </summary>
             <div className="px-4 pb-4 pt-2 text-sm text-ink-muted">
               <p className="mb-2">{e.desc}</p>
-              <pre className="bg-panel-2 p-3 rounded text-xs overflow-auto">{e.example}</pre>
+              <pre className="panel-inset p-3 text-xs overflow-auto">{e.example}</pre>
             </div>
           </details>
         ))}

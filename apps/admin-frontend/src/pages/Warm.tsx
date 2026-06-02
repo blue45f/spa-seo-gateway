@@ -91,7 +91,7 @@ function WarmBody() {
         <button
           type="submit"
           disabled={running || !sitemap.trim()}
-          className="btn-primary px-4 py-2 text-sm font-medium disabled:opacity-60"
+          className="btn-primary px-4 py-2 text-sm font-medium"
         >
           {running ? t('btn.running') : t('warm.run')}
         </button>
@@ -127,7 +127,7 @@ function WarmBody() {
 function Stat({ k, v, tone }: { k: string; v: string; tone?: 'ok' | 'err' }) {
   const toneClass = tone === 'err' ? 'text-err-fg' : tone === 'ok' ? 'text-ok-fg' : 'text-ink';
   return (
-    <div className="bg-panel-2 rounded p-3">
+    <div className="panel-inset p-3">
       <div className="text-xs text-ink-subtle">{k}</div>
       <div className={`font-mono text-lg ${toneClass}`}>{v}</div>
     </div>

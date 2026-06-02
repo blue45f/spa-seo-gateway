@@ -64,7 +64,7 @@ function DashboardBody() {
         <h2 className="text-lg font-semibold tracking-tight text-ink">현재 게이트웨이 상태</h2>
         <button
           type="button"
-          className="px-3 py-1.5 text-sm rounded-md border border-line bg-panel-2 text-ink-muted hover:text-ink hover:border-line-strong disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+          className="btn-ghost px-3 py-1.5 text-sm"
           onClick={load}
           disabled={loading}
         >
