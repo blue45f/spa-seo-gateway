@@ -19,6 +19,7 @@ function RoutesBody() {
   const pushToast = useStore((s) => s.pushToast);
   const [routes, setRoutes] = useState<ScopedRoute[]>([]);
   const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -49,6 +50,8 @@ function RoutesBody() {
 
   const save = useCallback(
     async (persist: boolean) => {
+      if (saving) return; // 버튼/⌘S 동시 호출로 인한 중복 PUT 방지
+      setSaving(true);
       try {
         const cleaned = routes
           .filter((r) => r.pattern)
@@ -66,9 +69,11 @@ function RoutesBody() {
         const msg = e instanceof ApiError ? e.message : (e as Error).message;
         setError(msg);
         pushToast(msg, 'error');
+      } finally {
+        setSaving(false);
       }
     },
-    [routes, pushToast, setError, t],
+    [routes, pushToast, setError, t, saving],
   );
 
   // ⌘/Ctrl + S 단축키
@@ -104,6 +109,7 @@ function RoutesBody() {
           type="button"
           className="btn-primary ml-auto px-3 py-2 text-sm"
           onClick={() => save(false)}
+          disabled={saving}
         >
           {t('btn.save-memory')}
         </button>
@@ -112,6 +118,7 @@ function RoutesBody() {
           className="btn-primary px-3 py-2 text-sm"
           onClick={() => save(true)}
           title={t('routes.persist.title')}
+          disabled={saving}
         >
           {t('btn.save-disk')}
         </button>
