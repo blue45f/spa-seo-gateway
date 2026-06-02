@@ -40,7 +40,6 @@ function detectInitialLang(): Lang {
 type State = {
   authed: boolean;
   adminEnabled: boolean;
-  loginToken: string;
   theme: Theme;
   themeMode: ThemeMode;
   density: Density;
@@ -82,7 +81,6 @@ type Actions = {
 export const useStore = create<State & Actions>((set, get) => ({
   authed: false,
   adminEnabled: true,
-  loginToken: '',
   theme: resolveTheme(detectInitialThemeMode()),
   themeMode: detectInitialThemeMode(),
   density: detectInitialDensity(),

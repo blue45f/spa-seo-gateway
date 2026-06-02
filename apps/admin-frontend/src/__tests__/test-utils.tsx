@@ -39,7 +39,6 @@ export function resetStore() {
   useStore.setState({
     authed: false,
     adminEnabled: true,
-    loginToken: '',
     theme: 'light',
     themeMode: 'system',
     density: 'comfortable',

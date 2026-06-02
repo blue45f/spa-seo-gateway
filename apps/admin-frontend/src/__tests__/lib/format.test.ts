@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
   bytesToHuman,
-  escapeRegex,
   formatUptime,
   lighthouseScoreColor,
   methodPillClass,
@@ -61,11 +60,5 @@ describe('bytesToHuman', () => {
   });
   it('handles MB', () => {
     expect(bytesToHuman(5 * 1024 * 1024)).toBe('5.00 MB');
-  });
-});
-
-describe('escapeRegex', () => {
-  it('escapes regex meta characters', () => {
-    expect(escapeRegex('a.b*c+')).toBe('a\\.b\\*c\\+');
   });
 });
