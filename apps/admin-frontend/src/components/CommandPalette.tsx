@@ -39,7 +39,7 @@ export function CommandPalette() {
     // biome-ignore lint/a11y/noStaticElementInteractions: backdrop intentionally not interactive — close on backdrop click only
     // biome-ignore lint/a11y/useKeyWithClickEvents: Escape key handled by Modal/global shortcut; backdrop has no keyboard target
     <div
-      className="fixed inset-0 z-[80] bg-black/50 flex items-start justify-center pt-24 px-4"
+      className="fixed inset-0 z-[80] bg-scrim flex items-start justify-center pt-24 px-4"
       onClick={(e) => {
         if (e.target === e.currentTarget) close();
       }}

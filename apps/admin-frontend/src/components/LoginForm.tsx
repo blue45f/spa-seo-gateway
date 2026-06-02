@@ -35,7 +35,7 @@ export function LoginForm() {
       <input
         type="password"
         placeholder={t('auth.token-placeholder')}
-        className="input px-3 py-1.5 text-sm w-72 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+        className="input px-3 py-1.5 text-sm w-full min-w-0 sm:w-72 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
         value={token}
         onChange={(e) => setToken(e.target.value)}
         aria-label="admin token"
@@ -45,7 +45,7 @@ export function LoginForm() {
         type="submit"
         disabled={submitting || !token.trim()}
         aria-busy={submitting}
-        className="btn-primary px-3 py-1.5 text-sm font-medium disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 dark:focus-visible:ring-offset-[var(--color-surface)]"
+        className="btn-primary px-3 py-1.5 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 dark:focus-visible:ring-offset-[var(--color-surface)]"
       >
         {submitting ? '…' : t('auth.login')}
       </button>
