@@ -45,4 +45,38 @@ describe('CommandPalette', () => {
     fireEvent.click(screen.getByText('대시보드'));
     expect(useStore.getState().cmdPaletteOpen).toBe(false);
   });
+
+  it('tracks the active option via ArrowDown and aria-activedescendant', () => {
+    useStore.setState({ cmdPaletteOpen: true });
+    renderWithRouter(<CommandPalette />);
+    const input = screen.getByRole('combobox');
+    const first = screen.getAllByRole('option');
+    expect(first[0]).toHaveAttribute('aria-selected', 'true');
+    expect(input).toHaveAttribute('aria-activedescendant', first[0]!.id);
+
+    fireEvent.keyDown(input, { key: 'ArrowDown' });
+    const next = screen.getAllByRole('option');
+    expect(next[0]).toHaveAttribute('aria-selected', 'false');
+    expect(next[1]).toHaveAttribute('aria-selected', 'true');
+    expect(input).toHaveAttribute('aria-activedescendant', next[1]!.id);
+  });
+
+  it('selects the active option on Enter (navigates + closes)', () => {
+    useStore.setState({ cmdPaletteOpen: true });
+    renderWithRouter(<CommandPalette />);
+    const input = screen.getByRole('combobox');
+    fireEvent.keyDown(input, { key: 'ArrowDown' });
+    fireEvent.keyDown(input, { key: 'Enter' });
+    expect(useStore.getState().cmdPaletteOpen).toBe(false);
+  });
+
+  it('Enter is a no-op when nothing matches', () => {
+    useStore.setState({ cmdPaletteOpen: true });
+    renderWithRouter(<CommandPalette />);
+    const input = screen.getByRole('combobox');
+    fireEvent.change(input, { target: { value: 'definitely-no-match-xyz' } });
+    expect(screen.queryAllByRole('option')).toHaveLength(0);
+    fireEvent.keyDown(input, { key: 'Enter' });
+    expect(useStore.getState().cmdPaletteOpen).toBe(true);
+  });
 });
