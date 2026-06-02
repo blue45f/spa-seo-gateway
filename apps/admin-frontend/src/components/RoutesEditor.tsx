@@ -71,7 +71,7 @@ export function RoutesEditor({ routes, onChange, labels, reorderable = true }: R
     const [moved] = arr.splice(dragSrc, 1);
     arr.splice(dst, 0, moved);
     onChange(arr);
-    pushToast(`라우트 순서 변경 (${dragSrc + 1} → ${dst + 1})`, 'info');
+    pushToast(`${t('toast.routes.reordered')} (${dragSrc + 1} → ${dst + 1})`, 'info');
     setDragSrc(null);
   }
 
@@ -212,6 +212,7 @@ export function RoutesEditor({ routes, onChange, labels, reorderable = true }: R
                   <td className="px-3 py-2 text-center">
                     <input
                       type="checkbox"
+                      className="checkbox h-4 w-4"
                       aria-label={`${L.ignore} ${i + 1}`}
                       checked={!!r.ignore}
                       onChange={(e) => update(i, { ignore: e.target.checked })}
