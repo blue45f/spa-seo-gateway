@@ -1,6 +1,7 @@
 import { lazy, useEffect } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import { CommandPalette } from './components/CommandPalette';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { Layout } from './components/Layout';
 import { ShortcutsModal } from './components/ShortcutsModal';
 import { ToastContainer } from './components/ToastContainer';
@@ -130,10 +131,15 @@ export function App() {
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
-      <CommandPalette />
-      <ShortcutsModal />
-      <Tour />
-      <ToastContainer />
+      {/* 보조 chrome — 오버레이 렌더 throw 가 SPA 전체를 white-screen 하지 않게 격리.
+          기본 alert fallback 은 본문 하단에 떠 거슬리므로, 보조 UI 는 조용히 사라지게(null) 두고
+          크래시는 componentDidCatch 가 콘솔에 남긴다. 새로고침하면 복구. */}
+      <ErrorBoundary fallback={() => null}>
+        <CommandPalette />
+        <ShortcutsModal />
+        <Tour />
+        <ToastContainer />
+      </ErrorBoundary>
     </>
   );
 }
