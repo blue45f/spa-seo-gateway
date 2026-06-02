@@ -28,7 +28,7 @@ function CacheBody() {
         url: url.trim(),
       });
       setLastResult(`삭제됨: key=${r.key}`);
-      pushToast(`URL 무효화 완료`, 'success');
+      pushToast(t('toast.url.invalidated'), 'success');
     } catch (e) {
       const msg = e instanceof ApiError ? e.message : (e as Error).message;
       setError(msg);

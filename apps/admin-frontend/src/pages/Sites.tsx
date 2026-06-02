@@ -61,7 +61,7 @@ function SitesBody() {
   async function save(site: Site) {
     try {
       await api('POST', '/admin/api/sites', site);
-      pushToast(`사이트 저장됨: ${site.id}`, 'success');
+      pushToast(`${t('toast.site.saved')}: ${site.id}`, 'success');
       setEditing(null);
       await load();
     } catch (e) {
@@ -74,7 +74,7 @@ function SitesBody() {
     if (!confirm(t('sites.delete.confirm'))) return;
     try {
       await api('DELETE', `/admin/api/sites/${encodeURIComponent(id)}`);
-      pushToast(`사이트 삭제됨: ${id}`, 'success');
+      pushToast(`${t('toast.site.deleted')}: ${id}`, 'success');
       await load();
     } catch (e) {
       const msg = e instanceof ApiError ? e.message : (e as Error).message;
@@ -87,7 +87,7 @@ function SitesBody() {
     if (!url) return;
     try {
       await api('POST', `/admin/api/sites/${encodeURIComponent(id)}/cache/invalidate`, { url });
-      pushToast(`URL 무효화 완료: ${url}`, 'success');
+      pushToast(`${t('toast.url.invalidated')}: ${url}`, 'success');
     } catch (e) {
       const msg = e instanceof ApiError ? e.message : (e as Error).message;
       pushToast(msg, 'error');
@@ -101,7 +101,10 @@ function SitesBody() {
         `/admin/api/sites/${encodeURIComponent(id)}/warm`,
         { max: 500 },
       );
-      pushToast(`워밍 완료: ${r.report.warmed} OK / ${r.report.errors} fail`, 'success');
+      pushToast(
+        `${t('toast.warm.done')}: ${r.report.warmed} OK / ${r.report.errors} fail`,
+        'success',
+      );
     } catch (e) {
       const msg = e instanceof ApiError ? e.message : (e as Error).message;
       pushToast(msg, 'error');

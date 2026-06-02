@@ -34,7 +34,10 @@ function WarmBody() {
         concurrency,
       });
       setReport(r.report);
-      pushToast(`워밍 완료: ${r.report.warmed} OK / ${r.report.errors} fail`, 'success');
+      pushToast(
+        `${t('toast.warm.done')}: ${r.report.warmed} OK / ${r.report.errors} fail`,
+        'success',
+      );
     } catch (e) {
       const msg = e instanceof ApiError ? e.message : (e as Error).message;
       setError(msg);

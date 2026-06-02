@@ -33,11 +33,11 @@ function AiSchemaBody() {
       );
       setSuggestions(r.suggestions ?? []);
       if ((r.suggestions ?? []).length === 0) pushToast(t('ai.empty'), 'warn');
-      else pushToast(`${r.suggestions.length}개 schema 제안`, 'success');
+      else pushToast(`${r.suggestions.length} ${t('toast.ai.suggestions')}`, 'success');
     } catch (e) {
       const msg = e instanceof ApiError ? e.message : (e as Error).message;
       setError(msg);
-      pushToast('AI schema 실패 — 어댑터 설정 확인', 'error');
+      pushToast(t('toast.ai.failed'), 'error');
     } finally {
       setRunning(false);
     }

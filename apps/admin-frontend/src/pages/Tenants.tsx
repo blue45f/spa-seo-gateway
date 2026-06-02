@@ -85,7 +85,7 @@ function TenantsBody() {
   async function save(tenant: Tenant) {
     try {
       await api('POST', '/admin/api/tenants', tenant);
-      pushToast(`테넌트 저장됨: ${tenant.id}`, 'success');
+      pushToast(`${t('toast.tenant.saved')}: ${tenant.id}`, 'success');
       setEditing(null);
       await load();
     } catch (e) {
@@ -98,7 +98,7 @@ function TenantsBody() {
     if (!confirm(t('tenants.delete.confirm'))) return;
     try {
       await api('DELETE', `/admin/api/tenants/${encodeURIComponent(id)}`);
-      pushToast(`테넌트 삭제됨: ${id}`, 'success');
+      pushToast(`${t('toast.tenant.deleted')}: ${id}`, 'success');
       await load();
     } catch (e) {
       const msg = e instanceof ApiError ? e.message : (e as Error).message;
@@ -111,7 +111,7 @@ function TenantsBody() {
       await navigator.clipboard?.writeText(key);
       pushToast(t('tenants.copied'), 'success');
     } catch {
-      pushToast('clipboard 접근 거부됨', 'warn');
+      pushToast(t('toast.clipboard.denied'), 'warn');
     }
   }
 

@@ -71,7 +71,7 @@ export function RoutesEditor({ routes, onChange, labels, reorderable = true }: R
     const [moved] = arr.splice(dragSrc, 1);
     arr.splice(dst, 0, moved);
     onChange(arr);
-    pushToast(`라우트 순서 변경 (${dragSrc + 1} → ${dst + 1})`, 'info');
+    pushToast(`${t('toast.routes.reordered')} (${dragSrc + 1} → ${dst + 1})`, 'info');
     setDragSrc(null);
   }
 

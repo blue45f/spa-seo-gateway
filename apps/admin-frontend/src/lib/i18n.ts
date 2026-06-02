@@ -44,6 +44,21 @@ const ko: Strings = {
   'auth.authenticated': '인증됨',
   'auth.unauthenticated': '미인증',
   'auth.required': '인증이 필요한 페이지입니다. 우측 상단 토큰 입력 후 로그인 하세요.',
+  'auth.disabled': 'admin 비활성화됨. 환경변수 ADMIN_TOKEN 을 설정하고 게이트웨이를 재시작하세요.',
+
+  // Toast
+  'toast.site.saved': '사이트 저장됨',
+  'toast.site.deleted': '사이트 삭제됨',
+  'toast.tenant.saved': '테넌트 저장됨',
+  'toast.tenant.deleted': '테넌트 삭제됨',
+  'toast.url.invalidated': 'URL 무효화 완료',
+  'toast.warm.done': '워밍 완료',
+  'toast.clipboard.denied': 'clipboard 접근 거부됨',
+  'toast.visual.failed': '시각 회귀 실패',
+  'toast.ai.suggestions': 'schema 제안',
+  'toast.ai.failed': 'AI schema 추론 실패. 어댑터 설정을 확인하세요.',
+  'toast.apikey.changed': 'API key 변경됨. 저장 버튼을 눌러야 적용됩니다.',
+  'toast.routes.reordered': '라우트 순서 변경',
 
   // Theme / lang
   'theme.dark': '다크 모드',
@@ -307,6 +322,21 @@ const en: Strings = {
   'auth.authenticated': 'Authenticated',
   'auth.unauthenticated': 'Not signed in',
   'auth.required': 'Authentication required. Enter the admin token in the top bar to sign in.',
+  'auth.disabled': 'Admin disabled. Set the ADMIN_TOKEN env var and restart the gateway.',
+
+  // Toast
+  'toast.site.saved': 'Site saved',
+  'toast.site.deleted': 'Site deleted',
+  'toast.tenant.saved': 'Tenant saved',
+  'toast.tenant.deleted': 'Tenant deleted',
+  'toast.url.invalidated': 'URL invalidated',
+  'toast.warm.done': 'Warming done',
+  'toast.clipboard.denied': 'Clipboard access denied',
+  'toast.visual.failed': 'Visual regression failed',
+  'toast.ai.suggestions': 'schema suggestions',
+  'toast.ai.failed': 'AI schema inference failed. Check the adapter setup.',
+  'toast.apikey.changed': 'API key changed. Click Save to apply.',
+  'toast.routes.reordered': 'Route reordered',
 
   // Theme / lang
   'theme.dark': 'Dark mode',

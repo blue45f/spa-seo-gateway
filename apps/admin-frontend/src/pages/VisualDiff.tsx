@@ -50,7 +50,7 @@ function VisualDiffBody() {
     } catch (e) {
       const msg = e instanceof ApiError ? e.message : (e as Error).message;
       setError(msg);
-      pushToast('시각 회귀 실패', 'error');
+      pushToast(t('toast.visual.failed'), 'error');
     } finally {
       setRunning(false);
     }

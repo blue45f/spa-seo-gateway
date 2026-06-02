@@ -68,7 +68,7 @@ function TenantDetailBody() {
           })),
       };
       await api('POST', '/admin/api/tenants', cleaned);
-      pushToast(`테넌트 저장됨: ${tenant.id}`, 'success');
+      pushToast(`${t('toast.tenant.saved')}: ${tenant.id}`, 'success');
       await load();
     } catch (e) {
       const msg = e instanceof ApiError ? e.message : (e as Error).message;
@@ -82,7 +82,7 @@ function TenantDetailBody() {
     if (!tenant) return;
     if (!confirm(t('tenants.detail.rotate.confirm'))) return;
     setTenant({ ...tenant, apiKey: generateApiKey() });
-    pushToast('API key 변경됨 — 저장 버튼을 눌러야 적용됩니다', 'warn');
+    pushToast(t('toast.apikey.changed'), 'warn');
   }
 
   async function copyKey() {
@@ -91,7 +91,7 @@ function TenantDetailBody() {
       await navigator.clipboard?.writeText(tenant.apiKey);
       pushToast(t('tenants.copied'), 'success');
     } catch {
-      pushToast('clipboard 접근 거부됨', 'warn');
+      pushToast(t('toast.clipboard.denied'), 'warn');
     }
   }
 

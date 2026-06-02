@@ -65,7 +65,7 @@ function SiteDetailBody() {
           })),
       };
       await api('POST', '/admin/api/sites', cleaned);
-      pushToast(`사이트 저장됨: ${site.id}`, 'success');
+      pushToast(`${t('toast.site.saved')}: ${site.id}`, 'success');
       await load();
     } catch (e) {
       const msg = e instanceof ApiError ? e.message : (e as Error).message;
