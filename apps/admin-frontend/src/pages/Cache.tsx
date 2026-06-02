@@ -28,7 +28,7 @@ function CacheBody() {
         url: url.trim(),
       });
       setLastResult(`삭제됨: key=${r.key}`);
-      pushToast(`URL 무효화 완료`, 'success');
+      pushToast(t('toast.url.invalidated'), 'success');
     } catch (e) {
       const msg = e instanceof ApiError ? e.message : (e as Error).message;
       setError(msg);
@@ -71,7 +71,7 @@ function CacheBody() {
           <button
             type="submit"
             disabled={busy || !url.trim()}
-            className="btn-primary px-4 py-2 text-sm font-medium disabled:opacity-60"
+            className="btn-primary px-4 py-2 text-sm font-medium"
           >
             {t('btn.invalidate')}
           </button>
@@ -86,7 +86,7 @@ function CacheBody() {
         <button
           type="button"
           disabled={busy}
-          className="btn-danger px-4 py-2 text-sm font-medium disabled:opacity-60"
+          className="btn-danger px-4 py-2 text-sm font-medium"
           onClick={clearAll}
         >
           {t('btn.clear-all')}

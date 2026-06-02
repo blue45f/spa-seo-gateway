@@ -17,6 +17,47 @@ import type { PublicInfo } from '../lib/types';
 
 type Ctx = { publicInfo: PublicInfo | null };
 
+const DOCS_BASE = 'https://github.com/blue45f/spa-seo-gateway/blob/main/docs';
+
+/** Quickstart steps. Step 1 has no link; the rest lead with a nav link, then a t()-keyed tail. */
+const QUICKSTART: Array<{ to?: string; navKey?: string; bodyKey: string }> = [
+  { bodyKey: 'welcome.qs1' },
+  { to: '/test', navKey: 'nav.test', bodyKey: 'welcome.qs2' },
+  { to: '/routes', navKey: 'nav.routes', bodyKey: 'welcome.qs3' },
+  { to: '/warm', navKey: 'nav.warm', bodyKey: 'welcome.qs4' },
+  { to: '/metrics', navKey: 'nav.metrics', bodyKey: 'welcome.qs5' },
+];
+
+const RESOURCES: Array<{ icon: LucideIcon; href: string; labelKey: string }> = [
+  {
+    icon: BookOpen,
+    href: `${DOCS_BASE}/GETTING-STARTED.md`,
+    labelKey: 'welcome.links.gettingStarted',
+  },
+  {
+    icon: Settings,
+    href: `${DOCS_BASE}/CONFIGURATION.md`,
+    labelKey: 'welcome.links.configuration',
+  },
+  { icon: Building2, href: `${DOCS_BASE}/MULTI-TENANT.md`, labelKey: 'welcome.links.multiTenant' },
+  { icon: Globe, href: `${DOCS_BASE}/CMS-MODE.md`, labelKey: 'welcome.links.cmsMode' },
+  { icon: Rocket, href: `${DOCS_BASE}/DEPLOYMENT.md`, labelKey: 'welcome.links.deployment' },
+  { icon: Network, href: `${DOCS_BASE}/ARCHITECTURE.md`, labelKey: 'welcome.links.architecture' },
+];
+
+// Technical architecture diagram — locale-neutral (English) so it reads the same in both languages.
+const ARCH_DIAGRAM = `Bot ─→ Edge/CDN ──→ spa-seo-gateway
+              (split by UA)      ├─ bot detect (isbot)
+                                 ├─ host → site/tenant map
+                                 ├─ cache lookup ──→ HIT (5ms)
+                                 ├─ cache MISS
+                                 ├─ in-flight dedup
+                                 ├─ render (puppeteer-cluster)
+                                 ├─ quality gate
+                                 ├─ cache.set
+                                 └─ response
+Human ──→ Edge/CDN ──→ origin (gateway: 204 or proxy)`;
+
 export function Welcome() {
   const { publicInfo } = useOutletContext<Ctx>();
   const t = useStore((s) => s.t);
@@ -24,11 +65,15 @@ export function Welcome() {
   return (
     <section className="space-y-6" data-testid="page-welcome">
       <div className="bg-accent-soft border border-line rounded-xl p-8">
-        <h2 className="text-3xl font-bold tracking-tight text-ink">{t('welcome.headline')}</h2>
+        <h2 className="text-xl font-semibold tracking-tight text-ink">{t('welcome.headline')}</h2>
         <p className="mt-2 text-ink-muted">{t('welcome.intro')}</p>
         <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
           <Stat label={t('mode')} value={publicInfo?.mode ?? '...'} />
-          <Stat label={t('origin')} value={publicInfo?.origin ?? '(미설정)'} truncate />
+          <Stat
+            label={t('origin')}
+            value={publicInfo?.origin ?? t('welcome.origin.unset')}
+            truncate
+          />
           <Stat label={t('uptime')} value={formatUptime(publicInfo?.uptimeSec)} />
           <Stat label={t('node')} value={publicInfo?.nodeVersion ?? '...'} />
         </div>
@@ -47,151 +92,44 @@ export function Welcome() {
       <div className="panel p-5">
         <h3 className="font-semibold mb-3 text-ink">{t('welcome.quickstart')}</h3>
         <ol className="text-sm space-y-3 text-ink-muted">
-          <li>
-            <span className="font-bold mr-2">1</span>
-            좌측 메뉴에서 원하는 작업을 선택. 인증이 필요한 페이지는 우측 상단에 토큰 입력 박스가
-            표시됩니다.
-          </li>
-          <li>
-            <span className="font-bold mr-2">2</span>
-            처음이라면{' '}
-            <Link to="/test" className="link">
-              렌더 테스트
-            </Link>{' '}
-            에서 간단한 URL 한 개를 렌더해 동작 확인.
-          </li>
-          <li>
-            <span className="font-bold mr-2">3</span>
-            <Link to="/routes" className="link">
-              라우트
-            </Link>{' '}
-            에서 URL 패턴별 캐시 TTL / waitUntil / ignore 정의.
-          </li>
-          <li>
-            <span className="font-bold mr-2">4</span>
-            <Link to="/warm" className="link">
-              워밍
-            </Link>{' '}
-            으로 sitemap 으로부터 미리 캐시 채우기.
-          </li>
-          <li>
-            <span className="font-bold mr-2">5</span>
-            <Link to="/metrics" className="link">
-              메트릭
-            </Link>{' '}
-            에서 실시간 처리량/지연/에러를 모니터링.
-          </li>
+          {QUICKSTART.map((step, i) => (
+            <li key={step.bodyKey}>
+              <span className="font-bold mr-2">{i + 1}</span>
+              {step.to && step.navKey ? (
+                <>
+                  <Link to={step.to} className="link">
+                    {t(step.navKey)}
+                  </Link>
+                  {t(step.bodyKey)}
+                </>
+              ) : (
+                t(step.bodyKey)
+              )}
+            </li>
+          ))}
         </ol>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="panel p-5">
-          <h3 className="font-semibold mb-2 text-ink">아키텍처 한눈에</h3>
-          <pre className="panel-inset text-xs p-3 overflow-auto">{`Bot ─→ Edge/CDN ──→ spa-seo-gateway
-              (UA로 분기)        ├─ bot detect (isbot)
-                                 ├─ host → site/tenant 매핑
-                                 ├─ cache lookup ──→ HIT (5ms)
-                                 ├─ cache MISS
-                                 ├─ in-flight dedup
-                                 ├─ render (puppeteer-cluster)
-                                 ├─ quality gate
-                                 ├─ cache.set
-                                 └─ 응답
-Human ──→ Edge/CDN ──→ origin (gateway는 204 또는 proxy)`}</pre>
+          <h3 className="font-semibold mb-2 text-ink">{t('welcome.architecture')}</h3>
+          <pre className="panel-inset text-xs p-3 overflow-auto">{ARCH_DIAGRAM}</pre>
         </div>
         <div className="panel p-5">
-          <h3 className="font-semibold mb-2 text-ink">바로가기 / Resources</h3>
+          <h3 className="font-semibold mb-2 text-ink">{t('welcome.resources')}</h3>
           <ul className="text-sm space-y-1.5">
-            <li className="flex items-center gap-2">
-              <BookOpen
-                className="h-4 w-4 shrink-0 text-ink-subtle"
-                strokeWidth={1.75}
-                aria-hidden="true"
-              />
-              <a
-                href="https://github.com/blue45f/spa-seo-gateway/blob/main/docs/GETTING-STARTED.md"
-                target="_blank"
-                rel="noreferrer"
-                className="link"
-              >
-                설치 가이드
-              </a>
-            </li>
-            <li className="flex items-center gap-2">
-              <Settings
-                className="h-4 w-4 shrink-0 text-ink-subtle"
-                strokeWidth={1.75}
-                aria-hidden="true"
-              />
-              <a
-                href="https://github.com/blue45f/spa-seo-gateway/blob/main/docs/CONFIGURATION.md"
-                target="_blank"
-                rel="noreferrer"
-                className="link"
-              >
-                전체 설정 레퍼런스
-              </a>
-            </li>
-            <li className="flex items-center gap-2">
-              <Building2
-                className="h-4 w-4 shrink-0 text-ink-subtle"
-                strokeWidth={1.75}
-                aria-hidden="true"
-              />
-              <a
-                href="https://github.com/blue45f/spa-seo-gateway/blob/main/docs/MULTI-TENANT.md"
-                target="_blank"
-                rel="noreferrer"
-                className="link"
-              >
-                SaaS 모드 (다중 테넌트)
-              </a>
-            </li>
-            <li className="flex items-center gap-2">
-              <Globe
-                className="h-4 w-4 shrink-0 text-ink-subtle"
-                strokeWidth={1.75}
-                aria-hidden="true"
-              />
-              <a
-                href="https://github.com/blue45f/spa-seo-gateway/blob/main/docs/CMS-MODE.md"
-                target="_blank"
-                rel="noreferrer"
-                className="link"
-              >
-                CMS 모드 (다중 사이트)
-              </a>
-            </li>
-            <li className="flex items-center gap-2">
-              <Rocket
-                className="h-4 w-4 shrink-0 text-ink-subtle"
-                strokeWidth={1.75}
-                aria-hidden="true"
-              />
-              <a
-                href="https://github.com/blue45f/spa-seo-gateway/blob/main/docs/DEPLOYMENT.md"
-                target="_blank"
-                rel="noreferrer"
-                className="link"
-              >
-                배포 가이드 (Docker/K8s/CDN)
-              </a>
-            </li>
-            <li className="flex items-center gap-2">
-              <Network
-                className="h-4 w-4 shrink-0 text-ink-subtle"
-                strokeWidth={1.75}
-                aria-hidden="true"
-              />
-              <a
-                href="https://github.com/blue45f/spa-seo-gateway/blob/main/docs/ARCHITECTURE.md"
-                target="_blank"
-                rel="noreferrer"
-                className="link"
-              >
-                아키텍처
-              </a>
-            </li>
+            {RESOURCES.map(({ icon: Icon, href, labelKey }) => (
+              <li key={href} className="flex items-center gap-2">
+                <Icon
+                  className="h-4 w-4 shrink-0 text-ink-subtle"
+                  strokeWidth={1.75}
+                  aria-hidden="true"
+                />
+                <a href={href} target="_blank" rel="noreferrer" className="link">
+                  {t(labelKey)}
+                </a>
+              </li>
+            ))}
           </ul>
         </div>
       </div>

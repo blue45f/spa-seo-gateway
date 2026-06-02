@@ -1,6 +1,7 @@
 import { cloneElement, type ReactElement, useCallback, useEffect, useId, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { AuthGate } from '../components/AuthGate';
+import { EmptyState } from '../components/EmptyState';
 import { RoutesEditor } from '../components/RoutesEditor';
 import { DetailSkeleton } from '../components/Skeleton';
 import { ApiError, api } from '../lib/api';
@@ -68,7 +69,7 @@ function TenantDetailBody() {
           })),
       };
       await api('POST', '/admin/api/tenants', cleaned);
-      pushToast(`테넌트 저장됨: ${tenant.id}`, 'success');
+      pushToast(`${t('toast.tenant.saved')}: ${tenant.id}`, 'success');
       await load();
     } catch (e) {
       const msg = e instanceof ApiError ? e.message : (e as Error).message;
@@ -82,7 +83,7 @@ function TenantDetailBody() {
     if (!tenant) return;
     if (!confirm(t('tenants.detail.rotate.confirm'))) return;
     setTenant({ ...tenant, apiKey: generateApiKey() });
-    pushToast('API key 변경됨 — 저장 버튼을 눌러야 적용됩니다', 'warn');
+    pushToast(t('toast.apikey.changed'), 'warn');
   }
 
   async function copyKey() {
@@ -91,7 +92,7 @@ function TenantDetailBody() {
       await navigator.clipboard?.writeText(tenant.apiKey);
       pushToast(t('tenants.copied'), 'success');
     } catch {
-      pushToast('clipboard 접근 거부됨', 'warn');
+      pushToast(t('toast.clipboard.denied'), 'warn');
     }
   }
 
@@ -113,10 +114,14 @@ function TenantDetailBody() {
   if (missing) {
     return (
       <section className="space-y-4" data-testid="page-tenant-detail">
-        <Link to="/tenants" className="link text-sm">
-          {t('tenants.detail.back')}
-        </Link>
-        <p className="text-sm text-ink-subtle">{t('tenants.detail.notFound')}</p>
+        <EmptyState
+          title={t('tenants.detail.notFound')}
+          hint={
+            <Link to="/tenants" className="link">
+              {t('tenants.detail.back')}
+            </Link>
+          }
+        />
       </section>
     );
   }
@@ -134,7 +139,7 @@ function TenantDetailBody() {
           </button>
           <button
             type="button"
-            className="btn-primary px-3 py-2 text-sm font-medium disabled:opacity-60"
+            className="btn-primary px-3 py-2 text-sm font-medium"
             onClick={save}
             disabled={saving}
           >
@@ -194,11 +199,7 @@ function TenantDetailBody() {
               <button type="button" className="btn-ghost px-3 py-2 text-sm" onClick={copyKey}>
                 {t('tenants.copy')}
               </button>
-              <button
-                type="button"
-                className="px-3 py-2 rounded bg-warn-bg text-warn-fg text-sm"
-                onClick={rotateApiKey}
-              >
+              <button type="button" className="btn-ghost px-3 py-2 text-sm" onClick={rotateApiKey}>
                 {t('tenants.detail.rotate')}
               </button>
             </div>
@@ -206,6 +207,7 @@ function TenantDetailBody() {
           <label className="flex items-center gap-2 mt-6 text-sm">
             <input
               type="checkbox"
+              className="checkbox h-4 w-4"
               checked={tenant.enabled}
               onChange={(e) => setTenant({ ...tenant, enabled: e.target.checked })}
             />

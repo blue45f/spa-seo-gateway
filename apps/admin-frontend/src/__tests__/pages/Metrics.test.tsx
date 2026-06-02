@@ -28,8 +28,8 @@ describe('Metrics page', () => {
     renderWithRouter(<Metrics />);
     await waitFor(() => expect(screen.getByTestId('page-metrics')).toBeInTheDocument());
     expect(screen.getByText('90.0%')).toBeInTheDocument();
-    expect(screen.getByText('90')).toBeInTheDocument();
-    expect(screen.getByText('10')).toBeInTheDocument();
+    // hit/miss counts are now the hit-ratio detail line, inflight stays a standalone figure
+    expect(screen.getByText('hit 90 / miss 10')).toBeInTheDocument();
     expect(screen.getByText('2')).toBeInTheDocument();
   });
 });

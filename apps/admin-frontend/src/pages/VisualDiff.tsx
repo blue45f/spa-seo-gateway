@@ -50,7 +50,7 @@ function VisualDiffBody() {
     } catch (e) {
       const msg = e instanceof ApiError ? e.message : (e as Error).message;
       setError(msg);
-      pushToast('시각 회귀 실패', 'error');
+      pushToast(t('toast.visual.failed'), 'error');
     } finally {
       setRunning(false);
     }
@@ -104,6 +104,7 @@ function VisualDiffBody() {
             <label className="mt-2 flex items-center gap-2 text-sm">
               <input
                 type="checkbox"
+                className="checkbox h-4 w-4"
                 aria-label="fullPage"
                 checked={fullPage}
                 onChange={(e) => setFullPage(e.target.checked)}
@@ -115,7 +116,7 @@ function VisualDiffBody() {
         <button
           type="submit"
           disabled={running || !url.trim()}
-          className="btn-primary px-4 py-2 text-sm font-medium disabled:opacity-60"
+          className="btn-primary px-4 py-2 text-sm font-medium"
         >
           {running ? t('visual.running') : t('visual.run')}
         </button>
@@ -124,21 +125,21 @@ function VisualDiffBody() {
       {result ? (
         <div className="panel p-5 space-y-3 text-sm">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-            <div className="bg-panel-2 rounded p-3">
+            <div className="panel-inset p-3">
               <div className="text-xs text-ink-subtle">{t('visual.diff')}</div>
               <div className="font-mono text-lg">{result.diffPercent.toFixed(3)}%</div>
             </div>
-            <div className="bg-panel-2 rounded p-3">
+            <div className="panel-inset p-3">
               <div className="text-xs text-ink-subtle">{t('visual.diffPx')}</div>
               <div className="font-mono text-lg">{result.diffPixels}</div>
             </div>
-            <div className="bg-panel-2 rounded p-3">
+            <div className="panel-inset p-3">
               <div className="text-xs text-ink-subtle">{t('visual.size')}</div>
               <div className="font-mono">
                 {result.width}×{result.height}
               </div>
             </div>
-            <div className="bg-panel-2 rounded p-3">
+            <div className="panel-inset p-3">
               <div className="text-xs text-ink-subtle">{t('visual.duration')}</div>
               <div className="font-mono">{result.durationMs}ms</div>
             </div>
