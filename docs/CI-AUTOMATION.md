@@ -8,7 +8,7 @@
 
 | Check | 무엇을 검증 | Workflow / 출처 |
 |--|--|--|
-| **`Quality gate`** | `pnpm verify` — format, lint, typecheck, test, build, schema 생성 + admin-frontend a11y(axe) 게이트(critical/serious 위반 0) | `.github/workflows/ci.yml` |
+| **`Quality gate`** | `pnpm verify` — format, lint, typecheck, build, test, schema 생성 + admin-frontend a11y(axe) 게이트(critical/serious 위반 0) | `.github/workflows/ci.yml` |
 | **`CodeRabbit`** | CodeRabbit 자동 분석이 critical issue 없다고 판정 (status check) | CodeRabbit App (외부) |
 | **`CodeRabbit review gate`** | CodeRabbit 의 PR review state 가 `APPROVED`. `COMMENTED` / `CHANGES_REQUESTED` / stale review 모두 fail | `.github/workflows/coderabbit-gate.yml` |
 

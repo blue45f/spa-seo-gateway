@@ -21,7 +21,7 @@
     "format:check": "biome format .",
     "test": "vitest run && pnpm --filter @spa-seo-gateway/admin-frontend run test",
     "clean": "pnpm -r --if-present run clean",
-    "ci": "pnpm run format:check && pnpm run lint && pnpm run typecheck && pnpm run test && pnpm run build && pnpm run schema:gen",
+    "ci": "pnpm run format:check && pnpm run lint && pnpm run typecheck && pnpm run build && pnpm run test && pnpm run schema:gen",
     "verify": "pnpm run validate:architecture && pnpm run ci",
     "verify:push": "pnpm run verify",
     "schema:gen": "tsx scripts/generate-schema.ts",
