@@ -2,7 +2,7 @@
 FROM node:26-slim AS deps
 WORKDIR /app
 ENV PUPPETEER_SKIP_DOWNLOAD=true
-RUN corepack enable && corepack prepare pnpm@11.4.0 --activate
+RUN npm install -g corepack@latest && corepack enable && corepack prepare pnpm@11.4.0 --activate
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
 COPY packages/core/package.json packages/core/
 COPY packages/cli/package.json packages/cli/
@@ -20,7 +20,7 @@ RUN --mount=type=cache,target=/root/.local/share/pnpm/store \
 FROM node:26-slim AS build
 WORKDIR /app
 ENV PUPPETEER_SKIP_DOWNLOAD=true
-RUN corepack enable && corepack prepare pnpm@11.4.0 --activate
+RUN npm install -g corepack@latest && corepack enable && corepack prepare pnpm@11.4.0 --activate
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/packages ./packages
 COPY --from=deps /app/apps ./apps
@@ -30,7 +30,7 @@ RUN pnpm run build
 FROM node:26-slim AS prod-deps
 WORKDIR /app
 ENV PUPPETEER_SKIP_DOWNLOAD=true
-RUN corepack enable && corepack prepare pnpm@11.4.0 --activate
+RUN npm install -g corepack@latest && corepack enable && corepack prepare pnpm@11.4.0 --activate
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
 COPY packages ./packages
 COPY apps ./apps
