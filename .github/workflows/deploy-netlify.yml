@@ -56,6 +56,20 @@ jobs:
         if: env.NETLIFY_AUTH_TOKEN != '' && env.NETLIFY_SITE_ID != ''
         run: pnpm --filter @spa-seo-gateway/demo run build
 
+      # Build the admin-frontend Storybook and nest it under the demo publish
+      # dir so the single Netlify deploy serves it at `/storybook`. This MUST run
+      # after the demo build, because the demo build wipes apps/demo/public.
+      - name: Build admin Storybook
+        if: env.NETLIFY_AUTH_TOKEN != '' && env.NETLIFY_SITE_ID != ''
+        run: pnpm --filter @spa-seo-gateway/admin-frontend run build-storybook
+
+      - name: Stage Storybook under /storybook
+        if: env.NETLIFY_AUTH_TOKEN != '' && env.NETLIFY_SITE_ID != ''
+        run: |
+          rm -rf apps/demo/public/storybook
+          mkdir -p apps/demo/public/storybook
+          cp -R apps/admin-frontend/storybook-static/. apps/demo/public/storybook/
+
       - name: Install Netlify CLI
         if: env.NETLIFY_AUTH_TOKEN != '' && env.NETLIFY_SITE_ID != ''
         run: npm i -g netlify-cli@latest

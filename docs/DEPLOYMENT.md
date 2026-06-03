@@ -23,7 +23,7 @@
 
 | 티어 | 산출물 | 빌드 커맨드 | 배포처 | CI 워크플로 |
 |------|--------|------------|--------|------------|
-| **Frontend** | `apps/demo/public` 정적 번들 | `pnpm --filter @spa-seo-gateway/admin-frontend run build && pnpm --filter @spa-seo-gateway/demo run build` | Netlify(주) / Vercel | `.github/workflows/deploy-netlify.yml`, `vercel.json` |
+| **Frontend** | `apps/demo/public` 정적 번들 (+ `/storybook` 서브경로) | `pnpm --filter @spa-seo-gateway/admin-frontend run build && pnpm --filter @spa-seo-gateway/demo run build` (+ `build-storybook`) | Netlify(주) / Vercel | `.github/workflows/deploy-netlify.yml`, `vercel.json` |
 | **Backend** | `Dockerfile` 컨테이너 이미지 (`apps/gateway/dist/main.js`, PORT 3000) | `docker build .` → `pnpm run build` (멀티스테이지) | GHCR + Fly.io(또는 Cloud Run/ECS/K8s) | `.github/workflows/ci.yml`(docker job → GHCR), `.github/workflows/deploy-fly.yml`(Fly), `fly.toml` |
 | **Libraries** | `packages/*/dist` | `pnpm run build` | npm (수동) | — |
 
@@ -336,8 +336,19 @@ import chromium from '@sparticuz/chromium-min';
 ### `.github/workflows/deploy-netlify.yml` — 프론트엔드 (정적)
 
 - `apps/admin-frontend` / `apps/demo` / `packages/{core,admin-ui}` 변경 시 `main` 에서 트리거.
-- admin-frontend + demo 빌드 → `netlify deploy --prod --dir apps/demo/public`.
-- `NETLIFY_AUTH_TOKEN` 또는 `NETLIFY_SITE_ID` 미설정 시 전 스텝 skip.
+- admin-frontend + demo 빌드 → admin **Storybook** 빌드(`build-storybook` → `apps/admin-frontend/storybook-static`)를 `apps/demo/public/storybook/` 로 복사 → `netlify deploy --prod --dir apps/demo/public`.
+  - Storybook 스테이징 스텝은 **반드시 데모 빌드 다음**에 실행됩니다. 데모 빌드(`apps/demo/build.js`)가 `apps/demo/public` 을 통째로 비우고 재생성하므로, 먼저 넣으면 지워집니다.
+- 단일 배포(별도 사이트/컨텍스트 불필요)로 데모는 `/`, 디자인 시스템(Storybook)은 **`/storybook`** 경로에 함께 게시됩니다.
+- `NETLIFY_AUTH_TOKEN` 또는 `NETLIFY_SITE_ID` 미설정 시 전 스텝 skip (Storybook 빌드/스테이징 스텝도 동일 게이트).
+
+#### Storybook (디자인 시스템) 게시 경로
+
+| 항목 | 값 |
+|------|-----|
+| URL | `https://<netlify-site>/storybook/` (예: 커스텀 도메인 사용 시 `https://<도메인>/storybook/`) |
+| 빌드 커맨드 | `pnpm --filter @spa-seo-gateway/admin-frontend run build-storybook` (= 루트 `pnpm run build-storybook`) |
+| 빌드 산출물 | `apps/admin-frontend/storybook-static` (gitignored) |
+| 배포 위치 | `apps/demo/public/storybook/` 로 복사되어 데모 번들과 한 번에 배포 |
 
 ### `.github/workflows/deploy-fly.yml` — 백엔드 (게이트웨이 컨테이너)
 
