@@ -17,6 +17,10 @@ function detectBasename(): string {
 const root = document.getElementById('root');
 if (!root) throw new Error('#root not found');
 
+if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch(() => {});
+}
+
 createRoot(root).render(
   <StrictMode>
     <BrowserRouter basename={detectBasename()}>
