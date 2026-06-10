@@ -71,7 +71,7 @@ export function Sidebar({ publicMode }: SidebarProps) {
               key={item.id}
               to={item.path}
               aria-current={active ? 'page' : undefined}
-              className={`nav-item w-full text-left px-3 py-2 rounded-md flex items-center gap-2.5 hover:bg-rail-elev hover:text-rail-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${active ? 'active' : ''}`}
+              className={`nav-item w-full text-left px-3 py-2 min-h-[44px] md:min-h-0 rounded-md flex items-center gap-2.5 hover:bg-rail-elev hover:text-rail-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${active ? 'active' : ''}`}
             >
               <span className="flex w-5 justify-center opacity-90" aria-hidden="true">
                 <NavIcon id={item.id} className="h-[18px] w-[18px]" />
@@ -101,7 +101,7 @@ export function Sidebar({ publicMode }: SidebarProps) {
           {authed ? (
             <button
               type="button"
-              className="nav-item ml-auto rounded text-rail-ink-muted hover:text-rail-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+              className="nav-item ml-auto min-h-[44px] min-w-[44px] md:min-h-0 md:min-w-0 rounded text-rail-ink-muted hover:text-rail-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
               onClick={logout}
             >
               {t('auth.logout')}
@@ -112,14 +112,14 @@ export function Sidebar({ publicMode }: SidebarProps) {
           href="https://github.com/blue45f/spa-seo-gateway"
           target="_blank"
           rel="noreferrer"
-          className="nav-item flex items-center gap-1.5 rounded text-rail-ink-muted hover:text-rail-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+          className="nav-item flex items-center gap-1.5 min-h-[44px] md:min-h-0 rounded text-rail-ink-muted hover:text-rail-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
         >
           <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
           GitHub
         </a>
         <button
           type="button"
-          className="nav-item w-full text-left text-rail-ink-muted hover:text-rail-ink flex items-center gap-2 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+          className="nav-item w-full text-left text-rail-ink-muted hover:text-rail-ink flex items-center gap-2 min-h-[44px] md:min-h-0 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
           onClick={() =>
             setThemeMode(themeMode === 'light' ? 'dark' : themeMode === 'dark' ? 'system' : 'light')
           }
@@ -130,7 +130,7 @@ export function Sidebar({ publicMode }: SidebarProps) {
         </button>
         <button
           type="button"
-          className="nav-item w-full text-left text-rail-ink-muted hover:text-rail-ink flex items-center gap-2 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+          className="nav-item w-full text-left text-rail-ink-muted hover:text-rail-ink flex items-center gap-2 min-h-[44px] md:min-h-0 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
           onClick={toggleDensity}
           aria-label={`Density: ${density}, click to toggle`}
         >
@@ -139,7 +139,7 @@ export function Sidebar({ publicMode }: SidebarProps) {
         </button>
         <button
           type="button"
-          className="nav-item w-full text-left text-rail-ink-muted hover:text-rail-ink flex items-center gap-2 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+          className="nav-item w-full text-left text-rail-ink-muted hover:text-rail-ink flex items-center gap-2 min-h-[44px] md:min-h-0 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
           onClick={toggleLang}
           title={lang === 'ko' ? 'Switch to English' : '한국어로 전환'}
           aria-label={lang === 'ko' ? 'Switch to English' : 'Switch to Korean'}
