@@ -22,7 +22,10 @@ self.addEventListener('fetch', (event) => {
             .catch(() => {});
           return response;
         })
-        .catch(() => caches.match(request).then((cached) => cached || caches.match('/'))),
+        .catch(() =>
+          // 오프라인 내비 폴백 — 등록 scope 루트(데모 '/', 임베드 '/admin/ui/')의 캐시된 셸.
+          caches.match(request).then((cached) => cached || caches.match(self.registration.scope)),
+        ),
     );
   }
 });

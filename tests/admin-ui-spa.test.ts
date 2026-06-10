@@ -129,3 +129,52 @@ describe('admin-ui SPA hosting', () => {
     expect([401, 404]).toContain(res.statusCode); // 404 if adminToken not set, 401 if set but missing
   });
 });
+
+describe('admin-ui PWA assets (sw / manifest / favicon)', () => {
+  it('GET /admin/ui/sw.js serves the service worker (embed registration path resolves)', async () => {
+    // main.tsx 가 임베드에서 `${basename}/sw.js` 로 등록 — prefix 아래에서 200 이어야 한다.
+    const res = await app.inject({ method: 'GET', url: '/admin/ui/sw.js' });
+    expect(res.statusCode).toBe(200);
+    expect(res.headers['content-type']).toMatch(/javascript/);
+    expect(res.body).toContain("addEventListener('fetch'");
+  });
+
+  it('manifest uses relative URLs, warm-charcoal brand colors and split icon purposes', async () => {
+    const res = await app.inject({ method: 'GET', url: '/admin/ui/manifest.webmanifest' });
+    expect(res.statusCode).toBe(200);
+    const manifest = res.json();
+    // 상대 경로 — 임베드(/admin/ui/)·데모(/) 양쪽에서 manifest URL 기준으로 해석된다.
+    expect(manifest.start_url).toBe('./');
+    expect(manifest.scope).toBe('./');
+    // 디자인 토큰 --app-bg(dark) = oklch(0.175 0.006 80) 의 sRGB — slate 가 아닌 웜 차콜.
+    expect(manifest.theme_color).toBe('#12100e');
+    expect(manifest.background_color).toBe('#12100e');
+    // 아이콘은 any / maskable 분리 항목 (combined 'any maskable' 금지).
+    expect(manifest.icons.length).toBeGreaterThan(0);
+    for (const icon of manifest.icons) {
+      expect(icon.src.startsWith('./'), `src=${icon.src}`).toBe(true);
+      expect(['any', 'maskable']).toContain(icon.purpose);
+    }
+    const purposes = manifest.icons.map((icon: { purpose: string }) => icon.purpose);
+    expect(purposes).toContain('any');
+    expect(purposes).toContain('maskable');
+  });
+
+  it('GET /admin/ui/favicon.svg serves a solid-background (maskable-safe) brand icon', async () => {
+    const res = await app.inject({ method: 'GET', url: '/admin/ui/favicon.svg' });
+    expect(res.statusCode).toBe(200);
+    expect(res.headers['content-type']).toMatch(/svg/);
+    // full-bleed 배경 rect — maskable 크롭에서 투명 모서리가 노출되지 않는다.
+    expect(res.body).toContain('<rect');
+    // 과거의 일반 파랑(#2563eb) 글로브가 아니라 brand violet accent 여야 한다.
+    expect(res.body).not.toContain('#2563eb');
+  });
+
+  it('built index.html declares light/dark theme-color metas + the svg favicon', () => {
+    const html = readFileSync(resolve(adminPublic, 'index.html'), 'utf8');
+    expect(html).toContain('name="theme-color"');
+    expect(html).toContain('media="(prefers-color-scheme: light)"');
+    expect(html).toContain('media="(prefers-color-scheme: dark)"');
+    expect(html).toMatch(/<link rel="icon" type="image\/svg\+xml" href="[^"]*favicon\.svg" \/>/);
+  });
+});

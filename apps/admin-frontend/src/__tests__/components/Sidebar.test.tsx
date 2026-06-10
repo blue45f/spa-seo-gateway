@@ -88,4 +88,21 @@ describe('Sidebar', () => {
     renderWithRouter(<Sidebar publicMode="render-only" />);
     expect(screen.getByText('render-only')).toBeInTheDocument();
   });
+
+  it('keeps 44px mobile touch targets on nav links and footer controls', () => {
+    useStore.setState({ authed: true });
+    renderWithRouter(<Sidebar />);
+    const controls = [
+      screen.getByText('소개').closest('a'),
+      screen.getByText('GitHub').closest('a'),
+      screen.getByText('시스템 테마').closest('button'),
+      screen.getByText('보통 간격').closest('button'),
+      screen.getByText('English').closest('button'),
+      screen.getByText('logout').closest('button'),
+    ];
+    for (const control of controls) {
+      // desktop density stays intact via the md: reset; mobile gets the 44px floor
+      expect(control).toHaveClass('min-h-[44px]', 'md:min-h-0');
+    }
+  });
 });
