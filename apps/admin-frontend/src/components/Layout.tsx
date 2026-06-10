@@ -73,16 +73,44 @@ export function Layout() {
             </Suspense>
           </ErrorBoundary>
         </main>
-        <footer className="border-t border-line px-6 py-3 text-xs text-ink-subtle flex justify-between bg-panel">
-          <span>spa-seo-gateway · open-source dynamic rendering</span>
-          <a
-            href="https://github.com/blue45f/spa-seo-gateway"
-            target="_blank"
-            rel="noreferrer"
-            className="rounded hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-          >
-            github
-          </a>
+        <footer className="border-t border-line px-6 py-3 text-xs text-ink-subtle">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <span>spa-seo-gateway · open-source dynamic rendering</span>
+            <nav aria-label="법적 고지 링크" className="flex flex-wrap gap-3">
+              <a
+                href="https://termsdesk.vercel.app/p/spa-seo-gateway/terms-of-service"
+                target="_blank"
+                rel="noreferrer"
+                className="rounded hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+              >
+                이용약관
+              </a>
+              <a
+                href="https://termsdesk.vercel.app/p/spa-seo-gateway/privacy-policy"
+                target="_blank"
+                rel="noreferrer"
+                className="rounded hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+              >
+                개인정보처리방침
+              </a>
+              <a
+                href="https://termsdesk.vercel.app/support/spa-seo-gateway"
+                target="_blank"
+                rel="noreferrer"
+                className="rounded hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+              >
+                지원
+              </a>
+            </nav>
+            <a
+              href="https://github.com/blue45f/spa-seo-gateway"
+              target="_blank"
+              rel="noreferrer"
+              className="rounded hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+            >
+              github
+            </a>
+          </div>
         </footer>
       </div>
     </div>
