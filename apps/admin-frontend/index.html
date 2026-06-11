@@ -3,13 +3,16 @@
   <head>
     <meta charset="utf-8" />
     <link rel="manifest" href="/manifest.webmanifest" />
+    <!-- 브라우저 크롬 색 — styles.css 의 --app-bg 토큰(light/dark)과 동일한 sRGB 값 -->
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f8f6f3" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#12100e" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="SEO Gateway Admin" />
 
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>spa-seo-gateway · admin</title>
-    <link rel="icon" href="data:," />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <script>
       // FOUC 방지 — paint 전에 테마/밀도 복원
       try {

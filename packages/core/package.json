@@ -27,7 +27,7 @@
     "cacheable": "^2.3.5",
     "dotenv": "^17.4.2",
     "fast-xml-parser": "^5.8.0",
-    "isbot": "^5.1.40",
+    "isbot": "^5.1.42",
     "keyv": "^5.6.0",
     "normalize-url": "^9.0.1",
     "opossum": "^9.0.0",

@@ -27,6 +27,7 @@ const Lighthouse = lazy(() =>
   import('./pages/Lighthouse').then((m) => ({ default: m.Lighthouse })),
 );
 const Metrics = lazy(() => import('./pages/Metrics').then((m) => ({ default: m.Metrics })));
+const Policy = lazy(() => import('./pages/Policy').then((m) => ({ default: m.Policy })));
 const RenderTest = lazy(() =>
   import('./pages/RenderTest').then((m) => ({ default: m.RenderTest })),
 );
@@ -128,6 +129,8 @@ export function App() {
           <Route path="api" element={<ApiExplorer />} />
           <Route path="library" element={<Library />} />
           <Route path="help" element={<Help />} />
+          <Route path="terms" element={<Policy slug="terms-of-service" />} />
+          <Route path="privacy" element={<Policy slug="privacy-policy" />} />
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>

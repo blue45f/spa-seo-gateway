@@ -1,6 +1,6 @@
 import { X } from 'lucide-react';
 import { Suspense, useEffect } from 'react';
-import { Outlet, useLocation } from 'react-router-dom';
+import { Link, Outlet, useLocation } from 'react-router-dom';
 import { api } from '../lib/api';
 import { useStore } from '../lib/store';
 import type { PublicInfo } from '../lib/types';
@@ -73,16 +73,41 @@ export function Layout() {
             </Suspense>
           </ErrorBoundary>
         </main>
-        <footer className="border-t border-line px-6 py-3 text-xs text-ink-subtle flex justify-between bg-panel">
-          <span>spa-seo-gateway · open-source dynamic rendering</span>
-          <a
-            href="https://github.com/blue45f/spa-seo-gateway"
-            target="_blank"
-            rel="noreferrer"
-            className="rounded hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-          >
-            github
-          </a>
+        <footer className="border-t border-line px-6 py-3 text-xs text-ink-subtle">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <span>spa-seo-gateway · open-source dynamic rendering</span>
+            <nav aria-label={t('footer.legal')} className="flex flex-wrap gap-3">
+              {/* 약관/방침은 내부 페이지(/terms·/privacy)가 TermsDesk 정본을 렌더 — 지원만 외부 */}
+              <Link
+                to="/terms"
+                className="rounded hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+              >
+                {t('footer.terms')}
+              </Link>
+              <Link
+                to="/privacy"
+                className="rounded hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+              >
+                {t('footer.privacy')}
+              </Link>
+              <a
+                href="https://termsdesk.vercel.app/support/spa-seo-gateway"
+                target="_blank"
+                rel="noreferrer"
+                className="rounded hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+              >
+                {t('footer.support')}
+              </a>
+            </nav>
+            <a
+              href="https://github.com/blue45f/spa-seo-gateway"
+              target="_blank"
+              rel="noreferrer"
+              className="rounded hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+            >
+              github
+            </a>
+          </div>
         </footer>
       </div>
     </div>

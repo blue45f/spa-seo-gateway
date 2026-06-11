@@ -36,7 +36,11 @@ export function Header() {
       </div>
       {showLogin ? <LoginForm /> : null}
       {authed ? (
-        <button type="button" className="btn-ghost shrink-0 px-3 py-1.5 text-sm" onClick={logout}>
+        <button
+          type="button"
+          className="btn-ghost shrink-0 min-h-[44px] md:min-h-0 px-3 py-1.5 text-sm"
+          onClick={logout}
+        >
           {t('auth.logout')}
         </button>
       ) : null}

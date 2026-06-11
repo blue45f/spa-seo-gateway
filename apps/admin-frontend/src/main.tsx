@@ -17,13 +17,17 @@ function detectBasename(): string {
 const root = document.getElementById('root');
 if (!root) throw new Error('#root not found');
 
+const basename = detectBasename();
+
 if (import.meta.env.PROD && 'serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js').catch(() => {});
+  // SW 는 basename 아래에서 함께 서빙된다 — 임베드는 /admin/ui/sw.js, 데모는 /sw.js.
+  // 등록 경로의 디렉토리가 곧 scope 가 되므로 두 모드 모두 자동 정합.
+  navigator.serviceWorker.register(`${basename === '/' ? '' : basename}/sw.js`).catch(() => {});
 }
 
 createRoot(root).render(
   <StrictMode>
-    <BrowserRouter basename={detectBasename()}>
+    <BrowserRouter basename={basename}>
       <App />
     </BrowserRouter>
   </StrictMode>,

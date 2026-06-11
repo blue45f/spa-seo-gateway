@@ -49,6 +49,13 @@ function escapeAttr(s: string): string {
   return s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 }
 
+// JSON-LD 를 <script> 안에 그대로 삽입하면 값 속의 `</script>` 가 블록을 조기 종료시켜
+// URL 경로/원본 메타 유래 마크업이 주입된다(JSON.stringify 는 < > & 를 이스케이프하지 않음).
+// 유니코드 이스케이프는 JSON 으로는 동일 값이라 구조화 데이터 의미는 불변.
+function scriptSafeJson(s: string): string {
+  return s.replace(/</g, '\\u003c').replace(/>/g, '\\u003e').replace(/&/g, '\\u0026');
+}
+
 function imgAlt(tag: string): string {
   const m = tag.match(/\balt=["']([^"']*)["']/i);
   return m?.[1] ?? '';
@@ -201,11 +208,11 @@ export function optimizeHtml(html: string, opts: OptimizeOptions): string {
   }
   if (opts.injectBreadcrumb && !HAS_BREADCRUMB_JSONLD.test(out)) {
     const ld = buildBreadcrumbJsonLd(opts.url);
-    if (ld) meta.push(`<script type="application/ld+json">${ld}</script>`);
+    if (ld) meta.push(`<script type="application/ld+json">${scriptSafeJson(ld)}</script>`);
   }
   if (opts.schemaTemplate) {
     const ld = buildSchemaJsonLd(opts.schemaTemplate, out, opts.url);
-    if (ld) meta.push(`<script type="application/ld+json">${ld}</script>`);
+    if (ld) meta.push(`<script type="application/ld+json">${scriptSafeJson(ld)}</script>`);
   }
   out = out.replace(HEAD_RE, (_m, attrs) => `<head${attrs}>\n${meta.join('\n')}`);
   if (opts.stripScripts) out = out.replace(SCRIPT_RE, '');
