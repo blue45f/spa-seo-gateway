@@ -34,4 +34,26 @@ describe('translate', () => {
       expect(translate('en', k)).not.toBe(k);
     }
   });
+
+  it('covers footer/policy keys in both languages', () => {
+    const keys = [
+      'footer.legal',
+      'footer.terms',
+      'footer.privacy',
+      'footer.support',
+      'policy.terms.title',
+      'policy.privacy.title',
+      'policy.sub',
+      'policy.version',
+      'policy.effectiveAt',
+      'policy.hash',
+      'policy.source',
+      'policy.error',
+      'policy.retry',
+    ];
+    for (const k of keys) {
+      expect(translate('ko', k)).not.toBe(k);
+      expect(translate('en', k)).not.toBe(k);
+    }
+  });
 });
