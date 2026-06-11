@@ -100,14 +100,35 @@ export const NAV_ITEMS: NavItem[] = [
   },
 ];
 
+/**
+ * 사이드바/command palette 에는 노출하지 않지만 라우트 매핑(헤더 타이틀 ·
+ * document.title · 인증 게이트)은 필요한 보조 라우트 — 푸터 법적 고지 페이지.
+ */
+export const AUX_NAV_ITEMS: NavItem[] = [
+  {
+    id: 'terms',
+    path: '/terms',
+    labelKey: 'policy.terms.title',
+    subtitleKey: 'policy.sub',
+    public: true,
+  },
+  {
+    id: 'privacy',
+    path: '/privacy',
+    labelKey: 'policy.privacy.title',
+    subtitleKey: 'policy.sub',
+    public: true,
+  },
+];
+
 export function findNavItemByPath(path: string): NavItem | undefined {
   // basename 이 '/admin/ui' 라 path 가 '/' 부터 시작.
   const normalized = path === '/' ? '/' : path.replace(/\/$/, '');
-  return NAV_ITEMS.find((n) => n.path === normalized);
+  return [...NAV_ITEMS, ...AUX_NAV_ITEMS].find((n) => n.path === normalized);
 }
 
 export function findNavItemById(id: string): NavItem | undefined {
-  return NAV_ITEMS.find((n) => n.id === id);
+  return [...NAV_ITEMS, ...AUX_NAV_ITEMS].find((n) => n.id === id);
 }
 
 /** 현재 mode 에서 노출되는 nav 항목만 (modes 필드가 없거나 현재 모드를 포함하면 OK). */

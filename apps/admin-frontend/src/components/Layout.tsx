@@ -1,6 +1,6 @@
 import { X } from 'lucide-react';
 import { Suspense, useEffect } from 'react';
-import { Outlet, useLocation } from 'react-router-dom';
+import { Link, Outlet, useLocation } from 'react-router-dom';
 import { api } from '../lib/api';
 import { useStore } from '../lib/store';
 import type { PublicInfo } from '../lib/types';
@@ -76,30 +76,27 @@ export function Layout() {
         <footer className="border-t border-line px-6 py-3 text-xs text-ink-subtle">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <span>spa-seo-gateway · open-source dynamic rendering</span>
-            <nav aria-label="법적 고지 링크" className="flex flex-wrap gap-3">
-              <a
-                href="https://termsdesk.vercel.app/p/spa-seo-gateway/terms-of-service"
-                target="_blank"
-                rel="noreferrer"
+            <nav aria-label={t('footer.legal')} className="flex flex-wrap gap-3">
+              {/* 약관/방침은 내부 페이지(/terms·/privacy)가 TermsDesk 정본을 렌더 — 지원만 외부 */}
+              <Link
+                to="/terms"
                 className="rounded hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
               >
-                이용약관
-              </a>
-              <a
-                href="https://termsdesk.vercel.app/p/spa-seo-gateway/privacy-policy"
-                target="_blank"
-                rel="noreferrer"
+                {t('footer.terms')}
+              </Link>
+              <Link
+                to="/privacy"
                 className="rounded hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
               >
-                개인정보처리방침
-              </a>
+                {t('footer.privacy')}
+              </Link>
               <a
                 href="https://termsdesk.vercel.app/support/spa-seo-gateway"
                 target="_blank"
                 rel="noreferrer"
                 className="rounded hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
               >
-                지원
+                {t('footer.support')}
               </a>
             </nav>
             <a

@@ -421,6 +421,23 @@ const ko: Strings = {
   'notFound.title': '페이지를 찾을 수 없습니다',
   'notFound.hint': '주소가 바뀌었거나 삭제된 페이지일 수 있어요. 사이드바에서 다시 찾아보세요.',
   'notFound.home': '홈으로',
+
+  // Footer
+  'footer.legal': '법적 고지 링크',
+  'footer.terms': '이용약관',
+  'footer.privacy': '개인정보처리방침',
+  'footer.support': '지원',
+
+  // Policy (TermsDesk 정본)
+  'policy.terms.title': '이용약관',
+  'policy.privacy.title': '개인정보처리방침',
+  'policy.sub': 'TermsDesk 정본',
+  'policy.version': '버전',
+  'policy.effectiveAt': '시행일',
+  'policy.hash': '본문 해시',
+  'policy.source': 'TermsDesk 원문',
+  'policy.error': '문서를 불러오지 못했습니다.',
+  'policy.retry': '다시 시도',
 };
 
 const en: Strings = {
@@ -847,6 +864,23 @@ const en: Strings = {
   'notFound.title': 'Page not found',
   'notFound.hint': 'The address may have changed or been removed. Try the sidebar.',
   'notFound.home': 'Back to home',
+
+  // Footer
+  'footer.legal': 'Legal links',
+  'footer.terms': 'Terms of Service',
+  'footer.privacy': 'Privacy Policy',
+  'footer.support': 'Support',
+
+  // Policy (TermsDesk canonical copy)
+  'policy.terms.title': 'Terms of Service',
+  'policy.privacy.title': 'Privacy Policy',
+  'policy.sub': 'TermsDesk canonical copy',
+  'policy.version': 'Version',
+  'policy.effectiveAt': 'Effective',
+  'policy.hash': 'Content hash',
+  'policy.source': 'View on TermsDesk',
+  'policy.error': 'Failed to load the document.',
+  'policy.retry': 'Retry',
 };
 
 const dicts: Record<Lang, Strings> = { ko, en };
