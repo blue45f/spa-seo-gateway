@@ -45,6 +45,16 @@ function TenantsBody() {
   // 삭제 in-flight 인 행 id — 중복 클릭/동시 DELETE 차단 (전역 loading 재사용 금지)
   const [removingId, setRemovingId] = useState<string | null>(null);
 
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
+
   const load = useCallback(async () => {
     setLoading(true);
     try {
@@ -129,7 +139,78 @@ function TenantsBody() {
         <div className="panel">
           <EmptyState title={t('tenants.empty')} hint={t('tenants.empty.hint')} />
         </div>
+      ) : isMobile ? (
+        /* Mobile Card View */
+        <div className="space-y-4">
+          {tenants.map((tn) => (
+            <div key={tn.id} className="panel p-4 space-y-3 bg-panel">
+              <div className="flex items-center justify-between border-b border-line pb-2">
+                <span className="font-mono text-xs font-semibold">
+                  <Link to={`/tenants/${encodeURIComponent(tn.id)}`} className="link">
+                    {tn.id}
+                  </Link>
+                </span>
+                <span className={`badge ${tn.enabled ? 'badge--ok' : 'badge--neutral'}`}>
+                  {tn.enabled ? 'ON' : 'OFF'}
+                </span>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <div className="text-xs text-ink-subtle">{t('tenants.col.name')}</div>
+                  <div className="text-sm font-medium text-ink">{tn.name}</div>
+                </div>
+                <div className="space-y-1">
+                  <div className="text-xs text-ink-subtle">{t('tenants.col.plan')}</div>
+                  <div>
+                    <span className={PLAN_PILL[tn.plan]}>{tn.plan}</span>
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-1">
+                <div className="text-xs text-ink-subtle">{t('tenants.col.origin')}</div>
+                <div className="text-sm font-mono truncate">
+                  <a href={tn.origin} target="_blank" rel="noreferrer" className="link">
+                    {tn.origin}
+                  </a>
+                </div>
+              </div>
+              <div className="space-y-1">
+                <div className="text-xs text-ink-subtle">{t('tenants.col.apikey')}</div>
+                <div className="text-xs font-mono text-ink-subtle flex items-center gap-2">
+                  <span>
+                    {tn.apiKey.slice(0, 8)}…{tn.apiKey.slice(-4)}
+                  </span>
+                  <button
+                    type="button"
+                    className="text-ink-muted hover:text-ink underline rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                    onClick={() => copyKey(tn.apiKey)}
+                  >
+                    {t('tenants.copy')}
+                  </button>
+                </div>
+              </div>
+              <div className="flex justify-end gap-3 border-t border-line pt-2 text-xs">
+                <button
+                  type="button"
+                  className="link text-xs"
+                  onClick={() => setEditing({ ...tn })}
+                >
+                  {t('tenants.edit')}
+                </button>
+                <button
+                  type="button"
+                  className="text-xs text-err hover:text-err-fg rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent disabled:opacity-50"
+                  onClick={() => remove(tn.id)}
+                  disabled={removingId === tn.id}
+                >
+                  {removingId === tn.id ? t('btn.running') : t('tenants.delete')}
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
       ) : (
+        /* Desktop Table View */
         <div className="panel overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-panel-2 text-xs uppercase text-ink-muted">

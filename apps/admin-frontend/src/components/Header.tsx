@@ -27,7 +27,7 @@ export function Header() {
   }
 
   return (
-    <header className="bg-panel border-b border-line px-6 py-3 flex items-center justify-between gap-4 pl-16 md:pl-6">
+    <header className="bg-panel border-b border-line px-6 py-3 flex items-center justify-between gap-4 pl-16 lg:pl-6">
       <div className="min-w-0">
         <h1 className="text-xl font-semibold tracking-tight text-ink truncate">
           {item ? t(item.labelKey) : ''}

@@ -35,6 +35,16 @@ export function RoutesEditor({ routes, onChange, labels, reorderable = true }: R
   const lastPatternRef = useRef<HTMLInputElement>(null);
   const prevLen = useRef(routes.length);
 
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
+
   useEffect(() => {
     // 길이가 늘었고(=추가) 필터가 비어 새 빈 행이 실제로 렌더될 때만 포커스.
     if (routes.length > prevLen.current && filter.trim() === '') {
@@ -115,7 +125,121 @@ export function RoutesEditor({ routes, onChange, labels, reorderable = true }: R
 
       {filtered.length === 0 ? (
         <p className="text-sm text-ink-subtle py-8 text-center">{t('routes.empty')}</p>
+      ) : isMobile ? (
+        /* Mobile Card List View */
+        <div className="space-y-4">
+          {filtered.map(({ row: r, idx: i }) => (
+            <div key={`${i}-${r.pattern}`} className="panel p-4 space-y-3 relative bg-panel">
+              <div className="flex items-center justify-between border-b border-line pb-2">
+                <span className="font-semibold text-xs text-ink-muted select-none">#{i + 1}</span>
+                <button
+                  type="button"
+                  className="text-err hover:text-err-fg text-xs rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                  aria-label={`${t('btn.delete')} ${L.pattern} ${i + 1}`}
+                  onClick={() => remove(i)}
+                >
+                  {t('btn.delete')}
+                </button>
+              </div>
+
+              <div className="space-y-2.5">
+                <label className="block space-y-1">
+                  <span className="text-xs font-medium text-ink-subtle">{L.pattern}</span>
+                  <input
+                    ref={i === routes.length - 1 ? lastPatternRef : undefined}
+                    type="text"
+                    className="input w-full px-3 py-1.5 font-mono text-xs"
+                    aria-label={`${L.pattern} ${i + 1}`}
+                    value={r.pattern}
+                    onChange={(e) => update(i, { pattern: e.target.value })}
+                    placeholder="^/products/[0-9]+"
+                  />
+                </label>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <label className="block space-y-1">
+                    <span className="text-xs font-medium text-ink-subtle">{L.ttl}</span>
+                    <input
+                      type="number"
+                      className="input w-full px-3 py-1.5 text-xs"
+                      aria-label={`${L.ttl} ${i + 1}`}
+                      value={r.ttlMs ?? ''}
+                      onChange={(e) =>
+                        update(i, {
+                          ttlMs: e.target.value ? Number(e.target.value) : undefined,
+                        })
+                      }
+                    />
+                  </label>
+
+                  <label className="block space-y-1">
+                    <span className="text-xs font-medium text-ink-subtle">{L.waitUntil}</span>
+                    <select
+                      className="input w-full px-3 py-1.5 text-xs"
+                      aria-label={`${L.waitUntil} ${i + 1}`}
+                      value={r.waitUntil ?? ''}
+                      onChange={(e) =>
+                        update(i, {
+                          waitUntil: (e.target.value as ScopedRoute['waitUntil']) || undefined,
+                        })
+                      }
+                    >
+                      <option value="">(default)</option>
+                      <option value="load">load</option>
+                      <option value="domcontentloaded">domcontentloaded</option>
+                      <option value="networkidle0">networkidle0</option>
+                      <option value="networkidle2">networkidle2</option>
+                    </select>
+                  </label>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <label className="block space-y-1">
+                    <span className="text-xs font-medium text-ink-subtle">{L.waitSelector}</span>
+                    <input
+                      type="text"
+                      className="input w-full px-3 py-1.5 text-xs"
+                      aria-label={`${L.waitSelector} ${i + 1}`}
+                      value={r.waitSelector ?? ''}
+                      onChange={(e) => update(i, { waitSelector: e.target.value || undefined })}
+                      placeholder="[data-loaded]"
+                    />
+                  </label>
+
+                  <label className="block space-y-1">
+                    <span className="text-xs font-medium text-ink-subtle">{L.waitMs}</span>
+                    <input
+                      type="number"
+                      className="input w-full px-3 py-1.5 text-xs"
+                      aria-label={`${L.waitMs} ${i + 1}`}
+                      value={r.waitMs ?? ''}
+                      onChange={(e) =>
+                        update(i, {
+                          waitMs: e.target.value ? Number(e.target.value) : undefined,
+                        })
+                      }
+                    />
+                  </label>
+                </div>
+
+                <div className="pt-2">
+                  <label className="inline-flex items-center gap-2 text-xs cursor-pointer">
+                    <input
+                      type="checkbox"
+                      className="checkbox h-4 w-4"
+                      aria-label={`${L.ignore} ${i + 1}`}
+                      checked={!!r.ignore}
+                      onChange={(e) => update(i, { ignore: e.target.checked })}
+                    />
+                    <span className="font-medium text-ink-subtle">{L.ignore}</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       ) : (
+        /* Desktop Table View */
         <div className="panel overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-panel-2 text-xs uppercase text-ink-muted">

@@ -15,12 +15,13 @@ export function Layout() {
   const publicInfo = useStore((s) => s.publicInfo);
   const setPublicInfo = useStore((s) => s.setPublicInfo);
   const setSidebarOpen = useStore((s) => s.setSidebarOpen);
+  const sidebarOpen = useStore((s) => s.sidebarOpen);
   const location = useLocation();
 
   // 라우트 변경 시 모바일 사이드바 닫기 — UX 일관성
   // biome-ignore lint/correctness/useExhaustiveDependencies: location.pathname triggers the effect on every route change
   useEffect(() => {
-    if (typeof window !== 'undefined' && window.innerWidth < 768) {
+    if (typeof window !== 'undefined' && window.innerWidth < 1024) {
       setSidebarOpen(false);
     }
   }, [location.pathname, setSidebarOpen]);
@@ -51,8 +52,16 @@ export function Layout() {
         {t('a11y.skipToContent')}
       </a>
       <MobileMenu />
+      {/* Background scrim backdrop overlay for mobile/tablet sidebar */}
+      {sidebarOpen && (
+        <div
+          className="lg:hidden fixed inset-0 bg-scrim backdrop-blur-sm z-30 transition-opacity duration-220 animate-fade-in"
+          onClick={() => setSidebarOpen(false)}
+          aria-hidden="true"
+        />
+      )}
       <Sidebar publicMode={publicInfo?.mode ?? undefined} />
-      <div className="flex-1 flex flex-col min-w-0 md:ml-0 ml-0">
+      <div className="flex-1 flex flex-col min-w-0 lg:ml-0 ml-0">
         <Header />
         <main
           id="main-content"

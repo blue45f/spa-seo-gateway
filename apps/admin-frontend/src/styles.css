@@ -371,6 +371,19 @@
   color: var(--color-accent-fg);
 }
 
+/* Fade animations */
+.animate-fade-in {
+  animation: fade-in 220ms cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 /* Toast animations */
 .toast-enter {
   animation: slide-in 200ms cubic-bezier(0.25, 1, 0.5, 1);
@@ -403,10 +416,10 @@
   border-top: 2px solid var(--color-accent);
 }
 
-/* Mobile sidebar slide — strictly below Tailwind md(width >= 768px).
-   inclusive 한 ≤768 쿼리는 md 와 정확히 768px 에서 겹쳐, static 사이드바가
-   translateX(-100%) 로 사라지고 햄버거(md:hidden)도 없는 데드존을 만든다. */
-@media (width < 768px) {
+/* Mobile/Tablet sidebar slide — strictly below Tailwind lg(width >= 1024px).
+   inclusive 한 ≤1024 쿼리는 lg 와 정확히 1024px 에서 겹쳐, static 사이드바가
+   translateX(-100%) 로 사라지고 햄버거(lg:hidden)도 없는 데드존을 만든다. */
+@media (width < 1024px) {
   aside.collapsed {
     transform: translateX(-100%);
   }

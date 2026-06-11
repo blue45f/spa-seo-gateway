@@ -38,6 +38,16 @@ function SitesBody() {
     action: 'warm' | 'remove' | 'invalidate';
   } | null>(null);
 
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
+
   const load = useCallback(async () => {
     setLoading(true);
     try {
@@ -150,7 +160,82 @@ function SitesBody() {
         <div className="panel">
           <EmptyState title={t('sites.empty')} hint={t('sites.empty.hint')} />
         </div>
+      ) : isMobile ? (
+        /* Mobile Card View */
+        <div className="space-y-4">
+          {sites.map((s) => (
+            <div key={s.id} className="panel p-4 space-y-3 bg-panel">
+              <div className="flex items-center justify-between border-b border-line pb-2">
+                <span className="font-mono text-xs font-semibold">
+                  <Link to={`/sites/${encodeURIComponent(s.id)}`} className="link">
+                    {s.id}
+                  </Link>
+                </span>
+                <span className={`badge ${s.enabled ? 'badge--ok' : 'badge--neutral'}`}>
+                  {s.enabled ? 'ON' : 'OFF'}
+                </span>
+              </div>
+              <div className="space-y-1">
+                <div className="text-xs text-ink-subtle">{t('sites.col.name')}</div>
+                <div className="text-sm font-medium text-ink">{s.name}</div>
+              </div>
+              <div className="space-y-1">
+                <div className="text-xs text-ink-subtle">{t('sites.col.origin')}</div>
+                <div className="text-sm font-mono truncate">
+                  <a href={s.origin} target="_blank" rel="noreferrer" className="link">
+                    {s.origin}
+                  </a>
+                </div>
+              </div>
+              <div className="flex flex-col gap-2 border-t border-line pt-2 text-xs">
+                <div>
+                  <span className="text-ink-subtle">{t('sites.col.routes')}: </span>
+                  <Link to={`/sites/${encodeURIComponent(s.id)}`} className="link font-mono">
+                    {s.routes.length}
+                  </Link>
+                </div>
+                <div className="flex flex-wrap gap-2 pt-1">
+                  <button
+                    type="button"
+                    className="text-xs text-ink-muted hover:text-ink rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent disabled:opacity-50"
+                    onClick={() => invalidate(s.id)}
+                    disabled={pending?.id === s.id}
+                  >
+                    {t('sites.invalidate')}
+                  </button>
+                  <button
+                    type="button"
+                    className="text-xs text-ink-muted hover:text-ink rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent disabled:opacity-50"
+                    onClick={() => warm(s.id)}
+                    disabled={pending?.id === s.id}
+                    aria-busy={pending?.id === s.id && pending.action === 'warm'}
+                  >
+                    {pending?.id === s.id && pending.action === 'warm'
+                      ? t('btn.running')
+                      : t('sites.warm')}
+                  </button>
+                  <button
+                    type="button"
+                    className="link text-xs"
+                    onClick={() => setEditing({ ...s })}
+                  >
+                    {t('sites.edit')}
+                  </button>
+                  <button
+                    type="button"
+                    className="text-xs text-err hover:text-err-fg rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent disabled:opacity-50"
+                    onClick={() => remove(s.id)}
+                    disabled={pending?.id === s.id}
+                  >
+                    {t('sites.delete')}
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       ) : (
+        /* Desktop Table View */
         <div className="panel overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-panel-2 text-xs uppercase text-ink-muted">
