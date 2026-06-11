@@ -2,6 +2,7 @@ import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { Sidebar } from '../../components/Sidebar';
 import { useStore } from '../../lib/store';
+import stylesCss from '../../styles.css?raw';
 import { mockJsonFetch, renderWithRouter, resetStore } from '../test-utils';
 
 const originalFetch = globalThis.fetch;
@@ -104,5 +105,15 @@ describe('Sidebar', () => {
       // desktop density stays intact via the md: reset; mobile gets the 44px floor
       expect(control).toHaveClass('min-h-[44px]', 'md:min-h-0');
     }
+  });
+});
+
+describe('mobile sidebar breakpoint boundary', () => {
+  it('keeps the collapsed-slide media query strictly below the Tailwind md breakpoint', () => {
+    // `md:`(width >= 768px)와 정확히 768px 에서 겹치면 static 사이드바가
+    // .collapsed 의 transform: translateX(-100%) 로 사라진 채 240px 데드존을 남기고,
+    // 햄버거(md:hidden)도 없어 내비게이션이 끊긴다. 모바일 쿼리는 768px 미만이어야 한다.
+    expect(stylesCss).toMatch(/@media \(width < 768px\)/);
+    expect(stylesCss).not.toMatch(/max-width:\s*768px/);
   });
 });

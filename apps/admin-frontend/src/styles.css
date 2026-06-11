@@ -403,8 +403,10 @@
   border-top: 2px solid var(--color-accent);
 }
 
-/* Mobile sidebar slide */
-@media (max-width: 768px) {
+/* Mobile sidebar slide — strictly below Tailwind md(width >= 768px).
+   inclusive 한 ≤768 쿼리는 md 와 정확히 768px 에서 겹쳐, static 사이드바가
+   translateX(-100%) 로 사라지고 햄버거(md:hidden)도 없는 데드존을 만든다. */
+@media (width < 768px) {
   aside.collapsed {
     transform: translateX(-100%);
   }
