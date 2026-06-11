@@ -287,8 +287,8 @@ importers:
         specifier: ^5.8.0
         version: 5.8.0
       isbot:
-        specifier: ^5.1.40
-        version: 5.1.40
+        specifier: ^5.1.42
+        version: 5.1.42
       keyv:
         specifier: ^5.6.0
         version: 5.6.0
@@ -2971,6 +2971,10 @@ packages:
 
   isbot@5.1.40:
     resolution: {integrity: sha512-yNeeynhhtIVRBk12tBV4eHNxwB42HzR4Q3Ea7vCOiJhImGaAIdIMrbJtacQlBizGLjUPw+akkFI5Dn9T70XoVQ==}
+    engines: {node: '>=18'}
+
+  isbot@5.1.42:
+    resolution: {integrity: sha512-/SXsVh7KpPRISrD4ffrGSxnTLlUBzEQUfWIusaJPrpJ93FW1P0YEZri5vAUkFsA0m2HRUhQRQadk2wJ+EeKowQ==}
     engines: {node: '>=18'}
 
   istanbul-lib-coverage@3.2.2:
@@ -6633,6 +6637,8 @@ snapshots:
   isarray@1.0.0: {}
 
   isbot@5.1.40: {}
+
+  isbot@5.1.42: {}
 
   istanbul-lib-coverage@3.2.2: {}
 
