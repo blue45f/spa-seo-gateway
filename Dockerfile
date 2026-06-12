@@ -76,6 +76,8 @@ COPY --from=prod-deps /app/apps ./apps
 COPY --from=build /app/packages/core/dist        ./packages/core/dist
 COPY --from=build /app/packages/admin-ui/dist    ./packages/admin-ui/dist
 COPY --from=build /app/packages/admin-ui/public  ./packages/admin-ui/public
+COPY --from=build /app/packages/cms/dist         ./packages/cms/dist
+COPY --from=build /app/packages/multi-tenant/dist ./packages/multi-tenant/dist
 COPY --from=build /app/apps/gateway/dist         ./apps/gateway/dist
 COPY package.json pnpm-workspace.yaml ./
 
