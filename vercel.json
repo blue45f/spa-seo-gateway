@@ -3,10 +3,20 @@
   "buildCommand": "pnpm --filter @spa-seo-gateway/admin-frontend run build && pnpm --filter @spa-seo-gateway/demo run build",
   "outputDirectory": "apps/demo/public",
   "framework": null,
+  "functions": {
+    "api/**/*.ts": {
+      "maxDuration": 30
+    }
+  },
   "rewrites": [
     { "source": "/admin/api/public/info", "destination": "/api/info" },
+    { "source": "/admin/api/:path*", "destination": "/api/admin/:path*" },
+    { "source": "/health", "destination": "/api/health" },
+    { "source": "/health/deep", "destination": "/api/health" },
+    { "source": "/metrics", "destination": "/api/metrics" },
     { "source": "/", "destination": "/index.html" },
     { "source": "/admin/ui", "destination": "/index.html" },
-    { "source": "/admin/ui/", "destination": "/index.html" }
+    { "source": "/admin/ui/", "destination": "/index.html" },
+    { "source": "/admin/ui/:path*", "destination": "/index.html" }
   ]
 }
