@@ -12,6 +12,7 @@
     { "source": "/admin/api/public/info", "destination": "/api/info" },
     { "source": "/admin/api/:path*", "destination": "/api/admin/:path*" },
     { "source": "/health", "destination": "/api/health" },
+    { "source": "/health/deep", "destination": "/api/health" },
     { "source": "/metrics", "destination": "/api/metrics" },
     { "source": "/", "destination": "/index.html" },
     { "source": "/admin/ui", "destination": "/index.html" },

@@ -9,6 +9,12 @@
  */
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
+
 const GATEWAY_URL = process.env.GATEWAY_URL ?? '';
 const PROXY_TIMEOUT_MS = 30_000;
 
@@ -53,11 +59,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const subPath = Array.isArray(pathSegments) ? pathSegments.join('/') : (pathSegments ?? '');
   const upstreamPath = `/admin/api/${subPath}`;
 
+  const search = new URLSearchParams();
+  for (const [key, value] of Object.entries(req.query)) {
+    if (key === 'path' || value == null) continue;
+    for (const item of Array.isArray(value) ? value : [value]) {
+      search.append(key, String(item));
+    }
+  }
+  const queryStr = search.toString();
+
   if (!GATEWAY_URL) {
     return serveMock(upstreamPath, res);
   }
 
-  const upstreamUrl = `${GATEWAY_URL.replace(/\/$/, '')}${upstreamPath}`;
+  const upstreamUrl = `${GATEWAY_URL.replace(/\/$/, '')}${upstreamPath}${queryStr ? `?${queryStr}` : ''}`;
 
   const forwardHeaders = filterHeaders(
     req.headers as Record<string, string | string[] | undefined>,
@@ -74,7 +89,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const upstream = await fetch(upstreamUrl, {
       method: req.method ?? 'GET',
       headers: forwardHeaders,
-      body: req.method !== 'GET' && req.method !== 'HEAD' ? JSON.stringify(req.body) : undefined,
+      body:
+        req.method !== 'GET' && req.method !== 'HEAD' ? (req as unknown as BodyInit) : undefined,
       signal: controller.signal,
       redirect: 'manual',
     });

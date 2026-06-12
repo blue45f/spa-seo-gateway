@@ -8,8 +8,20 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 const GATEWAY_URL = process.env.GATEWAY_URL ?? '';
 
-export default async function handler(_req: VercelRequest, res: VercelResponse) {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  const isDeep = req.url?.includes('/deep') ?? false;
+
   if (!GATEWAY_URL) {
+    if (isDeep) {
+      return res.status(200).json({
+        ok: true,
+        probe: 'https://example.com/',
+        status: 200,
+        durationMs: 5,
+        bytes: 1250,
+        _demo: true,
+      });
+    }
     return res.status(200).json({
       ok: true,
       uptime: process.uptime(),
@@ -21,7 +33,8 @@ export default async function handler(_req: VercelRequest, res: VercelResponse) 
   }
 
   try {
-    const upstream = await fetch(`${GATEWAY_URL.replace(/\/$/, '')}/health`, {
+    const path = isDeep ? '/health/deep' : '/health';
+    const upstream = await fetch(`${GATEWAY_URL.replace(/\/$/, '')}${path}`, {
       signal: AbortSignal.timeout(10_000),
     });
     const body = await upstream.text();
