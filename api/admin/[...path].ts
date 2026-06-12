@@ -37,6 +37,7 @@ const STRIP_RESPONSE = new Set([
   'connection',
   'keep-alive',
   'content-encoding',
+  'content-length',
 ]);
 
 function filterHeaders(
