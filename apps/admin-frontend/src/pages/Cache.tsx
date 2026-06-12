@@ -1,6 +1,7 @@
 import { type FormEvent, useState } from 'react';
 import { AuthGate } from '../components/AuthGate';
 import { api, errorMessage } from '../lib/api';
+import { useDialog } from '../lib/dialog';
 import { useStore } from '../lib/store';
 
 export function Cache() {
@@ -15,6 +16,7 @@ function CacheBody() {
   const t = useStore((s) => s.t);
   const pushToast = useStore((s) => s.pushToast);
   const setError = useStore((s) => s.setGlobalError);
+  const { confirm } = useDialog();
   const [url, setUrl] = useState('');
   const [busy, setBusy] = useState(false);
   const [lastResult, setLastResult] = useState('');
@@ -39,7 +41,13 @@ function CacheBody() {
   }
 
   async function clearAll() {
-    if (!confirm(t('cache.clear.confirm'))) return;
+    const ok = await confirm({
+      title: t('cache.clear.confirm.title'),
+      description: t('cache.clear.confirm.desc'),
+      confirmLabel: t('btn.clear-all'),
+      danger: true,
+    });
+    if (!ok) return;
     setBusy(true);
     try {
       const r = await api<{ ok: true; cleared: number }>('POST', '/admin/api/cache/clear');

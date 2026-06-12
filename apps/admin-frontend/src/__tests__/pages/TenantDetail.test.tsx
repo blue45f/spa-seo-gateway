@@ -1,6 +1,8 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { DialogHost } from '../../components/DialogHost';
+import { useDialogStore } from '../../lib/dialog';
 import { useStore } from '../../lib/store';
 import type { Tenant } from '../../lib/types';
 import { TenantDetail } from '../../pages/TenantDetail';
@@ -20,6 +22,7 @@ const originalFetch = globalThis.fetch;
 
 beforeEach(() => {
   resetStore();
+  useDialogStore.setState({ request: null });
   useStore.setState({ authed: true, adminEnabled: true });
 });
 
@@ -34,6 +37,7 @@ function renderAt(path: string) {
       <Routes>
         <Route path="/tenants/:id" element={<TenantDetail />} />
       </Routes>
+      <DialogHost />
     </MemoryRouter>,
   );
 }
@@ -56,21 +60,19 @@ describe('TenantDetail page', () => {
     expect(screen.getByDisplayValue('^/products/[0-9]+')).toBeInTheDocument();
   });
 
-  it('rotate button issues a new apiKey after confirm', async () => {
+  it('rotate button issues a new apiKey after dialog confirm', async () => {
     globalThis.fetch = vi.fn().mockResolvedValue(
       new Response(JSON.stringify({ ok: true, tenants: [TENANT] }), {
         status: 200,
         headers: { 'content-type': 'application/json' },
       }),
     );
-    Object.defineProperty(window, 'confirm', {
-      configurable: true,
-      writable: true,
-      value: vi.fn().mockReturnValue(true),
-    });
     renderAt('/tenants/acme');
     await waitFor(() => expect(screen.getByDisplayValue(TENANT.apiKey)).toBeInTheDocument());
     fireEvent.click(screen.getByText('API key 회전'));
+    const dialog = await screen.findByTestId('app-dialog');
+    expect(screen.getByText('API key 를 새로 발급할까요?')).toBeInTheDocument();
+    fireEvent.click(within(dialog).getByTestId('dialog-confirm'));
     await waitFor(() => {
       expect(screen.queryByDisplayValue(TENANT.apiKey)).not.toBeInTheDocument();
     });

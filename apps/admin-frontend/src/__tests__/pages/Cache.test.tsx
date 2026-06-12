@@ -1,6 +1,8 @@
-import { fireEvent, screen, waitFor } from '@testing-library/react';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { DialogHost } from '../../components/DialogHost';
+import { useDialogStore } from '../../lib/dialog';
 import { useStore } from '../../lib/store';
 import { Cache } from '../../pages/Cache';
 import { mockJsonFetch, renderWithRouter, resetStore } from '../test-utils';
@@ -9,6 +11,7 @@ const originalFetch = globalThis.fetch;
 
 beforeEach(() => {
   resetStore();
+  useDialogStore.setState({ request: null });
   useStore.setState({ authed: true, adminEnabled: true });
 });
 
@@ -54,17 +57,37 @@ describe('Cache page', () => {
     expect(toasts.some((t) => t.kind === 'error' && t.message === 'boom')).toBe(true);
   });
 
-  it('clear all triggers confirm', () => {
-    // happy-dom 의 window.confirm 은 stub 일 수 있어 직접 덮어쓴다.
-    const confirmFn = vi.fn().mockReturnValue(false);
-    Object.defineProperty(window, 'confirm', {
-      configurable: true,
-      writable: true,
-      value: confirmFn,
-    });
-    globalThis.fetch = mockJsonFetch({ ok: true, cleared: 0 });
-    renderWithRouter(<Cache />);
+  it('clear all opens the in-app confirm dialog; cancel sends no request', async () => {
+    const fetchMock = vi.fn();
+    globalThis.fetch = fetchMock;
+    renderWithRouter(
+      <>
+        <Cache />
+        <DialogHost />
+      </>,
+    );
     fireEvent.click(screen.getByText('전체 초기화'));
-    expect(confirmFn).toHaveBeenCalled();
+    const dialog = await screen.findByTestId('app-dialog');
+    expect(screen.getByText('캐시 전체를 삭제할까요?')).toBeInTheDocument();
+    fireEvent.click(within(dialog).getByText('취소'));
+    await waitFor(() => expect(screen.queryByTestId('app-dialog')).not.toBeInTheDocument());
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('clear all clears caches after dialog confirm', async () => {
+    globalThis.fetch = mockJsonFetch({ ok: true, cleared: 2 });
+    renderWithRouter(
+      <>
+        <Cache />
+        <DialogHost />
+      </>,
+    );
+    fireEvent.click(screen.getByText('전체 초기화'));
+    const dialog = await screen.findByTestId('app-dialog');
+    // danger 확인 버튼 라벨은 페이지 버튼과 동일한 t('btn.clear-all')
+    fireEvent.click(within(dialog).getByTestId('dialog-confirm'));
+    await waitFor(() =>
+      expect(useStore.getState().toasts.some((t) => t.message === '캐시 전체 삭제됨')).toBe(true),
+    );
   });
 });

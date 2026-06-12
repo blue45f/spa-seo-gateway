@@ -408,6 +408,29 @@
   }
 }
 
+/* Native <dialog> (confirm/prompt) — top-layer 진입 페이드/리프트. ::backdrop 은 scrim 토큰. */
+.app-dialog {
+  opacity: 0;
+  transform: translateY(8px) scale(0.98);
+  transition:
+    opacity 180ms cubic-bezier(0.25, 1, 0.5, 1),
+    transform 180ms cubic-bezier(0.25, 1, 0.5, 1);
+}
+.app-dialog[open] {
+  opacity: 1;
+  transform: none;
+}
+/* display:none → top-layer 전환 첫 프레임의 시작값 — 미지원 브라우저는 즉시 표시(우아한 강등) */
+@starting-style {
+  .app-dialog[open] {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+}
+.app-dialog::backdrop {
+  background: var(--color-scrim);
+}
+
 /* Drag-reorder feedback */
 .drag-row.dragging {
   opacity: 0.4;
@@ -488,6 +511,7 @@
 @media (prefers-reduced-motion: reduce) {
   .toast-enter,
   .toast-exit,
+  .app-dialog,
   .skeleton-pulse,
   .spark path,
   .figure-pulse,

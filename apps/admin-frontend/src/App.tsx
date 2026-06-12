@@ -1,6 +1,7 @@
-import { lazy, useEffect } from 'react';
+import { type ComponentType, lazy, useEffect } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import { CommandPalette } from './components/CommandPalette';
+import { DialogHost } from './components/DialogHost';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { Layout } from './components/Layout';
 import { ShortcutsModal } from './components/ShortcutsModal';
@@ -14,35 +15,90 @@ import { NotFound } from './pages/NotFound';
 import { RoutesPage } from './pages/Routes';
 import { Welcome } from './pages/Welcome';
 
+const CHUNK_RETRY_KEY = 'seo-admin-chunk-retry';
+
+/**
+ * 동적 import 실패 시 1회 전체 새로고침 후 재시도 — 배포로 청크 해시가 바뀐 stale 탭 복구.
+ * sessionStorage 가드가 새로고침 루프를 막고, 성공 로드 시 가드를 풀어 다음 배포에 대비한다.
+ */
+// sessionStorage 는 샌드박스 iframe / 엄격 프라이버시 모드에서 '접근 자체'가 SecurityError 를
+// 던질 수 있다 — 가드를 못 읽으면 '이미 재시도함'으로 취급해 새로고침 루프를 원천 차단한다.
+function hasRetryGuard(): boolean {
+  try {
+    return window.sessionStorage.getItem(CHUNK_RETRY_KEY) !== null;
+  } catch {
+    return true;
+  }
+}
+
+function armRetryGuard(): boolean {
+  try {
+    window.sessionStorage.setItem(CHUNK_RETRY_KEY, '1');
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function clearRetryGuard(): void {
+  try {
+    window.sessionStorage.removeItem(CHUNK_RETRY_KEY);
+  } catch {
+    // 스토리지 접근 불가 환경 — 가드 자체가 없으니 지울 것도 없다
+  }
+}
+
+// biome-ignore lint/suspicious/noExplicitAny: mirrors React.lazy's own ComponentType<any> bound
+function lazyRetry<T extends ComponentType<any>>(load: () => Promise<{ default: T }>) {
+  return lazy(() =>
+    load()
+      .then((module) => {
+        clearRetryGuard();
+        return module;
+      })
+      .catch((error: unknown) => {
+        // 가드를 기록할 수 있을 때만 새로고침 — 기록 실패 시 reload 하면 무한 루프가 된다
+        if (!hasRetryGuard() && armRetryGuard()) {
+          window.location.reload();
+          // 새로고침이 끼어들 때까지 Suspense fallback 유지
+          return new Promise<{ default: T }>(() => {});
+        }
+        // 이미 한 번 새로고침한 세션 — 가드를 풀고 ErrorBoundary 로 전달
+        clearRetryGuard();
+        throw error;
+      }),
+  );
+}
+
 // Lazy: 보조/저빈도 페이지 — 초기 번들에서 분리.
-const AiSchema = lazy(() => import('./pages/AiSchema').then((m) => ({ default: m.AiSchema })));
-const ApiExplorer = lazy(() =>
+const AiSchema = lazyRetry(() => import('./pages/AiSchema').then((m) => ({ default: m.AiSchema })));
+const ApiExplorer = lazyRetry(() =>
   import('./pages/ApiExplorer').then((m) => ({ default: m.ApiExplorer })),
 );
-const AuditLog = lazy(() => import('./pages/AuditLog').then((m) => ({ default: m.AuditLog })));
-const Cache = lazy(() => import('./pages/Cache').then((m) => ({ default: m.Cache })));
-const Help = lazy(() => import('./pages/Help').then((m) => ({ default: m.Help })));
-const Library = lazy(() => import('./pages/Library').then((m) => ({ default: m.Library })));
-const Lighthouse = lazy(() =>
+const AuditLog = lazyRetry(() => import('./pages/AuditLog').then((m) => ({ default: m.AuditLog })));
+const Cache = lazyRetry(() => import('./pages/Cache').then((m) => ({ default: m.Cache })));
+const Help = lazyRetry(() => import('./pages/Help').then((m) => ({ default: m.Help })));
+const Library = lazyRetry(() => import('./pages/Library').then((m) => ({ default: m.Library })));
+const Lighthouse = lazyRetry(() =>
   import('./pages/Lighthouse').then((m) => ({ default: m.Lighthouse })),
 );
-const Metrics = lazy(() => import('./pages/Metrics').then((m) => ({ default: m.Metrics })));
-const Policy = lazy(() => import('./pages/Policy').then((m) => ({ default: m.Policy })));
-const RenderTest = lazy(() =>
+const Metrics = lazyRetry(() => import('./pages/Metrics').then((m) => ({ default: m.Metrics })));
+const Policy = lazyRetry(() => import('./pages/Policy').then((m) => ({ default: m.Policy })));
+const RenderTest = lazyRetry(() =>
   import('./pages/RenderTest').then((m) => ({ default: m.RenderTest })),
 );
-const SiteDetail = lazy(() =>
+const SiteDetail = lazyRetry(() =>
   import('./pages/SiteDetail').then((m) => ({ default: m.SiteDetail })),
 );
-const Sites = lazy(() => import('./pages/Sites').then((m) => ({ default: m.Sites })));
-const TenantDetail = lazy(() =>
+const Sites = lazyRetry(() => import('./pages/Sites').then((m) => ({ default: m.Sites })));
+const TenantDetail = lazyRetry(() =>
   import('./pages/TenantDetail').then((m) => ({ default: m.TenantDetail })),
 );
-const Tenants = lazy(() => import('./pages/Tenants').then((m) => ({ default: m.Tenants })));
-const VisualDiff = lazy(() =>
+const Tenants = lazyRetry(() => import('./pages/Tenants').then((m) => ({ default: m.Tenants })));
+const VisualDiff = lazyRetry(() =>
   import('./pages/VisualDiff').then((m) => ({ default: m.VisualDiff })),
 );
-const Warm = lazy(() => import('./pages/Warm').then((m) => ({ default: m.Warm })));
+const Warm = lazyRetry(() => import('./pages/Warm').then((m) => ({ default: m.Warm })));
 
 export function App() {
   const setAuthed = useStore((s) => s.setAuthed);
@@ -142,6 +198,8 @@ export function App() {
         <ShortcutsModal />
         <Tour />
         <ToastContainer />
+        {/* useDialog() 의 confirm/prompt 요청을 네이티브 <dialog> 로 그리는 호스트 */}
+        <DialogHost />
       </ErrorBoundary>
     </>
   );

@@ -6,6 +6,7 @@ import { Field } from '../components/Field';
 import { Modal } from '../components/Modal';
 import { api, errorMessage } from '../lib/api';
 import { generateApiKey } from '../lib/apikey';
+import { useDialog } from '../lib/dialog';
 import { useStore } from '../lib/store';
 import type { Tenant, TenantPlan } from '../lib/types';
 
@@ -39,6 +40,7 @@ function TenantsBody() {
   const t = useStore((s) => s.t);
   const setError = useStore((s) => s.setGlobalError);
   const pushToast = useStore((s) => s.pushToast);
+  const { confirm } = useDialog();
   const [tenants, setTenants] = useState<Tenant[]>([]);
   const [loading, setLoading] = useState(false);
   const [editing, setEditing] = useState<Tenant | null>(null);
@@ -87,7 +89,13 @@ function TenantsBody() {
 
   async function remove(id: string) {
     if (removingId) return;
-    if (!confirm(t('tenants.delete.confirm'))) return;
+    const ok = await confirm({
+      title: t('tenants.delete.confirm.title'),
+      description: t('tenants.delete.confirm.desc'),
+      confirmLabel: t('tenants.delete'),
+      danger: true,
+    });
+    if (!ok) return;
     setRemovingId(id);
     try {
       await api('DELETE', `/admin/api/tenants/${encodeURIComponent(id)}`);

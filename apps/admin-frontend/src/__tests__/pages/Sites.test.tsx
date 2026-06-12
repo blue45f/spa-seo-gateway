@@ -1,6 +1,8 @@
-import { fireEvent, screen, waitFor } from '@testing-library/react';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { DialogHost } from '../../components/DialogHost';
+import { useDialogStore } from '../../lib/dialog';
 import { useStore } from '../../lib/store';
 import type { Site } from '../../lib/types';
 import { Sites } from '../../pages/Sites';
@@ -27,6 +29,7 @@ const SITES: Site[] = [
 
 beforeEach(() => {
   resetStore();
+  useDialogStore.setState({ request: null });
   useStore.setState({ authed: true, adminEnabled: true });
 });
 
@@ -108,22 +111,59 @@ describe('Sites page (CMS)', () => {
     expect(body.origin).toBe('https://shop.example.com');
   });
 
-  it('delete prompts confirm', async () => {
-    globalThis.fetch = vi.fn().mockResolvedValue(
+  it('delete opens the in-app confirm dialog; cancel issues no DELETE', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
       new Response(JSON.stringify({ ok: true, sites: SITES }), {
         status: 200,
         headers: { 'content-type': 'application/json' },
       }),
     );
-    const confirmFn = vi.fn().mockReturnValue(false);
-    Object.defineProperty(window, 'confirm', {
-      configurable: true,
-      writable: true,
-      value: confirmFn,
-    });
-    renderWithRouter(<Sites />);
+    globalThis.fetch = fetchMock;
+    renderWithRouter(
+      <>
+        <Sites />
+        <DialogHost />
+      </>,
+    );
     await waitFor(() => expect(screen.getByText('docs')).toBeInTheDocument());
     fireEvent.click(screen.getAllByText('삭제')[0]!);
-    expect(confirmFn).toHaveBeenCalled();
+    const dialog = await screen.findByTestId('app-dialog');
+    expect(screen.getByText('사이트를 삭제할까요?')).toBeInTheDocument();
+    expect(within(dialog).getByTestId('dialog-confirm').className).toContain('btn-danger');
+    fireEvent.click(within(dialog).getByText('취소'));
+    await waitFor(() => expect(screen.queryByTestId('app-dialog')).not.toBeInTheDocument());
+    const deleteCalls = fetchMock.mock.calls.filter(
+      (c) => (c[1] as RequestInit | undefined)?.method === 'DELETE',
+    );
+    expect(deleteCalls).toHaveLength(0);
+  });
+
+  it('invalidate opens the in-app prompt dialog and POSTs the entered URL', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ ok: true, sites: SITES }), {
+        status: 200,
+        headers: { 'content-type': 'application/json' },
+      }),
+    );
+    globalThis.fetch = fetchMock;
+    renderWithRouter(
+      <>
+        <Sites />
+        <DialogHost />
+      </>,
+    );
+    await waitFor(() => expect(screen.getByText('docs')).toBeInTheDocument());
+    fireEvent.click(screen.getAllByText('URL 무효화')[0]!);
+    const dialog = await screen.findByTestId('app-dialog');
+    fireEvent.change(within(dialog).getByTestId('dialog-prompt-input'), {
+      target: { value: 'https://docs.example.com/page' },
+    });
+    fireEvent.click(within(dialog).getByTestId('dialog-confirm'));
+    await waitFor(() => {
+      const post = fetchMock.mock.calls.find((c) => String(c[0]).includes('/cache/invalidate'));
+      expect(post).toBeDefined();
+      const body = JSON.parse(((post?.[1] as RequestInit).body as string) ?? '{}');
+      expect(body.url).toBe('https://docs.example.com/page');
+    });
   });
 });

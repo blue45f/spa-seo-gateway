@@ -82,6 +82,10 @@ const ko: Strings = {
   'btn.cancel': '취소',
   'btn.close': '닫기',
 
+  // In-app dialog (confirm/prompt)
+  'dialog.ok': '확인',
+  'dialog.input.required': '값을 입력해 주세요.',
+
   // Common labels
   mode: '모드',
   origin: 'Origin',
@@ -138,7 +142,8 @@ const ko: Strings = {
   'cache.title': '캐시 관리',
   'cache.invalidate.label': 'URL 한 개 무효화',
   'cache.clear.label': '전체 캐시 초기화',
-  'cache.clear.confirm': '캐시 전체를 삭제할까요? 다음 요청부터는 cold render 로 시작됩니다.',
+  'cache.clear.confirm.title': '캐시 전체를 삭제할까요?',
+  'cache.clear.confirm.desc': '다음 요청부터는 cold render 로 시작됩니다.',
   'cache.cleared': '캐시 전체 삭제됨',
   'cache.lastResult': '마지막 결과',
 
@@ -288,7 +293,8 @@ const ko: Strings = {
   'sites.form.webhookRender': 'Webhook on render (선택)',
   'sites.form.webhookError': 'Webhook on error (선택)',
   'sites.form.save': '저장',
-  'sites.delete.confirm': '정말 사이트를 삭제할까요? 영구적이며 캐시도 함께 정리됩니다.',
+  'sites.delete.confirm.title': '사이트를 삭제할까요?',
+  'sites.delete.confirm.desc': '영구적이며 캐시도 함께 정리됩니다.',
   'sites.invalidate.prompt': '무효화할 URL 을 입력하세요',
   'sites.detail.metadata': '메타데이터',
   'sites.detail.routes': '라우트 오버라이드 (사이트별)',
@@ -317,7 +323,8 @@ const ko: Strings = {
   'tenants.form.plan': 'Plan',
   'tenants.form.enabled': '활성화',
   'tenants.form.save': '저장',
-  'tenants.delete.confirm': '정말 테넌트를 삭제할까요? 영구적이며 캐시도 함께 정리됩니다.',
+  'tenants.delete.confirm.title': '테넌트를 삭제할까요?',
+  'tenants.delete.confirm.desc': '영구적이며 캐시도 함께 정리됩니다.',
   'tenants.copy': '복사',
   'tenants.copied': '클립보드에 복사됨',
   'tenants.detail.metadata': '메타데이터',
@@ -325,7 +332,8 @@ const ko: Strings = {
   'tenants.detail.notFound': '존재하지 않는 테넌트입니다.',
   'tenants.detail.back': '← 목록으로',
   'tenants.detail.rotate': 'API key 회전',
-  'tenants.detail.rotate.confirm': 'API key 를 새로 발급할까요? 이전 키는 즉시 무효화됩니다.',
+  'tenants.detail.rotate.confirm.title': 'API key 를 새로 발급할까요?',
+  'tenants.detail.rotate.confirm.desc': '이전 키는 즉시 무효화됩니다.',
 
   // Help
   'help.title': '도움말: 자주 묻는 질문',
@@ -520,6 +528,10 @@ const en: Strings = {
   'btn.cancel': 'Cancel',
   'btn.close': 'Close',
 
+  // In-app dialog (confirm/prompt)
+  'dialog.ok': 'OK',
+  'dialog.input.required': 'Please enter a value.',
+
   mode: 'mode',
   origin: 'Origin',
   uptime: 'Uptime',
@@ -575,7 +587,8 @@ const en: Strings = {
   'cache.title': 'Cache Management',
   'cache.invalidate.label': 'Invalidate single URL',
   'cache.clear.label': 'Clear all caches',
-  'cache.clear.confirm': 'Clear all caches? Subsequent requests will start cold.',
+  'cache.clear.confirm.title': 'Clear all caches?',
+  'cache.clear.confirm.desc': 'Subsequent requests will start cold.',
   'cache.cleared': 'All caches cleared',
   'cache.lastResult': 'Last result',
 
@@ -726,8 +739,8 @@ const en: Strings = {
   'sites.form.webhookRender': 'Webhook on render (optional)',
   'sites.form.webhookError': 'Webhook on error (optional)',
   'sites.form.save': 'Save',
-  'sites.delete.confirm':
-    'Delete this site? The action is permanent and clears its cache namespace.',
+  'sites.delete.confirm.title': 'Delete this site?',
+  'sites.delete.confirm.desc': 'The action is permanent and clears its cache namespace.',
   'sites.invalidate.prompt': 'URL to invalidate',
   'sites.detail.metadata': 'Metadata',
   'sites.detail.routes': 'Route overrides (per-site)',
@@ -757,8 +770,8 @@ const en: Strings = {
   'tenants.form.plan': 'Plan',
   'tenants.form.enabled': 'Enabled',
   'tenants.form.save': 'Save',
-  'tenants.delete.confirm':
-    'Delete this tenant? The action is permanent and clears its cache namespace.',
+  'tenants.delete.confirm.title': 'Delete this tenant?',
+  'tenants.delete.confirm.desc': 'The action is permanent and clears its cache namespace.',
   'tenants.copy': 'Copy',
   'tenants.copied': 'Copied to clipboard',
   'tenants.detail.metadata': 'Metadata',
@@ -766,8 +779,8 @@ const en: Strings = {
   'tenants.detail.notFound': 'Tenant not found.',
   'tenants.detail.back': '← Back to list',
   'tenants.detail.rotate': 'Rotate API key',
-  'tenants.detail.rotate.confirm':
-    'Issue a new API key? The previous key is invalidated immediately.',
+  'tenants.detail.rotate.confirm.title': 'Issue a new API key?',
+  'tenants.detail.rotate.confirm.desc': 'The previous key is invalidated immediately.',
 
   // Help
   'help.title': 'Help: frequently asked questions',

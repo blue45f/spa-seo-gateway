@@ -7,6 +7,7 @@ import { RoutesEditor } from '../components/RoutesEditor';
 import { DetailSkeleton } from '../components/Skeleton';
 import { api, errorMessage } from '../lib/api';
 import { generateApiKey } from '../lib/apikey';
+import { useDialog } from '../lib/dialog';
 import { cleanRoutes } from '../lib/routes';
 import { useStore } from '../lib/store';
 import type { ScopedRoute, Tenant, TenantPlan } from '../lib/types';
@@ -27,6 +28,7 @@ function TenantDetailBody() {
   const t = useStore((s) => s.t);
   const setError = useStore((s) => s.setGlobalError);
   const pushToast = useStore((s) => s.pushToast);
+  const { confirm } = useDialog();
   const [tenant, setTenant] = useState<Tenant | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -80,9 +82,15 @@ function TenantDetailBody() {
     }
   }
 
-  function rotateApiKey() {
+  async function rotateApiKey() {
     if (!tenant) return;
-    if (!confirm(t('tenants.detail.rotate.confirm'))) return;
+    const ok = await confirm({
+      title: t('tenants.detail.rotate.confirm.title'),
+      description: t('tenants.detail.rotate.confirm.desc'),
+      confirmLabel: t('tenants.detail.rotate'),
+      danger: true,
+    });
+    if (!ok) return;
     setTenant({ ...tenant, apiKey: generateApiKey() });
     pushToast(t('toast.apikey.changed'), 'warn');
   }

@@ -5,6 +5,7 @@ import { EmptyState } from '../components/EmptyState';
 import { Field } from '../components/Field';
 import { Modal } from '../components/Modal';
 import { api, errorMessage } from '../lib/api';
+import { useDialog } from '../lib/dialog';
 import { useStore } from '../lib/store';
 import type { Site } from '../lib/types';
 
@@ -29,6 +30,7 @@ function SitesBody() {
   const t = useStore((s) => s.t);
   const setError = useStore((s) => s.setGlobalError);
   const pushToast = useStore((s) => s.pushToast);
+  const { confirm, prompt } = useDialog();
   const [sites, setSites] = useState<Site[]>([]);
   const [loading, setLoading] = useState(false);
   const [editing, setEditing] = useState<Site | null>(null);
@@ -80,7 +82,13 @@ function SitesBody() {
 
   async function remove(id: string) {
     if (pending) return;
-    if (!confirm(t('sites.delete.confirm'))) return;
+    const ok = await confirm({
+      title: t('sites.delete.confirm.title'),
+      description: t('sites.delete.confirm.desc'),
+      confirmLabel: t('sites.delete'),
+      danger: true,
+    });
+    if (!ok) return;
     setPending({ id, action: 'remove' });
     try {
       await api('DELETE', `/admin/api/sites/${encodeURIComponent(id)}`);
@@ -96,7 +104,13 @@ function SitesBody() {
 
   async function invalidate(id: string) {
     if (pending) return;
-    const url = prompt(t('sites.invalidate.prompt'));
+    const url = await prompt({
+      title: t('sites.invalidate'),
+      description: t('sites.invalidate.prompt'),
+      placeholder: 'https://www.example.com/posts/1',
+      confirmLabel: t('btn.invalidate'),
+      validate: (v) => (v.trim() ? null : t('dialog.input.required')),
+    });
     if (!url) return;
     setPending({ id, action: 'invalidate' });
     try {
