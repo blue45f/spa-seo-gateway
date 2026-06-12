@@ -268,14 +268,48 @@ www.example.com {
 
 ### Vercel
 
-⚠️ **Vercel Functions 단독 배포는 비추천.** 이유:
+⚠️ **Vercel Functions 로 게이트웨이 자체(Puppeteer) 를 직접 실행하는 것은 비추천.** 이유:
 
 1. **Puppeteer 번들 크기**: chromium 이 ~250MB. `@sparticuz/chromium-min` 으로 ~30MB 까지 줄여도 Hobby 50MB 한도에 빠듯
 2. **콜드 스타트**: Function 재시작마다 chromium 다시 launch → 5–10초 지연
 3. **풀 / 캐시 휘발**: Function 인스턴스 사이에 브라우저 풀이나 메모리 캐시가 공유 안 됨 → Redis 필수, 그래도 풀의 효과는 0
 4. **타임아웃**: 무거운 SPA 는 최대 함수 실행 시간을 넘길 수 있음 (Pro 300s, Hobby 60s)
 
-**대안 1 — 하이브리드 (권장)**: Vercel 에는 SPA / 어드민 UI 만, 렌더 서비스는 별도 컨테이너 호스트.
+#### 대안 1 — Serverless Proxy (내장, 권장)
+
+`vercel.json` + `api/` 디렉토리의 서버리스 함수가 **어드민 UI API 호출을 실제 게이트웨이 백엔드로 프록시**합니다.
+
+```
+┌──────────┐         ┌──────────────────────────────┐         ┌────────────────┐
+│  브라우저  │ ─────→ │ Vercel                       │ ─────→ │ spa-seo-gateway│
+│           │         │ ├─ /admin/ui/*  → SPA (정적)  │         │ (Fly.io/Cloud  │
+│           │         │ ├─ /admin/api/* → Proxy Fn    │         │  Run/Docker)   │
+│           │         │ ├─ /health     → Proxy Fn    │         │                │
+│           │         │ └─ /metrics    → Proxy Fn    │         │                │
+└──────────┘         └──────────────────────────────┘         └────────────────┘
+```
+
+**설정 방법:**
+
+1. 게이트웨이를 Fly.io / Cloud Run / Docker 등에 배포
+2. Vercel Dashboard → Settings → Environment Variables:
+   - `GATEWAY_URL` = `https://spa-seo-gateway.fly.dev` (게이트웨이 URL)
+3. Vercel 에 재배포 (자동 Git 연동 시 `main` 푸시만으로 충분)
+
+`GATEWAY_URL` 미설정 시 정적 데모 모드로 동작 (mock 응답 + 데모 배너 주입).
+
+**프록시 대상:**
+
+| Vercel 경로 | 서버리스 함수 | 게이트웨이 경로 |
+|---|---|---|
+| `/admin/api/public/info` | `api/info.ts` | `/admin/api/public/info` |
+| `/admin/api/*` | `api/admin/[...path].ts` | `/admin/api/*` |
+| `/health` | `api/health.ts` | `/health` |
+| `/metrics` | `api/metrics.ts` | `/metrics` |
+
+#### 대안 2 — Edge Middleware (Next.js 봇 분기)
+
+Vercel 에는 SPA / 어드민 UI 만, 렌더 서비스는 별도 컨테이너 호스트.
 
 ```
 ┌──────────┐         ┌──────────────────┐         ┌────────────────┐
@@ -307,7 +341,9 @@ export function middleware(req: NextRequest) {
 
 `SEO_GATEWAY_HOST` 환경변수에 게이트웨이 도메인 설정. 게이트웨이는 Cloud Run / Fly.io / Railway 등 컨테이너 호스트에 띄움.
 
-**대안 2 — Vercel 에 직접 (실험적)**: Fluid Compute + `@sparticuz/chromium-min`
+#### 대안 3 — Vercel 에 직접 (실험적)
+
+Fluid Compute + `@sparticuz/chromium-min`
 
 Vercel 의 Fluid Compute 는 Function 인스턴스를 재사용하므로 Lambda 보다 풀 효과가 일부 있음. 하지만:
 - chromium-min 사용 필수
@@ -322,7 +358,7 @@ import chromium from '@sparticuz/chromium-min';
 // ... core 의 render 호출 시 executablePath 를 chromium.executablePath() 로
 ```
 
-**현실적 결론**: 게이트웨이 자체는 **Cloud Run / Fly.io / Railway / ECS** 같은 장기 실행 컨테이너 호스트가 최적. Vercel 은 SPA + 봇 분기 미들웨어 용도로 활용.
+**현실적 결론**: 게이트웨이 자체는 **Cloud Run / Fly.io / Railway / ECS** 같은 장기 실행 컨테이너 호스트가 최적. Vercel 은 **대안 1 (Serverless Proxy)** 로 어드민 UI 를 서빙하면서 API 를 프록시하거나, **대안 2 (Edge Middleware)** 로 봇 트래픽만 게이트웨이로 분기.
 
 ## 6. CI/CD
 

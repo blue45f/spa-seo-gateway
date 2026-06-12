@@ -1,0 +1,33 @@
+/**
+ * Vercel Serverless Function — /health proxy.
+ *
+ * Proxies the gateway /health endpoint for uptime monitoring.
+ * Returns mock data when GATEWAY_URL is not configured.
+ */
+import type { VercelRequest, VercelResponse } from '@vercel/node';
+
+const GATEWAY_URL = process.env.GATEWAY_URL ?? '';
+
+export default async function handler(_req: VercelRequest, res: VercelResponse) {
+  if (!GATEWAY_URL) {
+    return res.status(200).json({
+      ok: true,
+      uptime: process.uptime(),
+      pool: { idle: 0, busy: 0, total: 0 },
+      cache: { size: 0, ttlMs: 86_400_000, redisEnabled: false },
+      breakers: {},
+      _demo: true,
+    });
+  }
+
+  try {
+    const upstream = await fetch(`${GATEWAY_URL.replace(/\/$/, '')}/health`, {
+      signal: AbortSignal.timeout(10_000),
+    });
+    const body = await upstream.text();
+    res.setHeader('content-type', upstream.headers.get('content-type') ?? 'application/json');
+    return res.status(upstream.status).send(body);
+  } catch (e) {
+    return res.status(502).json({ ok: false, error: (e as Error).message });
+  }
+}
