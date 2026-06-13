@@ -1,15 +1,17 @@
-import { useOutletContext } from 'react-router-dom';
-import { methodPillClass } from '../lib/format';
-import { useStore } from '../lib/store';
-import type { PublicInfo } from '../lib/types';
+import { useOutletContext } from 'react-router-dom'
+
+import { methodPillClass } from '../lib/format'
+import { useStore } from '../lib/store'
+
+import type { PublicInfo } from '../lib/types'
 
 type Endpoint = {
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE';
-  path: string;
-  auth: 'public' | 'admin' | 'apiKey';
-  descKey: string;
-  example: string;
-};
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE'
+  path: string
+  auth: 'public' | 'admin' | 'apiKey'
+  descKey: string
+  example: string
+}
 
 const COMMON: Endpoint[] = [
   {
@@ -124,7 +126,7 @@ const COMMON: Endpoint[] = [
     descKey: 'api.desc.lighthouse',
     example: `curl -X POST -H "x-admin-token: $T" -d '{"url":"https://www.example.com/"}' http://localhost:3000/admin/api/lighthouse`,
   },
-];
+]
 
 const CMS_EXTRA: Endpoint[] = [
   {
@@ -169,7 +171,7 @@ const CMS_EXTRA: Endpoint[] = [
     descKey: 'api.desc.cmsStats',
     example: 'curl -H "x-admin-token: $T" http://localhost:3000/admin/api/cms/stats',
   },
-];
+]
 
 const SAAS_EXTRA: Endpoint[] = [
   {
@@ -207,19 +209,19 @@ const SAAS_EXTRA: Endpoint[] = [
     descKey: 'api.desc.saasStats',
     example: 'curl -H "x-admin-token: $T" http://localhost:3000/admin/api/multi-tenant/stats',
   },
-];
+]
 
-type Ctx = { publicInfo: PublicInfo | null };
+type Ctx = { publicInfo: PublicInfo | null }
 
 export function ApiExplorer() {
-  const t = useStore((s) => s.t);
-  const { publicInfo } = useOutletContext<Ctx>();
-  const mode = publicInfo?.mode;
+  const t = useStore((s) => s.t)
+  const { publicInfo } = useOutletContext<Ctx>()
+  const mode = publicInfo?.mode
   const list = [
     ...COMMON,
     ...(mode === 'cms' ? CMS_EXTRA : []),
     ...(mode === 'saas' ? SAAS_EXTRA : []),
-  ];
+  ]
 
   return (
     <section className="space-y-4" data-testid="page-api">
@@ -247,5 +249,5 @@ export function ApiExplorer() {
         ))}
       </div>
     </section>
-  );
+  )
 }

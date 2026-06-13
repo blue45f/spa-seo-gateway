@@ -10,42 +10,44 @@ import {
   Settings,
   ShieldCheck,
   Terminal,
-} from 'lucide-react';
-import type { ComponentProps } from 'react';
-import { useEffect, useRef, useState } from 'react';
-import { useStore } from '../lib/store';
+} from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+
+import { useStore } from '../lib/store'
+
+import type { ComponentProps } from 'react'
 
 interface Message {
-  id: string;
-  sender: 'user' | 'agent' | 'thought' | 'system';
-  text: string;
-  timestamp: string;
+  id: string
+  sender: 'user' | 'agent' | 'thought' | 'system'
+  text: string
+  timestamp: string
 }
 
 interface McpServer {
-  name: string;
-  type: 'stdio' | 'sse';
-  target: string;
-  connected: boolean;
+  name: string
+  type: 'stdio' | 'sse'
+  target: string
+  connected: boolean
 }
 
-type FormSubmitHandler = NonNullable<ComponentProps<'form'>['onSubmit']>;
+type FormSubmitHandler = NonNullable<ComponentProps<'form'>['onSubmit']>
 
 function getMessageBubbleClass(sender: Message['sender']) {
   if (sender === 'user') {
-    return 'bg-indigo-600 text-white rounded-tr-none';
+    return 'bg-indigo-600 text-white rounded-tr-none'
   }
   if (sender === 'system') {
-    return 'bg-white/5 border border-border text-muted-foreground text-xs rounded-lg';
+    return 'bg-white/5 border border-border text-muted-foreground text-xs rounded-lg'
   }
-  return 'bg-white/10 dark:bg-black/40 border border-border/50 text-foreground rounded-tl-none shadow-sm';
+  return 'bg-white/10 dark:bg-black/40 border border-border/50 text-foreground rounded-tl-none shadow-sm'
 }
 
 export function AgentDashboard() {
-  const lang = useStore((s) => s.lang);
+  const lang = useStore((s) => s.lang)
   const [activeTab, setActiveTab] = useState<'console' | 'mcp' | 'safety' | 'observability'>(
-    'console',
-  );
+    'console'
+  )
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -56,16 +58,16 @@ export function AgentDashboard() {
           : 'Google Antigravity Agent session initialized. Default model: gemini-3.5-flash',
       timestamp: new Date().toLocaleTimeString(),
     },
-  ]);
-  const [inputText, setInputText] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
-  const [currentThoughts, setCurrentThoughts] = useState<string>('');
+  ])
+  const [inputText, setInputText] = useState('')
+  const [isTyping, setIsTyping] = useState(false)
+  const [currentThoughts, setCurrentThoughts] = useState<string>('')
 
   // Model Settings
-  const [selectedModel, setSelectedModel] = useState('gemini-3.5-flash');
+  const [selectedModel, setSelectedModel] = useState('gemini-3.5-flash')
   const [systemInstructions, setSystemInstructions] = useState(
-    'You are a helpful coding assistant specialized in SEO gateways.',
-  );
+    'You are a helpful coding assistant specialized in SEO gateways.'
+  )
 
   // MCP State
   const [mcpServers, setMcpServers] = useState<McpServer[]>([
@@ -81,10 +83,10 @@ export function AgentDashboard() {
       target: 'https://mcp.seo-gateway.dev/sse',
       connected: false,
     },
-  ]);
-  const [newMcpName, setNewMcpName] = useState('');
-  const [newMcpType, setNewMcpType] = useState<'stdio' | 'sse'>('stdio');
-  const [newMcpTarget, setNewMcpTarget] = useState('');
+  ])
+  const [newMcpName, setNewMcpName] = useState('')
+  const [newMcpType, setNewMcpType] = useState<'stdio' | 'sse'>('stdio')
+  const [newMcpTarget, setNewMcpTarget] = useState('')
 
   // Safety Policies
   const [policies, setPolicies] = useState([
@@ -108,7 +110,7 @@ export function AgentDashboard() {
       enabled: true,
       isCustom: true,
     },
-  ]);
+  ])
 
   // Observability & Token Metrics
   const [tokenUsage, setTokenUsage] = useState({
@@ -116,12 +118,12 @@ export function AgentDashboard() {
     candidates: 850,
     thoughts: 1100,
     total: 3370,
-  });
+  })
 
-  const chatEndRef = useRef<HTMLDivElement>(null);
+  const chatEndRef = useRef<HTMLDivElement>(null)
   const appendMessage = (message: Message) => {
-    setMessages((prev) => [...prev, message]);
-  };
+    setMessages((prev) => [...prev, message])
+  }
   const addTokenUsage = (delta: Partial<typeof tokenUsage>) => {
     setTokenUsage((prev) => ({
       ...prev,
@@ -129,47 +131,46 @@ export function AgentDashboard() {
       candidates: prev.candidates + (delta.candidates ?? 0),
       thoughts: prev.thoughts + (delta.thoughts ?? 0),
       total: prev.total + (delta.total ?? 0),
-    }));
-  };
+    }))
+  }
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: scroll triggering requires tracking messages and thoughts state
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, currentThoughts]);
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages, currentThoughts])
 
   // Simulated Chat Action
   const handleSendMessage: FormSubmitHandler = (e) => {
-    e.preventDefault();
-    if (!inputText.trim() || isTyping) return;
+    e.preventDefault()
+    if (!inputText.trim() || isTyping) return
 
     const userMsg: Message = {
       id: Date.now().toString(),
       sender: 'user',
       text: inputText,
       timestamp: new Date().toLocaleTimeString(),
-    };
+    }
 
-    appendMessage(userMsg);
-    setInputText('');
-    setIsTyping(true);
-    setCurrentThoughts('');
+    appendMessage(userMsg)
+    setInputText('')
+    setIsTyping(true)
+    setCurrentThoughts('')
 
     // Simulated thought & output stream
-    let thoughtStep = 0;
+    let thoughtStep = 0
     const thoughtsList = [
       'Thinking: Analyzing input prompt...',
       'Thinking: Scanning local files using BuiltinTools.LIST_DIR...',
       'Thinking: Requesting SEO validator MCP server for canonical checks...',
       'Thinking: Validating answer compliance with Safety Policies...',
-    ];
+    ]
 
     const thoughtInterval = setInterval(() => {
       if (thoughtStep < thoughtsList.length) {
-        setCurrentThoughts((prev) => prev + (prev ? '\n' : '') + thoughtsList[thoughtStep]);
-        addTokenUsage({ thoughts: 120, total: 120 });
-        thoughtStep++;
+        setCurrentThoughts((prev) => prev + (prev ? '\n' : '') + thoughtsList[thoughtStep])
+        addTokenUsage({ thoughts: 120, total: 120 })
+        thoughtStep++
       } else {
-        clearInterval(thoughtInterval);
+        clearInterval(thoughtInterval)
 
         // Output response
         setTimeout(() => {
@@ -181,19 +182,19 @@ export function AgentDashboard() {
                 ? `[Google Antigravity Agent]\n요청하신 SEO 최적화 분석을 완료했습니다. 검사 결과, 현재 활성화된 MCP 서버와 연동하여 캐시 규칙에 따른 렌더 상태를 통과시켰습니다. 안전 정책에 의해 rm 등의 파괴적인 쉘 명령어는 엄격히 격리 차단된 상태입니다.`
                 : `[Google Antigravity Agent]\nCompleted your requested SEO optimization analysis. Verified that the pre-rendered caching guidelines are satisfied via MCP server tools. Destructive terminal commands are blocked by the active safety predicate filter.`,
             timestamp: new Date().toLocaleTimeString(),
-          };
-          appendMessage(agentResponse);
-          addTokenUsage({ prompt: 200, candidates: 150, total: 350 });
-          setCurrentThoughts('');
-          setIsTyping(false);
-        }, 800);
+          }
+          appendMessage(agentResponse)
+          addTokenUsage({ prompt: 200, candidates: 150, total: 350 })
+          setCurrentThoughts('')
+          setIsTyping(false)
+        }, 800)
       }
-    }, 900);
-  };
+    }, 900)
+  }
 
   const handleAddMcp: FormSubmitHandler = (e) => {
-    e.preventDefault();
-    if (!newMcpName.trim() || !newMcpTarget.trim()) return;
+    e.preventDefault()
+    if (!newMcpName.trim() || !newMcpTarget.trim()) return
 
     setMcpServers((prev) => [
       ...prev,
@@ -203,10 +204,10 @@ export function AgentDashboard() {
         target: newMcpTarget,
         connected: true,
       },
-    ]);
-    setNewMcpName('');
-    setNewMcpTarget('');
-  };
+    ])
+    setNewMcpName('')
+    setNewMcpTarget('')
+  }
 
   const togglePolicy = (id: string) => {
     setPolicies((prev) =>
@@ -214,20 +215,20 @@ export function AgentDashboard() {
         if (p.id === id) {
           // deny_all vs confirm_run_command exclusive toggle behavior for safety
           if (p.name === 'deny_all()' && !p.enabled) {
-            return { ...p, enabled: true };
+            return { ...p, enabled: true }
           }
-          return { ...p, enabled: !p.enabled };
+          return { ...p, enabled: !p.enabled }
         }
         if (p.id !== id && p.name === 'confirm_run_command()' && id === '1') {
-          return { ...p, enabled: false };
+          return { ...p, enabled: false }
         }
         if (p.id !== id && p.name === 'deny_all()' && id === '2') {
-          return { ...p, enabled: false };
+          return { ...p, enabled: false }
         }
-        return p;
-      }),
-    );
-  };
+        return p
+      })
+    )
+  }
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto p-4 md:p-6 text-foreground bg-background transition-all duration-300">
@@ -275,8 +276,8 @@ export function AgentDashboard() {
             icon: Activity,
           },
         ].map((tab) => {
-          const Icon = tab.icon;
-          const active = activeTab === tab.id;
+          const Icon = tab.icon
+          const active = activeTab === tab.id
           return (
             <button
               key={tab.id}
@@ -291,7 +292,7 @@ export function AgentDashboard() {
               <Icon className="h-4 w-4" />
               <span>{tab.label}</span>
             </button>
-          );
+          )
         })}
       </div>
 
@@ -415,7 +416,7 @@ export function AgentDashboard() {
                         text: 'Session reset. Reinitialized with default model gemini-3.5-flash.',
                         timestamp: new Date().toLocaleTimeString(),
                       },
-                    ]);
+                    ])
                   }}
                   className="p-1 hover:bg-white/5 rounded text-muted hover:text-foreground transition-all"
                   title="Clear history"
@@ -814,5 +815,5 @@ policy.deny(
         </div>
       </div>
     </div>
-  );
+  )
 }

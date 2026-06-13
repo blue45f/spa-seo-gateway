@@ -1,6 +1,8 @@
-import type { Meta, StoryObj } from '@storybook/react';
-import { NAV_ITEMS } from '../lib/nav';
-import { NavIcon } from './NavIcon';
+import { NAV_ITEMS } from '../lib/nav'
+
+import { NavIcon } from './NavIcon'
+
+import type { Meta, StoryObj } from '@storybook/react'
 
 const meta = {
   title: 'Components/NavIcon',
@@ -15,12 +17,12 @@ const meta = {
     },
   },
   args: { id: 'dashboard', className: 'h-6 w-6' },
-} satisfies Meta<typeof NavIcon>;
+} satisfies Meta<typeof NavIcon>
 
-export default meta;
-type Story = StoryObj<typeof meta>;
+export default meta
+type Story = StoryObj<typeof meta>
 
-export const Single: Story = {};
+export const Single: Story = {}
 
 /** Every nav id and the icon it resolves to. */
 export const AllNavIcons: Story = {
@@ -34,4 +36,4 @@ export const AllNavIcons: Story = {
       ))}
     </div>
   ),
-};
+}

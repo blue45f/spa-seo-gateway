@@ -1,7 +1,10 @@
-import type { Meta, StoryObj } from '@storybook/react';
-import { useState } from 'react';
-import { useDialog } from '../lib/dialog';
-import { DialogHost } from './DialogHost';
+import { useState } from 'react'
+
+import { useDialog } from '../lib/dialog'
+
+import { DialogHost } from './DialogHost'
+
+import type { Meta, StoryObj } from '@storybook/react'
 
 const meta = {
   title: 'Components/DialogHost',
@@ -17,14 +20,14 @@ const meta = {
       },
     },
   },
-} satisfies Meta<typeof DialogHost>;
+} satisfies Meta<typeof DialogHost>
 
-export default meta;
-type Story = StoryObj<typeof meta>;
+export default meta
+type Story = StoryObj<typeof meta>
 
 function Demo() {
-  const { confirm, prompt } = useDialog();
-  const [last, setLast] = useState('—');
+  const { confirm, prompt } = useDialog()
+  const [last, setLast] = useState('—')
   return (
     <div className="p-8 space-y-3">
       <div className="flex flex-wrap gap-2">
@@ -36,8 +39,8 @@ function Demo() {
               title: 'Clear all caches?',
               description: 'Subsequent requests will start cold.',
               confirmLabel: 'Clear all',
-            });
-            setLast(`confirm → ${ok}`);
+            })
+            setLast(`confirm → ${ok}`)
           }}
         >
           confirm
@@ -51,8 +54,8 @@ function Demo() {
               description: 'The action is permanent and clears its cache namespace.',
               confirmLabel: 'Delete',
               danger: true,
-            });
-            setLast(`danger confirm → ${ok}`);
+            })
+            setLast(`danger confirm → ${ok}`)
           }}
         >
           danger confirm
@@ -66,8 +69,8 @@ function Demo() {
               description: 'URL to invalidate',
               placeholder: 'https://www.example.com/posts/1',
               validate: (v) => (v.trim() ? null : 'Please enter a value.'),
-            });
-            setLast(`prompt → ${url === null ? 'null' : JSON.stringify(url)}`);
+            })
+            setLast(`prompt → ${url === null ? 'null' : JSON.stringify(url)}`)
           }}
         >
           prompt
@@ -78,9 +81,9 @@ function Demo() {
       </p>
       <DialogHost />
     </div>
-  );
+  )
 }
 
 export const Interactive: Story = {
   render: () => <Demo />,
-};
+}

@@ -1,42 +1,43 @@
-import { type FormEvent, useState } from 'react';
-import { AuthGate } from '../components/AuthGate';
-import { api, errorMessage } from '../lib/api';
-import { useDialog } from '../lib/dialog';
-import { useStore } from '../lib/store';
+import { type FormEvent, useState } from 'react'
+
+import { AuthGate } from '../components/AuthGate'
+import { api, errorMessage } from '../lib/api'
+import { useDialog } from '../lib/dialog'
+import { useStore } from '../lib/store'
 
 export function Cache() {
   return (
     <AuthGate>
       <CacheBody />
     </AuthGate>
-  );
+  )
 }
 
 function CacheBody() {
-  const t = useStore((s) => s.t);
-  const pushToast = useStore((s) => s.pushToast);
-  const setError = useStore((s) => s.setGlobalError);
-  const { confirm } = useDialog();
-  const [url, setUrl] = useState('');
-  const [busy, setBusy] = useState(false);
-  const [lastResult, setLastResult] = useState('');
+  const t = useStore((s) => s.t)
+  const pushToast = useStore((s) => s.pushToast)
+  const setError = useStore((s) => s.setGlobalError)
+  const { confirm } = useDialog()
+  const [url, setUrl] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [lastResult, setLastResult] = useState('')
 
   async function invalidate(e: FormEvent) {
-    e.preventDefault();
-    if (!url.trim() || busy) return;
-    setBusy(true);
+    e.preventDefault()
+    if (!url.trim() || busy) return
+    setBusy(true)
     try {
       const r = await api<{ ok: true; key: string }>('POST', '/admin/api/cache/invalidate', {
         url: url.trim(),
-      });
-      setLastResult(`삭제됨: key=${r.key}`);
-      pushToast(t('toast.url.invalidated'), 'success');
+      })
+      setLastResult(`삭제됨: key=${r.key}`)
+      pushToast(t('toast.url.invalidated'), 'success')
     } catch (e) {
-      const msg = errorMessage(e);
-      setError(msg);
-      pushToast(msg, 'error');
+      const msg = errorMessage(e)
+      setError(msg)
+      pushToast(msg, 'error')
     } finally {
-      setBusy(false);
+      setBusy(false)
     }
   }
 
@@ -46,19 +47,19 @@ function CacheBody() {
       description: t('cache.clear.confirm.desc'),
       confirmLabel: t('btn.clear-all'),
       danger: true,
-    });
-    if (!ok) return;
-    setBusy(true);
+    })
+    if (!ok) return
+    setBusy(true)
     try {
-      const r = await api<{ ok: true; cleared: number }>('POST', '/admin/api/cache/clear');
-      setLastResult(`${t('cache.cleared')} (${r.cleared} entries)`);
-      pushToast(t('cache.cleared'), 'success');
+      const r = await api<{ ok: true; cleared: number }>('POST', '/admin/api/cache/clear')
+      setLastResult(`${t('cache.cleared')} (${r.cleared} entries)`)
+      pushToast(t('cache.cleared'), 'success')
     } catch (e) {
-      const msg = errorMessage(e);
-      setError(msg);
-      pushToast(msg, 'error');
+      const msg = errorMessage(e)
+      setError(msg)
+      pushToast(msg, 'error')
     } finally {
-      setBusy(false);
+      setBusy(false)
     }
   }
 
@@ -115,5 +116,5 @@ function CacheBody() {
         ) : null}
       </div>
     </section>
-  );
+  )
 }

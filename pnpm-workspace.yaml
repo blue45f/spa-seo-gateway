@@ -5,25 +5,22 @@ packages:
 allowBuilds:
   esbuild: true
   puppeteer: true
+  unrs-resolver: true
 
 minimumReleaseAgeExclude:
-  - '@biomejs/biome@2.4.16'
-  - '@biomejs/cli-darwin-arm64@2.4.16'
-  - '@biomejs/cli-darwin-x64@2.4.16'
-  - '@biomejs/cli-linux-arm64-musl@2.4.16'
-  - '@biomejs/cli-linux-arm64@2.4.16'
-  - '@biomejs/cli-linux-x64-musl@2.4.16'
-  - '@biomejs/cli-linux-x64@2.4.16'
-  - '@biomejs/cli-win32-arm64@2.4.16'
-  - '@biomejs/cli-win32-x64@2.4.16'
   - '@vercel/build-utils@13.26.3'
   - '@vercel/node@5.8.6'
   - '@vercel/static-config@3.4.0'
+  - '@heejun/eslint-config@5.0.0'
+  - '@heejun/prettier-config@3.0.0'
 
 overrides:
-  minimatch: ">=10.2.3"
-  undici: ">=6.24.0"
-  ajv: ">=8.18.0"
-  smol-toml: ">=1.6.1"
-  path-to-regexp: ">=6.3.0"
-  uuid: ">=11.1.1"
+  minimatch: '>=10.2.3'
+  undici: '>=6.24.0'
+  ajv: '>=8.18.0'
+  # ESLint 코어는 ajv@^6 의 draft-04 메타스키마(ajv 7+ 에서 제거됨)에 의존하므로
+  # 보안용 전역 ajv>=8 오버라이드를 eslint 하위에서만 6.x 로 되돌린다.
+  eslint>ajv: '^6.12.6'
+  smol-toml: '>=1.6.1'
+  path-to-regexp: '>=6.3.0'
+  uuid: '>=11.1.1'

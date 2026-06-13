@@ -1,6 +1,8 @@
-import type { Meta, StoryObj } from '@storybook/react';
-import { useState } from 'react';
-import { Modal } from './Modal';
+import { useState } from 'react'
+
+import { Modal } from './Modal'
+
+import type { Meta, StoryObj } from '@storybook/react'
 
 const meta = {
   title: 'Components/Modal',
@@ -30,14 +32,14 @@ const meta = {
     size: { control: 'inline-radio', options: ['md', 'lg', 'xl'] },
     open: { control: 'boolean' },
   },
-} satisfies Meta<typeof Modal>;
+} satisfies Meta<typeof Modal>
 
-export default meta;
-type Story = StoryObj<typeof meta>;
+export default meta
+type Story = StoryObj<typeof meta>
 
-export const Default: Story = {};
+export const Default: Story = {}
 
-export const Medium: Story = { args: { size: 'md', title: 'Confirm delete' } };
+export const Medium: Story = { args: { size: 'md', title: 'Confirm delete' } }
 
 export const ExtraLarge: Story = {
   args: {
@@ -56,14 +58,14 @@ export const ExtraLarge: Story = {
       </div>
     ),
   },
-};
+}
 
 export const Closed: Story = {
   args: { open: false },
   parameters: {
     docs: { description: { story: 'When `open` is false the modal renders nothing.' } },
   },
-};
+}
 
 /**
  * Interactive open/close — wraps Modal in a state container so the close button
@@ -72,7 +74,7 @@ export const Closed: Story = {
 export const Interactive: Story = {
   render: (args) => {
     function Wrapper() {
-      const [open, setOpen] = useState(true);
+      const [open, setOpen] = useState(true)
       return (
         <div className="p-8">
           <button
@@ -84,8 +86,8 @@ export const Interactive: Story = {
           </button>
           <Modal {...args} open={open} onClose={() => setOpen(false)} />
         </div>
-      );
+      )
     }
-    return <Wrapper />;
+    return <Wrapper />
   },
-};
+}

@@ -1,31 +1,33 @@
-import { CircleAlert, CircleCheck, CircleX, Info, type LucideIcon, X } from 'lucide-react';
-import { useStore } from '../lib/store';
-import type { ToastKind } from '../lib/types';
+import { CircleAlert, CircleCheck, CircleX, Info, type LucideIcon, X } from 'lucide-react'
+
+import { useStore } from '../lib/store'
+
+import type { ToastKind } from '../lib/types'
 
 const KIND_BG: Record<string, string> = {
   success: 'bg-ok-bg text-ok-fg border border-ok',
   error: 'bg-err-bg text-err-fg border border-err',
   warn: 'bg-warn-bg text-warn-fg border border-warn',
   info: 'bg-accent-soft text-ink border border-accent',
-};
+}
 
 const KIND_ICON: Record<ToastKind, LucideIcon> = {
   success: CircleCheck,
   error: CircleX,
   warn: CircleAlert,
   info: Info,
-};
+}
 
 export function ToastContainer() {
-  const toasts = useStore((s) => s.toasts);
-  const removeToast = useStore((s) => s.removeToast);
+  const toasts = useStore((s) => s.toasts)
+  const removeToast = useStore((s) => s.removeToast)
 
   return (
     // 순수 위치 컨테이너 — live-region 은 토스트별로 둔다(중첩 금지). 각 토스트의 role
     // (error→alert/assertive, 그 외→status/polite)이 자체적으로 SR 알림 정중함을 운반.
     <div className="fixed bottom-4 right-4 z-[100] space-y-2" data-testid="toast-container">
       {toasts.map((t) => {
-        const Icon = KIND_ICON[t.kind] ?? Info;
+        const Icon = KIND_ICON[t.kind] ?? Info
         return (
           <div
             key={t.id}
@@ -43,8 +45,8 @@ export function ToastContainer() {
               <X aria-hidden="true" className="h-3.5 w-3.5" strokeWidth={2} />
             </button>
           </div>
-        );
+        )
       })}
     </div>
-  );
+  )
 }

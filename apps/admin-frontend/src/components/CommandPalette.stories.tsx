@@ -1,17 +1,20 @@
-import type { Meta, StoryObj } from '@storybook/react';
-import { useEffect } from 'react';
-import { MemoryRouter } from 'react-router-dom';
-import { useStore } from '../lib/store';
-import { CommandPalette } from './CommandPalette';
+import { useEffect } from 'react'
+import { MemoryRouter } from 'react-router-dom'
+
+import { useStore } from '../lib/store'
+
+import { CommandPalette } from './CommandPalette'
+
+import type { Meta, StoryObj } from '@storybook/react'
 
 function SeedOpen({ open }: { open: boolean }) {
   useEffect(() => {
-    useStore.setState({ cmdPaletteOpen: open });
+    useStore.setState({ cmdPaletteOpen: open })
     return () => {
-      useStore.setState({ cmdPaletteOpen: false });
-    };
-  }, [open]);
-  return null;
+      useStore.setState({ cmdPaletteOpen: false })
+    }
+  }, [open])
+  return null
 }
 
 const meta = {
@@ -34,10 +37,10 @@ const meta = {
       </MemoryRouter>
     ),
   ],
-} satisfies Meta<typeof CommandPalette>;
+} satisfies Meta<typeof CommandPalette>
 
-export default meta;
-type Story = StoryObj<typeof meta>;
+export default meta
+type Story = StoryObj<typeof meta>
 
 export const Open: Story = {
   render: () => (
@@ -46,7 +49,7 @@ export const Open: Story = {
       <CommandPalette />
     </>
   ),
-};
+}
 
 export const Closed: Story = {
   render: () => (
@@ -56,4 +59,4 @@ export const Closed: Story = {
       <CommandPalette />
     </div>
   ),
-};
+}

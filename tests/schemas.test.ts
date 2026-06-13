@@ -1,7 +1,7 @@
-import { SiteSchema } from '@heejun/spa-seo-gateway-cms';
-import { ConfigSchema } from '@heejun/spa-seo-gateway-core';
-import { TenantMemberSchema, TenantSchema } from '@heejun/spa-seo-gateway-multi-tenant';
-import { describe, expect, it } from 'vitest';
+import { SiteSchema } from '@heejun/spa-seo-gateway-cms'
+import { ConfigSchema } from '@heejun/spa-seo-gateway-core'
+import { TenantMemberSchema, TenantSchema } from '@heejun/spa-seo-gateway-multi-tenant'
+import { describe, expect, it } from 'vitest'
 
 describe('TenantSchema', () => {
   const valid = {
@@ -12,51 +12,51 @@ describe('TenantSchema', () => {
     routes: [],
     plan: 'pro' as const,
     enabled: true,
-  };
+  }
 
   it('accepts a valid tenant', () => {
-    expect(TenantSchema.safeParse(valid).success).toBe(true);
-  });
+    expect(TenantSchema.safeParse(valid).success).toBe(true)
+  })
 
   it('rejects id with uppercase or special chars', () => {
-    expect(TenantSchema.safeParse({ ...valid, id: 'AcMe' }).success).toBe(false);
-    expect(TenantSchema.safeParse({ ...valid, id: 'acme!' }).success).toBe(false);
-  });
+    expect(TenantSchema.safeParse({ ...valid, id: 'AcMe' }).success).toBe(false)
+    expect(TenantSchema.safeParse({ ...valid, id: 'acme!' }).success).toBe(false)
+  })
 
   it('rejects short apiKey', () => {
-    expect(TenantSchema.safeParse({ ...valid, apiKey: 'short' }).success).toBe(false);
-  });
+    expect(TenantSchema.safeParse({ ...valid, apiKey: 'short' }).success).toBe(false)
+  })
 
   it('rejects non-URL origin', () => {
-    expect(TenantSchema.safeParse({ ...valid, origin: 'not a url' }).success).toBe(false);
-  });
+    expect(TenantSchema.safeParse({ ...valid, origin: 'not a url' }).success).toBe(false)
+  })
 
   it('coerces enabled from string', () => {
-    const r = TenantSchema.safeParse({ ...valid, enabled: 'true' });
-    expect(r.success).toBe(true);
-    if (r.success) expect(r.data.enabled).toBe(true);
-  });
+    const r = TenantSchema.safeParse({ ...valid, enabled: 'true' })
+    expect(r.success).toBe(true)
+    if (r.success) expect(r.data.enabled).toBe(true)
+  })
 
   it('defaults plan to free when missing', () => {
-    const { plan: _omit, ...rest } = valid;
-    const r = TenantSchema.safeParse(rest);
-    expect(r.success).toBe(true);
-    if (r.success) expect(r.data.plan).toBe('free');
-  });
+    const { plan: _omit, ...rest } = valid
+    const r = TenantSchema.safeParse(rest)
+    expect(r.success).toBe(true)
+    if (r.success) expect(r.data.plan).toBe('free')
+  })
 
   it('defaults members to an empty list when missing', () => {
-    const r = TenantSchema.safeParse(valid);
-    expect(r.success).toBe(true);
-    if (r.success) expect(r.data.members).toEqual([]);
-  });
+    const r = TenantSchema.safeParse(valid)
+    expect(r.success).toBe(true)
+    if (r.success) expect(r.data.members).toEqual([])
+  })
 
   it('normalizes member emails and rejects normalized duplicates', () => {
     const member = TenantMemberSchema.parse({
       email: ' Owner@Example.COM ',
       role: 'owner',
       status: 'active',
-    });
-    expect(member.email).toBe('owner@example.com');
+    })
+    expect(member.email).toBe('owner@example.com')
 
     const duplicate = TenantSchema.safeParse({
       ...valid,
@@ -64,26 +64,26 @@ describe('TenantSchema', () => {
         { email: 'owner@example.com', role: 'owner', status: 'active' },
         { email: ' OWNER@example.com ', role: 'admin', status: 'active' },
       ],
-    });
-    expect(duplicate.success).toBe(false);
-  });
+    })
+    expect(duplicate.success).toBe(false)
+  })
 
   it('validates nested route override', () => {
     const r = TenantSchema.safeParse({
       ...valid,
       routes: [{ pattern: '^/p/', ttlMs: 60_000, waitUntil: 'networkidle2' }],
-    });
-    expect(r.success).toBe(true);
-  });
+    })
+    expect(r.success).toBe(true)
+  })
 
   it('rejects route with bad waitUntil enum', () => {
     const r = TenantSchema.safeParse({
       ...valid,
       routes: [{ pattern: '^/x/', waitUntil: 'eventually' }],
-    });
-    expect(r.success).toBe(false);
-  });
-});
+    })
+    expect(r.success).toBe(false)
+  })
+})
 
 describe('SiteSchema', () => {
   const valid = {
@@ -92,32 +92,32 @@ describe('SiteSchema', () => {
     origin: 'https://www.example.com',
     routes: [],
     enabled: true,
-  };
+  }
 
   it('accepts a valid site', () => {
-    expect(SiteSchema.safeParse(valid).success).toBe(true);
-  });
+    expect(SiteSchema.safeParse(valid).success).toBe(true)
+  })
 
   it('rejects id with spaces', () => {
-    expect(SiteSchema.safeParse({ ...valid, id: 'my site' }).success).toBe(false);
-  });
+    expect(SiteSchema.safeParse({ ...valid, id: 'my site' }).success).toBe(false)
+  })
 
   it('accepts optional webhooks block', () => {
     const r = SiteSchema.safeParse({
       ...valid,
       webhooks: { onRender: 'https://hook.example.com/render' },
-    });
-    expect(r.success).toBe(true);
-  });
+    })
+    expect(r.success).toBe(true)
+  })
 
   it('rejects invalid webhook URL', () => {
     const r = SiteSchema.safeParse({
       ...valid,
       webhooks: { onRender: 'not a url' },
-    });
-    expect(r.success).toBe(false);
-  });
-});
+    })
+    expect(r.success).toBe(false)
+  })
+})
 
 describe('ConfigSchema', () => {
   it('applies defaults when nested objects are passed empty', () => {
@@ -128,20 +128,20 @@ describe('ConfigSchema', () => {
       cache: { memory: {}, redis: {} },
       rateLimit: {},
       log: {},
-    });
-    expect(r.success).toBe(true);
+    })
+    expect(r.success).toBe(true)
     if (r.success) {
-      expect(r.data.mode).toBe('render-only');
-      expect(r.data.renderer.poolMin).toBe(2);
-      expect(r.data.renderer.poolMax).toBe(8);
-      expect(r.data.cache.swrWindowMs).toBeGreaterThan(0);
+      expect(r.data.mode).toBe('render-only')
+      expect(r.data.renderer.poolMin).toBe(2)
+      expect(r.data.renderer.poolMax).toBe(8)
+      expect(r.data.cache.swrWindowMs).toBeGreaterThan(0)
     }
-  });
+  })
 
   it('rejects invalid mode value', () => {
-    const r = ConfigSchema.safeParse({ mode: 'banana' });
-    expect(r.success).toBe(false);
-  });
+    const r = ConfigSchema.safeParse({ mode: 'banana' })
+    expect(r.success).toBe(false)
+  })
 
   it('accepts all valid mode values', () => {
     for (const m of ['render-only', 'proxy', 'cms', 'saas']) {
@@ -153,8 +153,8 @@ describe('ConfigSchema', () => {
         cache: { memory: {}, redis: {} },
         rateLimit: {},
         log: {},
-      });
-      expect(r.success, `mode=${m} should parse`).toBe(true);
+      })
+      expect(r.success, `mode=${m} should parse`).toBe(true)
     }
-  });
-});
+  })
+})

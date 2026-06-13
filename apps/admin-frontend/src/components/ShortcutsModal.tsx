@@ -1,18 +1,19 @@
-import * as Dialog from '@radix-ui/react-dialog';
-import { useId } from 'react';
-import { useStore } from '../lib/store';
+import * as Dialog from '@radix-ui/react-dialog'
+import { useId } from 'react'
+
+import { useStore } from '../lib/store'
 
 export function ShortcutsModal() {
-  const open = useStore((s) => s.shortcutsOpen);
-  const close = useStore((s) => s.closeShortcuts);
-  const t = useStore((s) => s.t);
-  const titleId = useId();
+  const open = useStore((s) => s.shortcutsOpen)
+  const close = useStore((s) => s.closeShortcuts)
+  const t = useStore((s) => s.t)
+  const titleId = useId()
 
   return (
     <Dialog.Root
       open={open}
       onOpenChange={(o) => {
-        if (!o) close();
+        if (!o) close()
       }}
     >
       <Dialog.Portal>
@@ -69,5 +70,5 @@ export function ShortcutsModal() {
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>
-  );
+  )
 }

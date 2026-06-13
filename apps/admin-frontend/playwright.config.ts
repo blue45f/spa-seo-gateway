@@ -1,4 +1,4 @@
-import { defineConfig, devices } from '@playwright/test';
+import { defineConfig, devices } from '@playwright/test'
 
 /**
  * Playwright harness scoped to automated accessibility (axe) checks only.
@@ -12,8 +12,8 @@ import { defineConfig, devices } from '@playwright/test';
  * shell), so the chrome (nav, header, skip link, footer) still renders fully and
  * deterministically. That keeps the check fast and non-flaky.
  */
-const PORT = Number(process.env.A11Y_PORT ?? 4317);
-const BASE_PATH = '/admin/ui/';
+const PORT = Number(process.env.A11Y_PORT ?? 4317)
+const BASE_PATH = '/admin/ui/'
 
 export default defineConfig({
   testDir: './tests/a11y',
@@ -40,4 +40,4 @@ export default defineConfig({
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
   },
-});
+})

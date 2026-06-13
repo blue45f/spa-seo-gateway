@@ -1,38 +1,40 @@
-import { type FormEvent, useState } from 'react';
-import { AuthGate } from '../components/AuthGate';
-import { api, errorMessage } from '../lib/api';
-import { lighthouseScoreBand, lighthouseScoreColor } from '../lib/format';
-import { useStore } from '../lib/store';
-import type { LighthouseResult, LighthouseScores } from '../lib/types';
+import { type FormEvent, useState } from 'react'
+
+import { AuthGate } from '../components/AuthGate'
+import { api, errorMessage } from '../lib/api'
+import { lighthouseScoreBand, lighthouseScoreColor } from '../lib/format'
+import { useStore } from '../lib/store'
+
+import type { LighthouseResult, LighthouseScores } from '../lib/types'
 
 export function Lighthouse() {
   return (
     <AuthGate>
       <LighthouseBody />
     </AuthGate>
-  );
+  )
 }
 
 function LighthouseBody() {
-  const t = useStore((s) => s.t);
-  const setError = useStore((s) => s.setGlobalError);
-  const [url, setUrl] = useState('');
-  const [running, setRunning] = useState(false);
-  const [result, setResult] = useState<LighthouseResult | null>(null);
+  const t = useStore((s) => s.t)
+  const setError = useStore((s) => s.setGlobalError)
+  const [url, setUrl] = useState('')
+  const [running, setRunning] = useState(false)
+  const [result, setResult] = useState<LighthouseResult | null>(null)
 
   async function run(e: FormEvent) {
-    e.preventDefault();
-    if (!url.trim() || running) return;
-    setRunning(true);
-    setResult(null);
+    e.preventDefault()
+    if (!url.trim() || running) return
+    setRunning(true)
+    setResult(null)
     try {
-      const r = await api<LighthouseResult>('POST', '/admin/api/lighthouse', { url: url.trim() });
-      setResult(r);
+      const r = await api<LighthouseResult>('POST', '/admin/api/lighthouse', { url: url.trim() })
+      setResult(r)
     } catch (e) {
-      const msg = errorMessage(e);
-      setError(msg);
+      const msg = errorMessage(e)
+      setError(msg)
     } finally {
-      setRunning(false);
+      setRunning(false)
     }
   }
 
@@ -41,7 +43,7 @@ function LighthouseBody() {
     { key: 'accessibility', label: t('lighthouse.scores.accessibility') },
     { key: 'seo', label: t('lighthouse.scores.seo') },
     { key: 'bestPractices', label: t('lighthouse.scores.bestPractices') },
-  ];
+  ]
 
   return (
     <section className="space-y-4" data-testid="page-lighthouse">
@@ -87,8 +89,8 @@ function LighthouseBody() {
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {labels.map((l) => {
-              const score = result.scores[l.key];
-              const band = lighthouseScoreBand(score);
+              const score = result.scores[l.key]
+              const band = lighthouseScoreBand(score)
               return (
                 <div key={l.key} className="bg-panel-2 rounded p-4 text-center">
                   <div className="text-xs text-ink-subtle">{l.label}</div>
@@ -105,11 +107,11 @@ function LighthouseBody() {
                     </span>
                   ) : null}
                 </div>
-              );
+              )
             })}
           </div>
         </div>
       ) : null}
     </section>
-  );
+  )
 }

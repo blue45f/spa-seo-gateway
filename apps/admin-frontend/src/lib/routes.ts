@@ -1,4 +1,4 @@
-import type { ScopedRoute } from './types';
+import type { ScopedRoute } from './types'
 
 /**
  * 라우트 편집 상태를 서버 전송용으로 직렬화 — 빈 pattern 행 제거, falsy 옵션 필드 생략.
@@ -15,5 +15,5 @@ export function cleanRoutes(routes: ScopedRoute[]) {
       ...(r.waitSelector ? { waitSelector: r.waitSelector } : {}),
       ...(r.waitMs ? { waitMs: Number(r.waitMs) } : {}),
       ...(r.ignore ? { ignore: true } : {}),
-    }));
+    }))
 }

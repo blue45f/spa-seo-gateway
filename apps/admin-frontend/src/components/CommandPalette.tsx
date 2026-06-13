@@ -1,74 +1,73 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { navItemsForLang } from '../lib/nav';
-import { useStore } from '../lib/store';
-import { useFocusRestore } from '../lib/useFocusRestore';
-import { useFocusTrap } from '../lib/useFocusTrap';
-import { NavIcon } from './NavIcon';
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+
+import { navItemsForLang } from '../lib/nav'
+import { useStore } from '../lib/store'
+import { useFocusRestore } from '../lib/useFocusRestore'
+import { useFocusTrap } from '../lib/useFocusTrap'
+
+import { NavIcon } from './NavIcon'
 
 export function CommandPalette() {
-  const open = useStore((s) => s.cmdPaletteOpen);
-  const close = useStore((s) => s.closeCmd);
-  const lang = useStore((s) => s.lang);
-  const mode = useStore((s) => s.publicInfo?.mode);
-  const t = useStore((s) => s.t);
-  const navigate = useNavigate();
-  const [query, setQuery] = useState('');
-  const [active, setActive] = useState(0);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const dialogRef = useRef<HTMLDivElement>(null);
-  const listRef = useRef<HTMLDivElement>(null);
+  const open = useStore((s) => s.cmdPaletteOpen)
+  const close = useStore((s) => s.closeCmd)
+  const lang = useStore((s) => s.lang)
+  const mode = useStore((s) => s.publicInfo?.mode)
+  const t = useStore((s) => s.t)
+  const navigate = useNavigate()
+  const [query, setQuery] = useState('')
+  const [active, setActive] = useState(0)
+  const inputRef = useRef<HTMLInputElement>(null)
+  const dialogRef = useRef<HTMLDivElement>(null)
+  const listRef = useRef<HTMLDivElement>(null)
 
-  useFocusRestore(open);
-  useFocusTrap(dialogRef, open);
+  useFocusRestore(open)
+  useFocusTrap(dialogRef, open)
 
   useEffect(() => {
     if (open) {
-      setQuery('');
-      setActive(0);
+      setQuery('')
+      setActive(0)
       // autoFocus 대체 — open 시 input 으로 포커스 이동
-      inputRef.current?.focus();
+      inputRef.current?.focus()
     }
-  }, [open]);
+  }, [open])
 
-  const items = useMemo(() => navItemsForLang(lang, mode), [lang, mode]);
+  const items = useMemo(() => navItemsForLang(lang, mode), [lang, mode])
   const filtered = useMemo(() => {
-    const q = query.toLowerCase().trim();
-    if (!q) return items;
+    const q = query.toLowerCase().trim()
+    if (!q) return items
     return items.filter(
       (n) =>
         n.label.toLowerCase().includes(q) ||
         n.id.toLowerCase().includes(q) ||
-        (n.subtitle ?? '').toLowerCase().includes(q),
-    );
-  }, [items, query]);
+        (n.subtitle ?? '').toLowerCase().includes(q)
+    )
+  }, [items, query])
 
   // 결과가 바뀌면 활성 인덱스를 첫 항목으로 리셋
-  // biome-ignore lint/correctness/useExhaustiveDependencies: reset active highlight whenever the result list changes
-  useEffect(() => setActive(0), [filtered]);
+  useEffect(() => setActive(0), [filtered])
 
   // 활성 옵션을 뷰포트 안으로 스크롤 (DOM 포커스는 input 에 유지)
   useEffect(() => {
-    const el = listRef.current?.children[active] as HTMLElement | undefined;
-    el?.scrollIntoView({ block: 'nearest' });
-  }, [active]);
+    const el = listRef.current?.children[active] as HTMLElement | undefined
+    el?.scrollIntoView({ block: 'nearest' })
+  }, [active])
 
-  if (!open) return null;
+  if (!open) return null
 
   const select = (i: number) => {
-    const n = filtered[i];
-    if (!n) return;
-    navigate(n.path);
-    close();
-  };
+    const n = filtered[i]
+    if (!n) return
+    navigate(n.path)
+    close()
+  }
 
   return (
-    // biome-ignore lint/a11y/noStaticElementInteractions: backdrop intentionally not interactive — close on backdrop click only
-    // biome-ignore lint/a11y/useKeyWithClickEvents: Escape key handled by global shortcut; backdrop has no keyboard target
     <div
       className="fixed inset-0 z-[80] bg-scrim flex items-start justify-center pt-24 px-4"
       onClick={(e) => {
-        if (e.target === e.currentTarget) close();
+        if (e.target === e.currentTarget) close()
       }}
       data-testid="cmd-palette"
     >
@@ -91,21 +90,21 @@ export function CommandPalette() {
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === 'ArrowDown') {
-              e.preventDefault();
+              e.preventDefault()
               // 빈 결과(length 0)에서도 -1 로 내려가지 않게 하한 0 클램프
-              setActive((i) => Math.max(0, Math.min(i + 1, filtered.length - 1)));
+              setActive((i) => Math.max(0, Math.min(i + 1, filtered.length - 1)))
             } else if (e.key === 'ArrowUp') {
-              e.preventDefault();
-              setActive((i) => Math.max(i - 1, 0));
+              e.preventDefault()
+              setActive((i) => Math.max(i - 1, 0))
             } else if (e.key === 'Home') {
-              e.preventDefault();
-              setActive(0);
+              e.preventDefault()
+              setActive(0)
             } else if (e.key === 'End') {
-              e.preventDefault();
-              setActive(Math.max(0, filtered.length - 1));
+              e.preventDefault()
+              setActive(Math.max(0, filtered.length - 1))
             } else if (e.key === 'Enter') {
-              e.preventDefault();
-              select(active);
+              e.preventDefault()
+              select(active)
             }
           }}
           placeholder={t('cmd.placeholder')}
@@ -146,5 +145,5 @@ export function CommandPalette() {
         </div>
       </div>
     </div>
-  );
+  )
 }

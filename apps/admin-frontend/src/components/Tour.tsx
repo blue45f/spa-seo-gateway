@@ -1,8 +1,10 @@
-import * as Dialog from '@radix-ui/react-dialog';
-import { useEffect, useId } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useStore } from '../lib/store';
-import { NavIcon } from './NavIcon';
+import * as Dialog from '@radix-ui/react-dialog'
+import { useEffect, useId } from 'react'
+import { useNavigate } from 'react-router-dom'
+
+import { useStore } from '../lib/store'
+
+import { NavIcon } from './NavIcon'
 
 const STEPS = [
   {
@@ -53,33 +55,33 @@ const STEPS = [
     bodyKo: '5초마다 갱신. cache hit ratio, 에러 분류 확인.',
     bodyEn: 'Refreshes every 5s: cache hit ratio, error breakdown.',
   },
-];
+]
 
 export function Tour() {
-  const lang = useStore((s) => s.lang);
-  const tourSeen = useStore((s) => s.tourSeen);
-  const tourStep = useStore((s) => s.tourStep);
-  const tourNext = useStore((s) => s.tourNext);
-  const endTour = useStore((s) => s.endTour);
-  const startTour = useStore((s) => s.startTour);
-  const t = useStore((s) => s.t);
-  const navigate = useNavigate();
-  const titleId = useId();
-  const tourVisible = !tourSeen && tourStep >= 0 && tourStep < STEPS.length;
+  const lang = useStore((s) => s.lang)
+  const tourSeen = useStore((s) => s.tourSeen)
+  const tourStep = useStore((s) => s.tourStep)
+  const tourNext = useStore((s) => s.tourNext)
+  const endTour = useStore((s) => s.endTour)
+  const startTour = useStore((s) => s.startTour)
+  const t = useStore((s) => s.t)
+  const navigate = useNavigate()
+  const titleId = useId()
+  const tourVisible = !tourSeen && tourStep >= 0 && tourStep < STEPS.length
 
   // 첫 방문 시 자동 시작
   useEffect(() => {
     if (!tourSeen && tourStep === 0) {
-      const timer = setTimeout(() => startTour(), 800);
-      return () => clearTimeout(timer);
+      const timer = setTimeout(() => startTour(), 800)
+      return () => clearTimeout(timer)
     }
-    return undefined;
-  }, [tourSeen, tourStep, startTour]);
+    return undefined
+  }, [tourSeen, tourStep, startTour])
 
-  if (!tourVisible) return null;
-  const step = STEPS[tourStep];
-  const title = lang === 'ko' ? step.titleKo : step.titleEn;
-  const body = lang === 'ko' ? step.bodyKo : step.bodyEn;
+  if (!tourVisible) return null
+  const step = STEPS[tourStep]
+  const title = lang === 'ko' ? step.titleKo : step.titleEn
+  const body = lang === 'ko' ? step.bodyKo : step.bodyEn
 
   // Radix Dialog 가 focus-trap / Escape / scroll-lock / 트리거 포커스 복원을 처리.
   // key={tourStep} 으로 단계 전환 시 Content 가 재마운트되어 새 단계로 포커스가 이동.
@@ -87,7 +89,7 @@ export function Tour() {
     <Dialog.Root
       open
       onOpenChange={(o) => {
-        if (!o) endTour();
+        if (!o) endTour()
       }}
     >
       <Dialog.Portal>
@@ -127,13 +129,13 @@ export function Tour() {
               type="button"
               className="btn-primary ml-auto px-4 py-2 text-sm"
               onClick={() => {
-                const next = tourStep + 1;
+                const next = tourStep + 1
                 if (next >= STEPS.length) {
-                  endTour();
-                  return;
+                  endTour()
+                  return
                 }
-                tourNext();
-                navigate(STEPS[next].path);
+                tourNext()
+                navigate(STEPS[next].path)
               }}
             >
               {tourStep < STEPS.length - 1 ? t('tour.next') : t('tour.start')}
@@ -142,5 +144,5 @@ export function Tour() {
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>
-  );
+  )
 }

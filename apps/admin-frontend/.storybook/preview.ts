@@ -1,10 +1,11 @@
-import { withThemeByClassName } from '@storybook/addon-themes';
-import type { Preview } from '@storybook/react';
+import { withThemeByClassName } from '@storybook/addon-themes'
+
+import type { Preview } from '@storybook/react'
 
 // Tailwind v4 + custom variants. The app's `<html>` gets a `dark` class
 // (see apps/admin-frontend/index.html bootstrap script). We mirror that
 // here via the themes addon so every story respects the dark variant.
-import '../src/styles.css';
+import '../src/styles.css'
 
 const preview: Preview = {
   parameters: {
@@ -33,6 +34,6 @@ const preview: Preview = {
       parentSelector: 'html',
     }),
   ],
-};
+}
 
-export default preview;
+export default preview

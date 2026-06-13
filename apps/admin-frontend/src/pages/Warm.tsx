@@ -1,49 +1,51 @@
-import { type FormEvent, useState } from 'react';
-import { AuthGate } from '../components/AuthGate';
-import { api, errorMessage } from '../lib/api';
-import { useStore } from '../lib/store';
-import type { WarmReport } from '../lib/types';
+import { type FormEvent, useState } from 'react'
+
+import { AuthGate } from '../components/AuthGate'
+import { api, errorMessage } from '../lib/api'
+import { useStore } from '../lib/store'
+
+import type { WarmReport } from '../lib/types'
 
 export function Warm() {
   return (
     <AuthGate>
       <WarmBody />
     </AuthGate>
-  );
+  )
 }
 
 function WarmBody() {
-  const t = useStore((s) => s.t);
-  const pushToast = useStore((s) => s.pushToast);
-  const setError = useStore((s) => s.setGlobalError);
-  const [sitemap, setSitemap] = useState('');
-  const [max, setMax] = useState(1000);
-  const [concurrency, setConcurrency] = useState(4);
-  const [running, setRunning] = useState(false);
-  const [report, setReport] = useState<WarmReport | null>(null);
+  const t = useStore((s) => s.t)
+  const pushToast = useStore((s) => s.pushToast)
+  const setError = useStore((s) => s.setGlobalError)
+  const [sitemap, setSitemap] = useState('')
+  const [max, setMax] = useState(1000)
+  const [concurrency, setConcurrency] = useState(4)
+  const [running, setRunning] = useState(false)
+  const [report, setReport] = useState<WarmReport | null>(null)
 
   async function run(e: FormEvent) {
-    e.preventDefault();
-    if (!sitemap.trim() || running) return;
-    setRunning(true);
-    setReport(null);
+    e.preventDefault()
+    if (!sitemap.trim() || running) return
+    setRunning(true)
+    setReport(null)
     try {
       const r = await api<{ ok: true; report: WarmReport }>('POST', '/admin/api/warm', {
         sitemap: sitemap.trim(),
         max,
         concurrency,
-      });
-      setReport(r.report);
+      })
+      setReport(r.report)
       pushToast(
         `${t('toast.warm.done')}: ${r.report.warmed} OK / ${r.report.errors} fail`,
-        'success',
-      );
+        'success'
+      )
     } catch (e) {
-      const msg = errorMessage(e);
-      setError(msg);
-      pushToast(msg, 'error');
+      const msg = errorMessage(e)
+      setError(msg)
+      pushToast(msg, 'error')
     } finally {
-      setRunning(false);
+      setRunning(false)
     }
   }
 
@@ -119,15 +121,15 @@ function WarmBody() {
         </div>
       ) : null}
     </section>
-  );
+  )
 }
 
 function Stat({ k, v, tone }: { k: string; v: string; tone?: 'ok' | 'err' }) {
-  const toneClass = tone === 'err' ? 'text-err-fg' : tone === 'ok' ? 'text-ok-fg' : 'text-ink';
+  const toneClass = tone === 'err' ? 'text-err-fg' : tone === 'ok' ? 'text-ok-fg' : 'text-ink'
   return (
     <div className="panel-inset p-3">
       <div className="text-xs text-ink-subtle">{k}</div>
       <div className={`font-mono text-lg ${toneClass}`}>{v}</div>
     </div>
-  );
+  )
 }

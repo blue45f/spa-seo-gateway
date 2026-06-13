@@ -1,6 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { useStore } from '../lib/store';
-import type { ScopedRoute } from '../lib/types';
+import { useEffect, useMemo, useRef, useState } from 'react'
+
+import { useStore } from '../lib/store'
+
+import type { ScopedRoute } from '../lib/types'
 
 /**
  * Routes 편집 테이블 (controlled component).
@@ -10,48 +12,48 @@ import type { ScopedRoute } from '../lib/types';
  * - 드래그 리오더, 패턴 필터, 추가/삭제, 셀 단위 인라인 편집 지원.
  */
 export type RoutesEditorProps = {
-  routes: ScopedRoute[];
-  onChange(next: ScopedRoute[]): void;
+  routes: ScopedRoute[]
+  onChange(next: ScopedRoute[]): void
   /** 컬럼 헤더에서 사용할 라벨. i18n key 가 아닌 화면 문자열 그대로. */
   labels?: {
-    pattern?: string;
-    ttl?: string;
-    waitUntil?: string;
-    waitSelector?: string;
-    waitMs?: string;
-    ignore?: string;
-    actions?: string;
-  };
+    pattern?: string
+    ttl?: string
+    waitUntil?: string
+    waitSelector?: string
+    waitMs?: string
+    ignore?: string
+    actions?: string
+  }
   /** 드래그 리오더 활성화 여부 (기본 true) */
-  reorderable?: boolean;
-};
+  reorderable?: boolean
+}
 
 export function RoutesEditor({ routes, onChange, labels, reorderable = true }: RoutesEditorProps) {
-  const t = useStore((s) => s.t);
-  const pushToast = useStore((s) => s.pushToast);
-  const [filter, setFilter] = useState('');
-  const [dragSrc, setDragSrc] = useState<number | null>(null);
+  const t = useStore((s) => s.t)
+  const pushToast = useStore((s) => s.pushToast)
+  const [filter, setFilter] = useState('')
+  const [dragSrc, setDragSrc] = useState<number | null>(null)
   // 행 추가 시 새 행의 pattern 입력으로 포커스 이동 — 키보드 사용자가 테이블 전체를 Tab 하지 않게.
-  const lastPatternRef = useRef<HTMLInputElement>(null);
-  const prevLen = useRef(routes.length);
+  const lastPatternRef = useRef<HTMLInputElement>(null)
+  const prevLen = useRef(routes.length)
 
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const check = () => setIsMobile(window.innerWidth < 768);
-    check();
-    window.addEventListener('resize', check);
-    return () => window.removeEventListener('resize', check);
-  }, []);
+    if (typeof window === 'undefined') return
+    const check = () => setIsMobile(window.innerWidth < 768)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
 
   useEffect(() => {
     // 길이가 늘었고(=추가) 필터가 비어 새 빈 행이 실제로 렌더될 때만 포커스.
     if (routes.length > prevLen.current && filter.trim() === '') {
-      lastPatternRef.current?.focus();
+      lastPatternRef.current?.focus()
     }
-    prevLen.current = routes.length;
-  }, [routes.length, filter]);
+    prevLen.current = routes.length
+  }, [routes.length, filter])
 
   const L = {
     pattern: labels?.pattern ?? t('routes.col.pattern'),
@@ -61,10 +63,10 @@ export function RoutesEditor({ routes, onChange, labels, reorderable = true }: R
     waitMs: labels?.waitMs ?? t('routes.col.waitMs'),
     ignore: labels?.ignore ?? t('routes.col.ignore'),
     actions: labels?.actions ?? '',
-  };
+  }
 
   function update(i: number, patch: Partial<ScopedRoute>) {
-    onChange(routes.map((r, idx) => (idx === i ? { ...r, ...patch } : r)));
+    onChange(routes.map((r, idx) => (idx === i ? { ...r, ...patch } : r)))
   }
 
   function add() {
@@ -78,35 +80,35 @@ export function RoutesEditor({ routes, onChange, labels, reorderable = true }: R
         waitMs: undefined,
         ignore: false,
       },
-    ]);
+    ])
   }
 
   function remove(i: number) {
-    onChange(routes.filter((_, idx) => idx !== i));
+    onChange(routes.filter((_, idx) => idx !== i))
   }
 
   function onDrop(dst: number) {
-    if (!reorderable) return;
-    if (dragSrc === null || dragSrc === dst) return;
-    const arr = routes.slice();
-    const [moved] = arr.splice(dragSrc, 1);
-    arr.splice(dst, 0, moved);
-    onChange(arr);
-    pushToast(`${t('toast.routes.reordered')} (${dragSrc + 1} → ${dst + 1})`, 'info');
-    setDragSrc(null);
+    if (!reorderable) return
+    if (dragSrc === null || dragSrc === dst) return
+    const arr = routes.slice()
+    const [moved] = arr.splice(dragSrc, 1)
+    arr.splice(dst, 0, moved)
+    onChange(arr)
+    pushToast(`${t('toast.routes.reordered')} (${dragSrc + 1} → ${dst + 1})`, 'info')
+    setDragSrc(null)
   }
 
   const filtered = useMemo(() => {
-    const q = filter.toLowerCase().trim();
-    if (!q) return routes.map((r, i) => ({ row: r, idx: i }));
+    const q = filter.toLowerCase().trim()
+    if (!q) return routes.map((r, i) => ({ row: r, idx: i }))
     return routes
       .map((r, i) => ({ row: r, idx: i }))
       .filter(
         ({ row }) =>
           (row.pattern || '').toLowerCase().includes(q) ||
-          (row.waitSelector || '').toLowerCase().includes(q),
-      );
-  }, [routes, filter]);
+          (row.waitSelector || '').toLowerCase().includes(q)
+      )
+  }, [routes, filter])
 
   return (
     <div className="space-y-3" data-testid="routes-editor">
@@ -261,21 +263,21 @@ export function RoutesEditor({ routes, onChange, labels, reorderable = true }: R
                   className={`drag-row ${dragSrc === i ? 'dragging' : ''}`}
                   draggable={reorderable}
                   onDragStart={(e) => {
-                    setDragSrc(i);
-                    e.dataTransfer.effectAllowed = 'move';
+                    setDragSrc(i)
+                    e.dataTransfer.effectAllowed = 'move'
                   }}
                   onDragOver={(e) => {
-                    e.preventDefault();
-                    e.dataTransfer.dropEffect = 'move';
-                    e.currentTarget.classList.add('drag-over');
+                    e.preventDefault()
+                    e.dataTransfer.dropEffect = 'move'
+                    e.currentTarget.classList.add('drag-over')
                   }}
                   onDragLeave={(e) => {
-                    e.currentTarget.classList.remove('drag-over');
+                    e.currentTarget.classList.remove('drag-over')
                   }}
                   onDrop={(e) => {
-                    e.preventDefault();
-                    e.currentTarget.classList.remove('drag-over');
-                    onDrop(i);
+                    e.preventDefault()
+                    e.currentTarget.classList.remove('drag-over')
+                    onDrop(i)
                   }}
                   onDragEnd={() => setDragSrc(null)}
                 >
@@ -371,5 +373,5 @@ export function RoutesEditor({ routes, onChange, labels, reorderable = true }: R
         </div>
       )}
     </div>
-  );
+  )
 }

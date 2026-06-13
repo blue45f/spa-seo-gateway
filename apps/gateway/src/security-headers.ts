@@ -1,4 +1,4 @@
-import type { FastifyInstance } from 'fastify';
+import type { FastifyInstance } from 'fastify'
 
 /**
  * Baseline security response headers applied to every reply.
@@ -23,13 +23,13 @@ export function registerSecurityHeaders(app: FastifyInstance): void {
     // Never clobber the Prometheus exposition content-type or sniffing behavior
     // on /metrics, and leave /health JSON untouched beyond the safe defaults.
     if (!reply.hasHeader('x-content-type-options')) {
-      reply.header('x-content-type-options', 'nosniff');
+      reply.header('x-content-type-options', 'nosniff')
     }
     if (!reply.hasHeader('referrer-policy')) {
-      reply.header('referrer-policy', 'strict-origin-when-cross-origin');
+      reply.header('referrer-policy', 'strict-origin-when-cross-origin')
     }
     if (!reply.hasHeader('x-dns-prefetch-control')) {
-      reply.header('x-dns-prefetch-control', 'off');
+      reply.header('x-dns-prefetch-control', 'off')
     }
 
     // Frame/CORP protections are most relevant for the admin UI + API surface.
@@ -37,13 +37,13 @@ export function registerSecurityHeaders(app: FastifyInstance): void {
     // same defaults are safe there too.
     if (req.url.startsWith('/admin')) {
       if (!reply.hasHeader('x-frame-options')) {
-        reply.header('x-frame-options', 'SAMEORIGIN');
+        reply.header('x-frame-options', 'SAMEORIGIN')
       }
       if (!reply.hasHeader('cross-origin-resource-policy')) {
-        reply.header('cross-origin-resource-policy', 'same-origin');
+        reply.header('cross-origin-resource-policy', 'same-origin')
       }
     }
 
-    return payload;
-  });
+    return payload
+  })
 }

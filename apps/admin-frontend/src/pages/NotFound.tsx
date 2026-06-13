@@ -1,10 +1,11 @@
-import { Compass } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { useStore } from '../lib/store';
+import { Compass } from 'lucide-react'
+import { Link } from 'react-router-dom'
+
+import { useStore } from '../lib/store'
 
 /** Catch-all 404 — replaces the old behaviour of silently rendering Welcome. */
 export function NotFound() {
-  const t = useStore((s) => s.t);
+  const t = useStore((s) => s.t)
   return (
     <section
       className="flex flex-col items-center justify-center py-16 text-center"
@@ -17,5 +18,5 @@ export function NotFound() {
         {t('notFound.home')}
       </Link>
     </section>
-  );
+  )
 }

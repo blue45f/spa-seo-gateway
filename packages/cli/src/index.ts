@@ -6,10 +6,11 @@
  *   npx @heejun/spa-seo-gateway-cli doctor
  *   npx @heejun/spa-seo-gateway-cli render <url>
  */
-import pc from 'picocolors';
-import { runDoctor } from './doctor.js';
-import { runInit } from './init.js';
-import { runRender } from './render.js';
+import pc from 'picocolors'
+
+import { runDoctor } from './doctor.js'
+import { runInit } from './init.js'
+import { runRender } from './render.js'
 
 const HELP = `
 ${pc.bold('spa-seo-gateway')} ${pc.dim('— SPA SEO 게이트웨이 CLI')}
@@ -37,34 +38,34 @@ ${pc.bold('EXAMPLES')}
 ${pc.bold('LINKS')}
   Docs:    https://github.com/blue45f/spa-seo-gateway
   Issues:  https://github.com/blue45f/spa-seo-gateway/issues
-`;
+`
 
 async function main() {
-  const [, , cmd, ...rest] = process.argv;
+  const [, , cmd, ...rest] = process.argv
   switch (cmd) {
     case 'init':
-      await runInit(rest);
-      break;
+      await runInit(rest)
+      break
     case 'doctor':
-      await runDoctor();
-      break;
+      await runDoctor()
+      break
     case 'render':
-      await runRender(rest);
-      break;
+      await runRender(rest)
+      break
     case undefined:
     case 'help':
     case '--help':
     case '-h':
-      console.log(HELP);
-      break;
+      console.log(HELP)
+      break
     default:
-      console.error(pc.red(`알 수 없는 명령: ${cmd}`));
-      console.log(HELP);
-      process.exitCode = 2;
+      console.error(pc.red(`알 수 없는 명령: ${cmd}`))
+      console.log(HELP)
+      process.exitCode = 2
   }
 }
 
 main().catch((err) => {
-  console.error(pc.red('실패:'), err.message);
-  process.exit(1);
-});
+  console.error(pc.red('실패:'), err.message)
+  process.exit(1)
+})

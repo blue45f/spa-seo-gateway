@@ -1,19 +1,20 @@
-import { translate } from './i18n';
-import type { Lang, PublicInfo } from './types';
+import { translate } from './i18n'
 
-export type GatewayMode = PublicInfo['mode'];
+import type { Lang, PublicInfo } from './types'
+
+export type GatewayMode = PublicInfo['mode']
 
 export type NavItem = {
-  id: string;
+  id: string
   /** react-router path 부분 (basename 은 '/admin/ui') */
-  path: string;
-  labelKey: string;
-  subtitleKey: string;
+  path: string
+  labelKey: string
+  subtitleKey: string
   /** 인증 없이 접근 가능 */
-  public?: boolean;
+  public?: boolean
   /** 특정 모드에서만 노출 (지정 시 해당 모드에서만 사이드바/router/cmd palette 에 등장). */
-  modes?: GatewayMode[];
-};
+  modes?: GatewayMode[]
+}
 
 /**
  * 사이드바 / command palette / 라우터 매핑이 모두 참조하는 단일 진실 원천.
@@ -105,7 +106,7 @@ export const NAV_ITEMS: NavItem[] = [
     subtitleKey: 'nav.help.sub',
     public: true,
   },
-];
+]
 
 /**
  * 사이드바/command palette 에는 노출하지 않지만 라우트 매핑(헤더 타이틀 ·
@@ -126,36 +127,36 @@ export const AUX_NAV_ITEMS: NavItem[] = [
     subtitleKey: 'policy.sub',
     public: true,
   },
-];
+]
 
 export function findNavItemByPath(path: string): NavItem | undefined {
   // basename 이 '/admin/ui' 라 path 가 '/' 부터 시작.
-  const normalized = path === '/' ? '/' : path.replace(/\/$/, '');
-  return [...NAV_ITEMS, ...AUX_NAV_ITEMS].find((n) => n.path === normalized);
+  const normalized = path === '/' ? '/' : path.replace(/\/$/, '')
+  return [...NAV_ITEMS, ...AUX_NAV_ITEMS].find((n) => n.path === normalized)
 }
 
 export function findNavItemById(id: string): NavItem | undefined {
-  return [...NAV_ITEMS, ...AUX_NAV_ITEMS].find((n) => n.id === id);
+  return [...NAV_ITEMS, ...AUX_NAV_ITEMS].find((n) => n.id === id)
 }
 
 /** 현재 mode 에서 노출되는 nav 항목만 (modes 필드가 없거나 현재 모드를 포함하면 OK). */
 export function visibleForMode(items: NavItem[], mode?: GatewayMode): NavItem[] {
-  return items.filter((n) => !n.modes || (mode && n.modes.includes(mode)));
+  return items.filter((n) => !n.modes || (mode && n.modes.includes(mode)))
 }
 
 export function navItemsForLang(
   lang: Lang,
-  mode?: GatewayMode,
+  mode?: GatewayMode
 ): Array<NavItem & { label: string; subtitle: string }> {
   return visibleForMode(NAV_ITEMS, mode).map((n) => ({
     ...n,
     label: translate(lang, n.labelKey),
     subtitle: translate(lang, n.subtitleKey),
-  }));
+  }))
 }
 
 export function requiresAuth(navId: string): boolean {
-  const n = findNavItemById(navId);
-  if (!n) return true;
-  return !n.public;
+  const n = findNavItemById(navId)
+  if (!n) return true
+  return !n.public
 }

@@ -1,14 +1,17 @@
-import type { Meta, StoryObj } from '@storybook/react';
-import { useEffect } from 'react';
-import { MemoryRouter } from 'react-router-dom';
-import { useStore } from '../lib/store';
-import { Sidebar } from './Sidebar';
+import { useEffect } from 'react'
+import { MemoryRouter } from 'react-router-dom'
+
+import { useStore } from '../lib/store'
+
+import { Sidebar } from './Sidebar'
+
+import type { Meta, StoryObj } from '@storybook/react'
 
 function SeedAuth({ authed }: { authed: boolean }) {
   useEffect(() => {
-    useStore.setState({ authed });
-  }, [authed]);
-  return null;
+    useStore.setState({ authed })
+  }, [authed])
+  return null
 }
 
 const meta = {
@@ -36,10 +39,10 @@ const meta = {
       </MemoryRouter>
     ),
   ],
-} satisfies Meta<typeof Sidebar>;
+} satisfies Meta<typeof Sidebar>
 
-export default meta;
-type Story = StoryObj<typeof meta>;
+export default meta
+type Story = StoryObj<typeof meta>
 
 export const RenderOnly: Story = {
   render: () => (
@@ -48,7 +51,7 @@ export const RenderOnly: Story = {
       <Sidebar publicMode="render-only" />
     </>
   ),
-};
+}
 
 export const CmsMode: Story = {
   render: () => (
@@ -60,7 +63,7 @@ export const CmsMode: Story = {
   parameters: {
     docs: { description: { story: 'CMS mode exposes the Sites tab in the nav.' } },
   },
-};
+}
 
 export const SaasMode: Story = {
   render: () => (
@@ -72,7 +75,7 @@ export const SaasMode: Story = {
   parameters: {
     docs: { description: { story: 'SaaS mode exposes the Tenants tab in the nav.' } },
   },
-};
+}
 
 export const Unauthenticated: Story = {
   render: () => (
@@ -81,4 +84,4 @@ export const Unauthenticated: Story = {
       <Sidebar publicMode="render-only" />
     </>
   ),
-};
+}

@@ -1,29 +1,31 @@
-import { useLocation } from 'react-router-dom';
-import { api } from '../lib/api';
-import { findNavItemByPath, requiresAuth } from '../lib/nav';
-import { useStore } from '../lib/store';
-import { LoginForm } from './LoginForm';
+import { useLocation } from 'react-router-dom'
+
+import { api } from '../lib/api'
+import { findNavItemByPath, requiresAuth } from '../lib/nav'
+import { useStore } from '../lib/store'
+
+import { LoginForm } from './LoginForm'
 
 export function Header() {
-  const location = useLocation();
-  const t = useStore((s) => s.t);
-  const authed = useStore((s) => s.authed);
-  const setAuthed = useStore((s) => s.setAuthed);
-  const pushToast = useStore((s) => s.pushToast);
+  const location = useLocation()
+  const t = useStore((s) => s.t)
+  const authed = useStore((s) => s.authed)
+  const setAuthed = useStore((s) => s.setAuthed)
+  const pushToast = useStore((s) => s.pushToast)
 
-  const item = findNavItemByPath(location.pathname);
-  const tabId = item?.id ?? 'welcome';
-  const needsAuth = requiresAuth(tabId);
-  const showLogin = !authed && needsAuth;
+  const item = findNavItemByPath(location.pathname)
+  const tabId = item?.id ?? 'welcome'
+  const needsAuth = requiresAuth(tabId)
+  const showLogin = !authed && needsAuth
 
   async function logout() {
     try {
-      await api('POST', '/admin/api/logout', undefined, { publicEndpoint: true });
+      await api('POST', '/admin/api/logout', undefined, { publicEndpoint: true })
     } catch {
       // ignore
     }
-    setAuthed(false);
-    pushToast('logged out', 'info');
+    setAuthed(false)
+    pushToast('logged out', 'info')
   }
 
   return (
@@ -45,5 +47,5 @@ export function Header() {
         </button>
       ) : null}
     </header>
-  );
+  )
 }

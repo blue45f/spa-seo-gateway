@@ -1,20 +1,22 @@
-import { type FormEvent, useCallback, useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { AuthGate } from '../components/AuthGate';
-import { EmptyState } from '../components/EmptyState';
-import { Field } from '../components/Field';
-import { Modal } from '../components/Modal';
-import { api, errorMessage } from '../lib/api';
-import { useDialog } from '../lib/dialog';
-import { useStore } from '../lib/store';
-import type { Site } from '../lib/types';
+import { type FormEvent, useCallback, useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
+
+import { AuthGate } from '../components/AuthGate'
+import { EmptyState } from '../components/EmptyState'
+import { Field } from '../components/Field'
+import { Modal } from '../components/Modal'
+import { api, errorMessage } from '../lib/api'
+import { useDialog } from '../lib/dialog'
+import { useStore } from '../lib/store'
+
+import type { Site } from '../lib/types'
 
 export function Sites() {
   return (
     <AuthGate>
       <SitesBody />
     </AuthGate>
-  );
+  )
 }
 
 const EMPTY_SITE: Site = {
@@ -24,124 +26,124 @@ const EMPTY_SITE: Site = {
   routes: [],
   enabled: true,
   webhooks: undefined,
-};
+}
 
 function SitesBody() {
-  const t = useStore((s) => s.t);
-  const setError = useStore((s) => s.setGlobalError);
-  const pushToast = useStore((s) => s.pushToast);
-  const { confirm, prompt } = useDialog();
-  const [sites, setSites] = useState<Site[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [editing, setEditing] = useState<Site | null>(null);
+  const t = useStore((s) => s.t)
+  const setError = useStore((s) => s.setGlobalError)
+  const pushToast = useStore((s) => s.pushToast)
+  const { confirm, prompt } = useDialog()
+  const [sites, setSites] = useState<Site[]>([])
+  const [loading, setLoading] = useState(false)
+  const [editing, setEditing] = useState<Site | null>(null)
   // 행 단위 in-flight 액션 — 같은 행의 중복/동시 요청 차단 + 진행 표시 (전역 loading 재사용 금지)
   const [pending, setPending] = useState<{
-    id: string;
-    action: 'warm' | 'remove' | 'invalidate';
-  } | null>(null);
+    id: string
+    action: 'warm' | 'remove' | 'invalidate'
+  } | null>(null)
 
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const check = () => setIsMobile(window.innerWidth < 768);
-    check();
-    window.addEventListener('resize', check);
-    return () => window.removeEventListener('resize', check);
-  }, []);
+    if (typeof window === 'undefined') return
+    const check = () => setIsMobile(window.innerWidth < 768)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
 
   const load = useCallback(async () => {
-    setLoading(true);
+    setLoading(true)
     try {
-      const r = await api<{ ok: true; sites: Site[] }>('GET', '/admin/api/sites');
-      setSites(r.sites ?? []);
-      setError('');
+      const r = await api<{ ok: true; sites: Site[] }>('GET', '/admin/api/sites')
+      setSites(r.sites ?? [])
+      setError('')
     } catch (e) {
-      const msg = errorMessage(e);
-      setError(msg);
+      const msg = errorMessage(e)
+      setError(msg)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  }, [setError]);
+  }, [setError])
 
   useEffect(() => {
-    void load();
-  }, [load]);
+    void load()
+  }, [load])
 
   async function save(site: Site) {
     try {
-      await api('POST', '/admin/api/sites', site);
-      pushToast(`${t('toast.site.saved')}: ${site.id}`, 'success');
-      setEditing(null);
-      await load();
+      await api('POST', '/admin/api/sites', site)
+      pushToast(`${t('toast.site.saved')}: ${site.id}`, 'success')
+      setEditing(null)
+      await load()
     } catch (e) {
-      const msg = errorMessage(e);
-      pushToast(msg, 'error');
+      const msg = errorMessage(e)
+      pushToast(msg, 'error')
     }
   }
 
   async function remove(id: string) {
-    if (pending) return;
+    if (pending) return
     const ok = await confirm({
       title: t('sites.delete.confirm.title'),
       description: t('sites.delete.confirm.desc'),
       confirmLabel: t('sites.delete'),
       danger: true,
-    });
-    if (!ok) return;
-    setPending({ id, action: 'remove' });
+    })
+    if (!ok) return
+    setPending({ id, action: 'remove' })
     try {
-      await api('DELETE', `/admin/api/sites/${encodeURIComponent(id)}`);
-      pushToast(`${t('toast.site.deleted')}: ${id}`, 'success');
-      await load();
+      await api('DELETE', `/admin/api/sites/${encodeURIComponent(id)}`)
+      pushToast(`${t('toast.site.deleted')}: ${id}`, 'success')
+      await load()
     } catch (e) {
-      const msg = errorMessage(e);
-      pushToast(msg, 'error');
+      const msg = errorMessage(e)
+      pushToast(msg, 'error')
     } finally {
-      setPending(null);
+      setPending(null)
     }
   }
 
   async function invalidate(id: string) {
-    if (pending) return;
+    if (pending) return
     const url = await prompt({
       title: t('sites.invalidate'),
       description: t('sites.invalidate.prompt'),
       placeholder: 'https://www.example.com/posts/1',
       confirmLabel: t('btn.invalidate'),
       validate: (v) => (v.trim() ? null : t('dialog.input.required')),
-    });
-    if (!url) return;
-    setPending({ id, action: 'invalidate' });
+    })
+    if (!url) return
+    setPending({ id, action: 'invalidate' })
     try {
-      await api('POST', `/admin/api/sites/${encodeURIComponent(id)}/cache/invalidate`, { url });
-      pushToast(`${t('toast.url.invalidated')}: ${url}`, 'success');
+      await api('POST', `/admin/api/sites/${encodeURIComponent(id)}/cache/invalidate`, { url })
+      pushToast(`${t('toast.url.invalidated')}: ${url}`, 'success')
     } catch (e) {
-      const msg = errorMessage(e);
-      pushToast(msg, 'error');
+      const msg = errorMessage(e)
+      pushToast(msg, 'error')
     } finally {
-      setPending(null);
+      setPending(null)
     }
   }
 
   async function warm(id: string) {
-    if (pending) return;
-    setPending({ id, action: 'warm' });
+    if (pending) return
+    setPending({ id, action: 'warm' })
     try {
       const r = await api<{ ok: true; report: { warmed: number; errors: number } }>(
         'POST',
         `/admin/api/sites/${encodeURIComponent(id)}/warm`,
-        { max: 500 },
-      );
+        { max: 500 }
+      )
       pushToast(
         `${t('toast.warm.done')}: ${r.report.warmed} OK / ${r.report.errors} fail`,
-        'success',
-      );
+        'success'
+      )
     } catch (e) {
-      const msg = errorMessage(e);
-      pushToast(msg, 'error');
+      const msg = errorMessage(e)
+      pushToast(msg, 'error')
     } finally {
-      setPending(null);
+      setPending(null)
     }
   }
 
@@ -335,7 +337,7 @@ function SitesBody() {
 
       {editing ? <SiteForm site={editing} onCancel={() => setEditing(null)} onSave={save} /> : null}
     </section>
-  );
+  )
 }
 
 function SiteForm({
@@ -343,36 +345,36 @@ function SiteForm({
   onCancel,
   onSave,
 }: {
-  site: Site;
-  onCancel(): void;
-  onSave(s: Site): Promise<void>;
+  site: Site
+  onCancel(): void
+  onSave(s: Site): Promise<void>
 }) {
-  const t = useStore((s) => s.t);
-  const [draft, setDraft] = useState<Site>(site);
-  const [submitting, setSubmitting] = useState(false);
+  const t = useStore((s) => s.t)
+  const [draft, setDraft] = useState<Site>(site)
+  const [submitting, setSubmitting] = useState(false)
 
   function update<K extends keyof Site>(key: K, value: Site[K]) {
-    setDraft((d) => ({ ...d, [key]: value }));
+    setDraft((d) => ({ ...d, [key]: value }))
   }
 
   function updateWebhook(key: 'onRender' | 'onError', value: string) {
     setDraft((d) => ({
       ...d,
       webhooks: { ...(d.webhooks ?? {}), [key]: value || undefined },
-    }));
+    }))
   }
 
   async function submit(e: FormEvent) {
-    e.preventDefault();
-    if (submitting) return; // 중복 제출 방지
-    if (!/^[a-z0-9_-]+$/.test(draft.id)) return;
-    if (!draft.name || !draft.origin) return;
-    setSubmitting(true);
+    e.preventDefault()
+    if (submitting) return // 중복 제출 방지
+    if (!/^[a-z0-9_-]+$/.test(draft.id)) return
+    if (!draft.name || !draft.origin) return
+    setSubmitting(true)
     try {
-      await onSave(draft);
+      await onSave(draft)
     } finally {
       // save 는 실패 시 모달을 열어두므로(재시도) 항상 버튼을 되살린다
-      setSubmitting(false);
+      setSubmitting(false)
     }
   }
 
@@ -453,5 +455,5 @@ function SiteForm({
         </div>
       </form>
     </Modal>
-  );
+  )
 }

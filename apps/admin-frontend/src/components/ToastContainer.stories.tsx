@@ -1,7 +1,10 @@
-import type { Meta, StoryObj } from '@storybook/react';
-import { useEffect } from 'react';
-import { useStore } from '../lib/store';
-import { ToastContainer } from './ToastContainer';
+import { useEffect } from 'react'
+
+import { useStore } from '../lib/store'
+
+import { ToastContainer } from './ToastContainer'
+
+import type { Meta, StoryObj } from '@storybook/react'
 
 /**
  * Helper — replaces the live toast list with a fixed set so the story is deterministic.
@@ -9,7 +12,7 @@ import { ToastContainer } from './ToastContainer';
 function SeedToasts({
   items,
 }: {
-  items: Array<{ kind: 'success' | 'error' | 'warn' | 'info'; message: string }>;
+  items: Array<{ kind: 'success' | 'error' | 'warn' | 'info'; message: string }>
 }) {
   useEffect(() => {
     // ToastContainer derives the icon from `kind` (lucide CircleCheck/CircleX/…),
@@ -20,12 +23,12 @@ function SeedToasts({
         kind: it.kind,
         message: it.message,
       })),
-    });
+    })
     return () => {
-      useStore.setState({ toasts: [] });
-    };
-  }, [items]);
-  return null;
+      useStore.setState({ toasts: [] })
+    }
+  }, [items])
+  return null
 }
 
 const meta = {
@@ -41,10 +44,10 @@ const meta = {
       },
     },
   },
-} satisfies Meta<typeof ToastContainer>;
+} satisfies Meta<typeof ToastContainer>
 
-export default meta;
-type Story = StoryObj<typeof meta>;
+export default meta
+type Story = StoryObj<typeof meta>
 
 export const Empty: Story = {
   render: () => (
@@ -54,7 +57,7 @@ export const Empty: Story = {
       <ToastContainer />
     </div>
   ),
-};
+}
 
 export const SingleSuccess: Story = {
   render: () => (
@@ -63,7 +66,7 @@ export const SingleSuccess: Story = {
       <ToastContainer />
     </div>
   ),
-};
+}
 
 export const AllKinds: Story = {
   render: () => (
@@ -79,4 +82,4 @@ export const AllKinds: Story = {
       <ToastContainer />
     </div>
   ),
-};
+}

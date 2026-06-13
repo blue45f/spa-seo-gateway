@@ -1,9 +1,11 @@
-import { type FormEvent, useState } from 'react';
-import { AuthGate } from '../components/AuthGate';
-import { api, errorMessage } from '../lib/api';
-import { bytesToHuman } from '../lib/format';
-import { useStore } from '../lib/store';
-import type { RenderTestResult } from '../lib/types';
+import { type FormEvent, useState } from 'react'
+
+import { AuthGate } from '../components/AuthGate'
+import { api, errorMessage } from '../lib/api'
+import { bytesToHuman } from '../lib/format'
+import { useStore } from '../lib/store'
+
+import type { RenderTestResult } from '../lib/types'
 
 const BOT_UAS = [
   {
@@ -24,43 +26,43 @@ const BOT_UAS = [
   { name: 'facebookexternalhit', value: 'facebookexternalhit/1.1' },
   { name: 'Slackbot', value: 'Slackbot-LinkExpanding 1.0 (+https://api.slack.com/robots)' },
   { name: 'KakaoTalk', value: 'kakaotalk-scrap/1.0' },
-];
+]
 
 export function RenderTest() {
   return (
     <AuthGate>
       <RenderTestBody />
     </AuthGate>
-  );
+  )
 }
 
 function RenderTestBody() {
-  const t = useStore((s) => s.t);
-  const pushToast = useStore((s) => s.pushToast);
-  const setError = useStore((s) => s.setGlobalError);
-  const [url, setUrl] = useState('');
-  const [ua, setUa] = useState('');
-  const [running, setRunning] = useState(false);
-  const [result, setResult] = useState<RenderTestResult | null>(null);
+  const t = useStore((s) => s.t)
+  const pushToast = useStore((s) => s.pushToast)
+  const setError = useStore((s) => s.setGlobalError)
+  const [url, setUrl] = useState('')
+  const [ua, setUa] = useState('')
+  const [running, setRunning] = useState(false)
+  const [result, setResult] = useState<RenderTestResult | null>(null)
 
   async function run(e: FormEvent) {
-    e.preventDefault();
-    if (!url.trim() || running) return;
-    setRunning(true);
-    setResult(null);
+    e.preventDefault()
+    if (!url.trim() || running) return
+    setRunning(true)
+    setResult(null)
     try {
       const r = await api<RenderTestResult>('POST', '/admin/api/render-test', {
         url: url.trim(),
         ua: ua.trim() || undefined,
-      });
-      setResult(r);
-      pushToast(`${r.status} · ${r.durationMs}ms · ${bytesToHuman(r.bytes)}`, 'success');
+      })
+      setResult(r)
+      pushToast(`${r.status} · ${r.durationMs}ms · ${bytesToHuman(r.bytes)}`, 'success')
     } catch (e) {
-      const msg = errorMessage(e);
-      setError(msg);
-      pushToast(msg, 'error');
+      const msg = errorMessage(e)
+      setError(msg)
+      pushToast(msg, 'error')
     } finally {
-      setRunning(false);
+      setRunning(false)
     }
   }
 
@@ -154,5 +156,5 @@ function RenderTestBody() {
         </div>
       ) : null}
     </section>
-  );
+  )
 }

@@ -9,10 +9,11 @@ import {
   Settings,
   TrendingUp,
   Zap,
-} from 'lucide-react';
-import { useStore } from '../lib/store';
+} from 'lucide-react'
 
-const DOCS_BASE = 'https://github.com/blue45f/spa-seo-gateway/blob/main/docs';
+import { useStore } from '../lib/store'
+
+const DOCS_BASE = 'https://github.com/blue45f/spa-seo-gateway/blob/main/docs'
 
 const GUIDES: Array<{ icon: LucideIcon; href: string; labelKey: string }> = [
   {
@@ -28,12 +29,12 @@ const GUIDES: Array<{ icon: LucideIcon; href: string; labelKey: string }> = [
   { icon: Zap, href: `${DOCS_BASE}/CONCURRENCY.md`, labelKey: 'help.links.concurrency' },
   { icon: ChartColumn, href: `${DOCS_BASE}/BENCHMARKS.md`, labelKey: 'help.links.benchmarks' },
   { icon: TrendingUp, href: `${DOCS_BASE}/MIGRATION-1.7.md`, labelKey: 'help.links.migration' },
-];
+]
 
-const FAQ_COUNT = 10;
+const FAQ_COUNT = 10
 
 export function Help() {
-  const t = useStore((s) => s.t);
+  const t = useStore((s) => s.t)
   return (
     <section className="space-y-4" data-testid="page-help">
       <div className="alert alert--info p-4 text-sm">
@@ -69,5 +70,5 @@ export function Help() {
         </ul>
       </div>
     </section>
-  );
+  )
 }

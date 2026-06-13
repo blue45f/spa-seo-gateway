@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
-import { useLocation } from 'react-router-dom';
-import { findNavItemByPath } from './nav';
-import { useStore } from './store';
+import { useEffect, useRef, useState } from 'react'
+import { useLocation } from 'react-router-dom'
+
+import { findNavItemByPath } from './nav'
+import { useStore } from './store'
 
 /**
  * SPA 라우트 전환 접근성 (WCAG 2.4.3 Focus Order / 4.1.3 Status Messages).
@@ -20,39 +21,38 @@ import { useStore } from './store';
  * @returns aria-live 영역에 넣을 안내 문구 (RouteAnnouncer 가 렌더).
  */
 export function useRouteAnnouncer(): string {
-  const location = useLocation();
-  const t = useStore((s) => s.t);
+  const location = useLocation()
+  const t = useStore((s) => s.t)
   // lang 을 구독해 언어 토글 시 안내 문구/타이틀도 재계산되도록.
-  const lang = useStore((s) => s.lang);
-  const [message, setMessage] = useState('');
-  const prevPathRef = useRef<string | null>(null);
+  const lang = useStore((s) => s.lang)
+  const [message, setMessage] = useState('')
+  const prevPathRef = useRef<string | null>(null)
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: lang 변경 시에도 타이틀/문구를 재계산해야 한다
   useEffect(() => {
-    const item = findNavItemByPath(location.pathname);
-    const label = item ? t(item.labelKey) : t('a11y.routeUnknown', 'Page');
+    const item = findNavItemByPath(location.pathname)
+    const label = item ? t(item.labelKey) : t('a11y.routeUnknown', 'Page')
 
     // document.title — 탭 전환/북마크/SR 컨텍스트. 항상(초기 포함) 최신으로.
     if (typeof document !== 'undefined') {
-      document.title = `${label} · ${t('app.title', 'spa-seo-gateway admin')}`;
+      document.title = `${label} · ${t('app.title', 'spa-seo-gateway admin')}`
     }
 
-    const isInitial = prevPathRef.current === null;
-    const changed = !isInitial && prevPathRef.current !== location.pathname;
-    prevPathRef.current = location.pathname;
+    const isInitial = prevPathRef.current === null
+    const changed = !isInitial && prevPathRef.current !== location.pathname
+    prevPathRef.current = location.pathname
 
-    if (!changed) return;
+    if (!changed) return
 
     // 포커스를 본문으로 — skip-link 타깃(<main tabIndex={-1}>)을 재사용.
     if (typeof document !== 'undefined') {
-      const main = document.getElementById('main-content');
+      const main = document.getElementById('main-content')
       // preventScroll: 포커스 이동이 스크롤 점프를 일으키지 않도록(이미 상단).
-      main?.focus({ preventScroll: true });
+      main?.focus({ preventScroll: true })
     }
 
     // aria-live 안내 — "{페이지} 페이지로 이동했습니다".
-    setMessage(t('a11y.routeChanged', `Navigated to ${label}`).replace('{page}', label));
-  }, [location.pathname, t, lang]);
+    setMessage(t('a11y.routeChanged', `Navigated to ${label}`).replace('{page}', label))
+  }, [location.pathname, t, lang])
 
-  return message;
+  return message
 }

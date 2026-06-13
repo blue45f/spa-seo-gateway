@@ -1,11 +1,12 @@
 {
   "recommendations": [
-    "biomejs.biome",
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
     "vitest.explorer",
     "bradlc.vscode-tailwindcss",
     "github.vscode-github-actions",
     "redhat.vscode-yaml",
     "github.vscode-pull-request-github"
   ],
-  "unwantedRecommendations": ["esbenp.prettier-vscode", "dbaeumer.vscode-eslint"]
+  "unwantedRecommendations": ["biomejs.biome"]
 }

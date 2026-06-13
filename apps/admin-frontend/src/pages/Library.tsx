@@ -1,7 +1,7 @@
-import { useStore } from '../lib/store';
+import { useStore } from '../lib/store'
 
 export function Library() {
-  const t = useStore((s) => s.t);
+  const t = useStore((s) => s.t)
   return (
     <section className="space-y-6" data-testid="page-library">
       <h2 className="text-lg font-semibold tracking-tight text-ink">{t('library.title')}</h2>
@@ -108,7 +108,7 @@ const { ok, brokenAt } = verifyAuditChain();
 if (!ok) alertSecurity(\`tampered at \${brokenAt}\`);`}</pre>
       </Block>
     </section>
-  );
+  )
 }
 
 function Block({ title, children }: { title: string; children: React.ReactNode }) {
@@ -119,5 +119,5 @@ function Block({ title, children }: { title: string; children: React.ReactNode }
         {children}
       </div>
     </div>
-  );
+  )
 }

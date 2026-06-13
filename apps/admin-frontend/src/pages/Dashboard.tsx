@@ -1,56 +1,58 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { AuthGate } from '../components/AuthGate';
-import { EmptyState } from '../components/EmptyState';
-import { Figure } from '../components/Figure';
-import { CardGridSkeleton } from '../components/Skeleton';
-import { Sparkline } from '../components/Sparkline';
-import { api, errorMessage } from '../lib/api';
-import { useStore } from '../lib/store';
-import type { SiteInfo } from '../lib/types';
+import { useCallback, useEffect, useRef, useState } from 'react'
+
+import { AuthGate } from '../components/AuthGate'
+import { EmptyState } from '../components/EmptyState'
+import { Figure } from '../components/Figure'
+import { CardGridSkeleton } from '../components/Skeleton'
+import { Sparkline } from '../components/Sparkline'
+import { api, errorMessage } from '../lib/api'
+import { useStore } from '../lib/store'
+
+import type { SiteInfo } from '../lib/types'
 
 /** 추세선이 의미를 갖도록 최근 갱신 N회의 표본만 보관. */
-const TREND_CAP = 24;
-const intFmt = (n: number) => String(Math.round(n));
+const TREND_CAP = 24
+const intFmt = (n: number) => String(Math.round(n))
 
 export function Dashboard() {
   return (
     <AuthGate>
       <DashboardBody />
     </AuthGate>
-  );
+  )
 }
 
 function DashboardBody() {
-  const t = useStore((s) => s.t);
-  const setError = useStore((s) => s.setGlobalError);
-  const [info, setInfo] = useState<SiteInfo | null>(null);
-  const [loading, setLoading] = useState(false);
+  const t = useStore((s) => s.t)
+  const setError = useStore((s) => s.setGlobalError)
+  const [info, setInfo] = useState<SiteInfo | null>(null)
+  const [loading, setLoading] = useState(false)
   // 갱신마다 누적 실패 합계를 적재해 추세선을 만든다(최근 TREND_CAP 회).
-  const [failTrend, setFailTrend] = useState<number[]>([]);
-  const trendRef = useRef<number[]>([]);
+  const [failTrend, setFailTrend] = useState<number[]>([])
+  const trendRef = useRef<number[]>([])
 
   const load = useCallback(async () => {
-    setLoading(true);
+    setLoading(true)
     try {
-      const r = await api<SiteInfo>('GET', '/admin/api/site');
-      setInfo(r);
+      const r = await api<SiteInfo>('GET', '/admin/api/site')
+      setInfo(r)
       const totalFails = r.breakers
         ? Object.values(r.breakers).reduce((sum, b) => sum + (b.failures ?? 0), 0)
-        : 0;
-      trendRef.current = [...trendRef.current, totalFails].slice(-TREND_CAP);
-      setFailTrend(trendRef.current);
-      setError('');
+        : 0
+      trendRef.current = [...trendRef.current, totalFails].slice(-TREND_CAP)
+      setFailTrend(trendRef.current)
+      setError('')
     } catch (e) {
-      const msg = errorMessage(e);
-      setError(msg);
+      const msg = errorMessage(e)
+      setError(msg)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  }, [setError]);
+  }, [setError])
 
   useEffect(() => {
-    void load();
-  }, [load]);
+    void load()
+  }, [load])
 
   if (!info) {
     if (loading) {
@@ -58,14 +60,14 @@ function DashboardBody() {
         <section className="space-y-4" data-testid="page-dashboard-loading">
           <CardGridSkeleton count={3} />
         </section>
-      );
+      )
     }
-    return <EmptyState title={t('dashboard.empty')} hint={t('dashboard.empty.hint')} />;
+    return <EmptyState title={t('dashboard.empty')} hint={t('dashboard.empty.hint')} />
   }
 
-  const ttlMin = Math.floor((info.cache?.ttlMs ?? 0) / 60_000);
-  const swrMin = info.cache?.swrMs ? Math.floor(info.cache.swrMs / 60_000) : 0;
-  const breakerHosts = info.breakers ? Object.entries(info.breakers) : [];
+  const ttlMin = Math.floor((info.cache?.ttlMs ?? 0) / 60_000)
+  const swrMin = info.cache?.swrMs ? Math.floor(info.cache.swrMs / 60_000) : 0
+  const breakerHosts = info.breakers ? Object.entries(info.breakers) : []
 
   return (
     <section className="space-y-5" data-testid="page-dashboard">
@@ -161,5 +163,5 @@ function DashboardBody() {
         )}
       </div>
     </section>
-  );
+  )
 }

@@ -23,10 +23,13 @@ updates:
       types:
         patterns:
           - '@types/*'
-      eslint-biome:
+      eslint-prettier:
         patterns:
-          - '@biomejs/*'
           - 'eslint*'
+          - '@heejun/eslint-config'
+          - '@heejun/prettier-config'
+          - 'prettier*'
+          - 'typescript-eslint'
       build-tooling:
         patterns:
           - 'vite'

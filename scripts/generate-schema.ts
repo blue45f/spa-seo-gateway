@@ -4,19 +4,20 @@
  *
  *   tsx scripts/generate-schema.ts
  */
-import { mkdirSync, writeFileSync } from 'node:fs';
-import { resolve } from 'node:path';
-import { ConfigSchema } from '@heejun/spa-seo-gateway-core';
-import { z } from 'zod';
+import { mkdirSync, writeFileSync } from 'node:fs'
+import { resolve } from 'node:path'
+
+import { ConfigSchema } from '@heejun/spa-seo-gateway-core'
+import { z } from 'zod'
 
 const schema = z.toJSONSchema(ConfigSchema, {
   target: 'draft-2020-12',
   io: 'input',
   unrepresentable: 'any',
-});
+})
 
-const outDir = resolve(process.cwd(), 'schema');
-mkdirSync(outDir, { recursive: true });
-const outFile = resolve(outDir, 'seo-gateway.config.schema.json');
-writeFileSync(outFile, `${JSON.stringify(schema, null, 2)}\n`, 'utf8');
-console.log(`✓ JSON Schema written: ${outFile}`);
+const outDir = resolve(process.cwd(), 'schema')
+mkdirSync(outDir, { recursive: true })
+const outFile = resolve(outDir, 'seo-gateway.config.schema.json')
+writeFileSync(outFile, `${JSON.stringify(schema, null, 2)}\n`, 'utf8')
+console.log(`✓ JSON Schema written: ${outFile}`)

@@ -1,0 +1,25 @@
+# 생성물/의존성 — 포맷 대상 아님
+**/node_modules/**
+**/dist/**
+**/build/**
+**/coverage/**
+**/storybook-static/**
+**/.venv/**
+**/.vercel/**
+**/.cache/**
+**/puppeteer-cache/**
+test-results/
+playwright-report/
+blob-report/
+pnpm-lock.yaml
+
+# Helm 차트 템플릿 — Go 템플릿 문법({{ }})이라 prettier YAML 파서가 처리 불가.
+charts/**
+
+# 자동 생성 스키마(scripts/generate-schema.ts).
+schema/
+
+# 마크다운/HTML — 기존 biome 설정도 제외했던 범위(불필요한 대량 reformat 방지).
+**/*.md
+**/*.html
+CHANGELOG.md

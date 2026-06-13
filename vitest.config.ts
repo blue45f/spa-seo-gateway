@@ -1,5 +1,5 @@
-import { resolve } from 'node:path';
-import { defineConfig } from 'vitest/config';
+import { resolve } from 'node:path'
+import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
   resolve: {
@@ -8,7 +8,7 @@ export default defineConfig({
       '@heejun/spa-seo-gateway-admin-ui': resolve(__dirname, 'packages/admin-ui/src/index.ts'),
       '@heejun/spa-seo-gateway-multi-tenant': resolve(
         __dirname,
-        'packages/multi-tenant/src/index.ts',
+        'packages/multi-tenant/src/index.ts'
       ),
       '@heejun/spa-seo-gateway-cms': resolve(__dirname, 'packages/cms/src/index.ts'),
       '@heejun/spa-seo-gateway-anthropic': resolve(__dirname, 'packages/anthropic/src/index.ts'),
@@ -27,4 +27,4 @@ export default defineConfig({
       include: ['packages/*/src/**/*.ts'],
     },
   },
-});
+})

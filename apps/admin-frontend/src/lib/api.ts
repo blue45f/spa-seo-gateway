@@ -8,10 +8,10 @@
 export class ApiError extends Error {
   constructor(
     message: string,
-    public status: number,
+    public status: number
   ) {
-    super(message);
-    this.name = 'ApiError';
+    super(message)
+    this.name = 'ApiError'
   }
 }
 
@@ -21,44 +21,44 @@ export class ApiError extends Error {
  * undefined 를 내 토스트/배너가 빈칸이 되므로 쓰지 않는다.
  */
 export function errorMessage(e: unknown): string {
-  if (e instanceof Error) return e.message;
-  if (typeof e === 'string') return e;
+  if (e instanceof Error) return e.message
+  if (typeof e === 'string') return e
   if (e && typeof e === 'object' && 'message' in e) {
-    return String((e as { message: unknown }).message);
+    return String((e as { message: unknown }).message)
   }
-  return String(e);
+  return String(e)
 }
 
 export type ApiOptions = {
   /** Welcome / API explorer / Library / Help 같이 인증 없이 호출 가능한 endpoint 표시. */
-  publicEndpoint?: boolean;
+  publicEndpoint?: boolean
   /** 응답 본문을 JSON 으로 파싱하지 않고 string 으로 반환 (예: /metrics 텍스트) */
-  asText?: boolean;
+  asText?: boolean
   /** 헤더 토큰 — legacy 호환 */
-  token?: string;
+  token?: string
   /** 요청 타임아웃(ms). 기본 15s — 멎은 게이트웨이가 UI 를 영원히 매달지 않게. */
-  timeoutMs?: number;
+  timeoutMs?: number
   /** 외부 AbortSignal — 호출부가 직접 취소(예: 컴포넌트 unmount/요청 교체). */
-  signal?: AbortSignal;
-};
+  signal?: AbortSignal
+}
 
 export async function api<T>(
   method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH',
   path: string,
   body?: unknown,
-  opts: ApiOptions = {},
+  opts: ApiOptions = {}
 ): Promise<T> {
-  const headers: Record<string, string> = { 'content-type': 'application/json' };
-  if (opts.token && !opts.publicEndpoint) headers['x-admin-token'] = opts.token;
+  const headers: Record<string, string> = { 'content-type': 'application/json' }
+  if (opts.token && !opts.publicEndpoint) headers['x-admin-token'] = opts.token
 
-  const ctrl = new AbortController();
-  let timedOut = false;
+  const ctrl = new AbortController()
+  let timedOut = false
   const timer = setTimeout(() => {
-    timedOut = true;
-    ctrl.abort();
-  }, opts.timeoutMs ?? 15_000);
-  opts.signal?.addEventListener('abort', () => ctrl.abort());
-  let res: Response;
+    timedOut = true
+    ctrl.abort()
+  }, opts.timeoutMs ?? 15_000)
+  opts.signal?.addEventListener('abort', () => ctrl.abort())
+  let res: Response
   try {
     res = await fetch(path, {
       method,
@@ -66,54 +66,54 @@ export async function api<T>(
       body: body !== undefined ? JSON.stringify(body) : undefined,
       credentials: 'same-origin',
       signal: ctrl.signal,
-    });
+    })
   } catch (e) {
     // 타임아웃은 408 로 표면화, 외부 취소(unmount 등)는 그대로 전파해 호출부가 무시할 수 있게.
     if (e instanceof DOMException && e.name === 'AbortError' && timedOut) {
-      throw new ApiError('timeout', 408);
+      throw new ApiError('timeout', 408)
     }
-    throw e;
+    throw e
   } finally {
-    clearTimeout(timer);
+    clearTimeout(timer)
   }
 
   if (opts.asText) {
-    const text = await res.text();
-    if (!res.ok) throw new ApiError(text || `${res.status} ${res.statusText}`, res.status);
-    return text as unknown as T;
+    const text = await res.text()
+    if (!res.ok) throw new ApiError(text || `${res.status} ${res.statusText}`, res.status)
+    return text as unknown as T
   }
 
-  let data: unknown;
+  let data: unknown
   try {
-    data = await res.json();
+    data = await res.json()
   } catch {
-    data = {};
+    data = {}
   }
   if (!res.ok) {
-    const errMsg = (data as { error?: string })?.error ?? `${res.status} ${res.statusText}`;
-    throw new ApiError(errMsg, res.status);
+    const errMsg = (data as { error?: string })?.error ?? `${res.status} ${res.statusText}`
+    throw new ApiError(errMsg, res.status)
   }
-  return data as T;
+  return data as T
 }
 
 export async function fetchText(path: string, signal?: AbortSignal): Promise<string> {
-  const ctrl = new AbortController();
-  let timedOut = false;
+  const ctrl = new AbortController()
+  let timedOut = false
   const timer = setTimeout(() => {
-    timedOut = true;
-    ctrl.abort();
-  }, 15_000);
-  signal?.addEventListener('abort', () => ctrl.abort());
+    timedOut = true
+    ctrl.abort()
+  }, 15_000)
+  signal?.addEventListener('abort', () => ctrl.abort())
   try {
-    const res = await fetch(path, { credentials: 'same-origin', signal: ctrl.signal });
-    if (!res.ok) throw new ApiError(`${res.status} ${res.statusText}`, res.status);
-    return await res.text();
+    const res = await fetch(path, { credentials: 'same-origin', signal: ctrl.signal })
+    if (!res.ok) throw new ApiError(`${res.status} ${res.statusText}`, res.status)
+    return await res.text()
   } catch (e) {
     if (e instanceof DOMException && e.name === 'AbortError' && timedOut) {
-      throw new ApiError('timeout', 408);
+      throw new ApiError('timeout', 408)
     }
-    throw e;
+    throw e
   } finally {
-    clearTimeout(timer);
+    clearTimeout(timer)
   }
 }

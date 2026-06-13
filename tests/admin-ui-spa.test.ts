@@ -5,64 +5,65 @@
  *
  * 본 테스트는 빌드가 완료된 상태에서 실행됨을 전제로 한다 (CI/husky 가 build 를 먼저 돌림).
  */
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { registerAdminUI } from '@heejun/spa-seo-gateway-admin-ui';
-import Fastify, { type FastifyInstance } from 'fastify';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { existsSync, readdirSync, readFileSync } from 'node:fs'
+import { dirname, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const repoRoot = resolve(__dirname, '..');
-const adminPublic = resolve(repoRoot, 'packages/admin-ui/public');
+import { registerAdminUI } from '@heejun/spa-seo-gateway-admin-ui'
+import Fastify, { type FastifyInstance } from 'fastify'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-let app: FastifyInstance;
+const __dirname = dirname(fileURLToPath(import.meta.url))
+const repoRoot = resolve(__dirname, '..')
+const adminPublic = resolve(repoRoot, 'packages/admin-ui/public')
+
+let app: FastifyInstance
 
 beforeEach(async () => {
-  app = Fastify({ logger: false });
-  await registerAdminUI(app);
-  await app.ready();
-});
+  app = Fastify({ logger: false })
+  await registerAdminUI(app)
+  await app.ready()
+})
 
 afterEach(async () => {
-  await app.close();
-});
+  await app.close()
+})
 
 describe('admin-ui SPA hosting', () => {
   it('publishes the Vite build output to packages/admin-ui/public', () => {
-    expect(existsSync(adminPublic)).toBe(true);
-    expect(existsSync(resolve(adminPublic, 'index.html'))).toBe(true);
-    const assetsDir = resolve(adminPublic, 'assets');
-    expect(existsSync(assetsDir)).toBe(true);
+    expect(existsSync(adminPublic)).toBe(true)
+    expect(existsSync(resolve(adminPublic, 'index.html'))).toBe(true)
+    const assetsDir = resolve(adminPublic, 'assets')
+    expect(existsSync(assetsDir)).toBe(true)
     // hashed 자산이 적어도 한 개 (js + css) 존재.
-    const files = readdirSync(assetsDir);
-    expect(files.some((f) => f.endsWith('.js'))).toBe(true);
-    expect(files.some((f) => f.endsWith('.css'))).toBe(true);
-  });
+    const files = readdirSync(assetsDir)
+    expect(files.some((f) => f.endsWith('.js'))).toBe(true)
+    expect(files.some((f) => f.endsWith('.css'))).toBe(true)
+  })
 
   it('built index.html references the React root + asset paths under /admin/ui/', () => {
-    const html = readFileSync(resolve(adminPublic, 'index.html'), 'utf8');
-    expect(html).toContain('<div id="root"></div>');
+    const html = readFileSync(resolve(adminPublic, 'index.html'), 'utf8')
+    expect(html).toContain('<div id="root"></div>')
     // base 가 /admin/ui/ 로 설정되어 모든 자산이 그 prefix 로 발급됨.
-    expect(html).toMatch(/src="\/admin\/ui\/assets\/[^"]+\.js"/);
-    expect(html).toMatch(/href="\/admin\/ui\/assets\/[^"]+\.css"/);
+    expect(html).toMatch(/src="\/admin\/ui\/assets\/[^"]+\.js"/)
+    expect(html).toMatch(/href="\/admin\/ui\/assets\/[^"]+\.css"/)
     // FOUC 방지 dark-mode bootstrap 스크립트 포함.
-    expect(html).toContain('seo-admin-theme');
-  });
+    expect(html).toContain('seo-admin-theme')
+  })
 
   it('GET /admin/ui redirects to /admin/ui/', async () => {
-    const res = await app.inject({ method: 'GET', url: '/admin/ui' });
-    expect(res.statusCode).toBe(302);
-    expect(res.headers.location).toBe('/admin/ui/');
-  });
+    const res = await app.inject({ method: 'GET', url: '/admin/ui' })
+    expect(res.statusCode).toBe(302)
+    expect(res.headers.location).toBe('/admin/ui/')
+  })
 
   it('GET /admin/ui/ serves index.html (200, html content-type)', async () => {
-    const res = await app.inject({ method: 'GET', url: '/admin/ui/' });
-    expect(res.statusCode).toBe(200);
-    expect(res.headers['content-type']).toMatch(/text\/html/);
-    expect(res.body).toContain('<div id="root"></div>');
-    expect(res.body).toMatch(/\/admin\/ui\/assets\/[^"]+\.js/);
-  });
+    const res = await app.inject({ method: 'GET', url: '/admin/ui/' })
+    expect(res.statusCode).toBe(200)
+    expect(res.headers['content-type']).toMatch(/text\/html/)
+    expect(res.body).toContain('<div id="root"></div>')
+    expect(res.body).toMatch(/\/admin\/ui\/assets\/[^"]+\.js/)
+  })
 
   it('GET /admin/ui/<deep-link> falls back to index.html (SPA routing)', async () => {
     // react-router 가 클라이언트에서 해석 — 서버는 index.html 만 반환.
@@ -72,109 +73,109 @@ describe('admin-ui SPA hosting', () => {
       '/admin/ui/audit',
       '/admin/ui/some/nested/path',
     ]) {
-      const res = await app.inject({ method: 'GET', url: path });
-      expect(res.statusCode, `path=${path}`).toBe(200);
-      expect(res.headers['content-type']).toMatch(/text\/html/);
-      expect(res.body).toContain('<div id="root"></div>');
+      const res = await app.inject({ method: 'GET', url: path })
+      expect(res.statusCode, `path=${path}`).toBe(200)
+      expect(res.headers['content-type']).toMatch(/text\/html/)
+      expect(res.body).toContain('<div id="root"></div>')
     }
-  });
+  })
 
   it('GET /admin/ui/assets/<hashed.js> serves the built bundle (200, javascript)', async () => {
-    const assetsDir = resolve(adminPublic, 'assets');
-    const jsFile = readdirSync(assetsDir).find((f) => f.endsWith('.js'));
-    expect(jsFile).toBeDefined();
-    const res = await app.inject({ method: 'GET', url: `/admin/ui/assets/${jsFile}` });
-    expect(res.statusCode).toBe(200);
-    expect(res.headers['content-type']).toMatch(/javascript/);
-    expect(res.body.length).toBeGreaterThan(100);
-  });
+    const assetsDir = resolve(adminPublic, 'assets')
+    const jsFile = readdirSync(assetsDir).find((f) => f.endsWith('.js'))
+    expect(jsFile).toBeDefined()
+    const res = await app.inject({ method: 'GET', url: `/admin/ui/assets/${jsFile}` })
+    expect(res.statusCode).toBe(200)
+    expect(res.headers['content-type']).toMatch(/javascript/)
+    expect(res.body.length).toBeGreaterThan(100)
+  })
 
   it('GET /admin/ui/assets/<hashed.css> serves the built stylesheet', async () => {
-    const assetsDir = resolve(adminPublic, 'assets');
-    const cssFile = readdirSync(assetsDir).find((f) => f.endsWith('.css'));
-    expect(cssFile).toBeDefined();
-    const res = await app.inject({ method: 'GET', url: `/admin/ui/assets/${cssFile}` });
-    expect(res.statusCode).toBe(200);
-    expect(res.headers['content-type']).toMatch(/css/);
-  });
+    const assetsDir = resolve(adminPublic, 'assets')
+    const cssFile = readdirSync(assetsDir).find((f) => f.endsWith('.css'))
+    expect(cssFile).toBeDefined()
+    const res = await app.inject({ method: 'GET', url: `/admin/ui/assets/${cssFile}` })
+    expect(res.statusCode).toBe(200)
+    expect(res.headers['content-type']).toMatch(/css/)
+  })
 
   it('GET /admin/ui/assets/missing-file.js returns 404 (real asset miss)', async () => {
     const res = await app.inject({
       method: 'GET',
       url: '/admin/ui/assets/definitely-not-a-real-hashed.js',
-    });
-    expect(res.statusCode).toBe(404);
-  });
+    })
+    expect(res.statusCode).toBe(404)
+  })
 
   it('GET /admin/api/public/info returns mode + cache info without auth', async () => {
-    const res = await app.inject({ method: 'GET', url: '/admin/api/public/info' });
-    expect(res.statusCode).toBe(200);
-    const body = res.json();
-    expect(body.ok).toBe(true);
-    expect(typeof body.mode).toBe('string');
-    expect(typeof body.uptimeSec).toBe('number');
-    expect(typeof body.nodeVersion).toBe('string');
-  });
+    const res = await app.inject({ method: 'GET', url: '/admin/api/public/info' })
+    expect(res.statusCode).toBe(200)
+    const body = res.json()
+    expect(body.ok).toBe(true)
+    expect(typeof body.mode).toBe('string')
+    expect(typeof body.uptimeSec).toBe('number')
+    expect(typeof body.nodeVersion).toBe('string')
+  })
 
   it('GET /admin/api/whoami reports unauthenticated by default', async () => {
-    const res = await app.inject({ method: 'GET', url: '/admin/api/whoami' });
-    expect(res.statusCode).toBe(200);
-    const body = res.json();
-    expect(body.ok).toBe(true);
-    expect(body.authenticated).toBe(false);
-  });
+    const res = await app.inject({ method: 'GET', url: '/admin/api/whoami' })
+    expect(res.statusCode).toBe(200)
+    const body = res.json()
+    expect(body.ok).toBe(true)
+    expect(body.authenticated).toBe(false)
+  })
 
   it('protected endpoints require auth', async () => {
-    const res = await app.inject({ method: 'GET', url: '/admin/api/site' });
-    expect([401, 404]).toContain(res.statusCode); // 404 if adminToken not set, 401 if set but missing
-  });
-});
+    const res = await app.inject({ method: 'GET', url: '/admin/api/site' })
+    expect([401, 404]).toContain(res.statusCode) // 404 if adminToken not set, 401 if set but missing
+  })
+})
 
 describe('admin-ui PWA assets (sw / manifest / favicon)', () => {
   it('GET /admin/ui/sw.js serves the service worker (embed registration path resolves)', async () => {
     // main.tsx 가 임베드에서 `${basename}/sw.js` 로 등록 — prefix 아래에서 200 이어야 한다.
-    const res = await app.inject({ method: 'GET', url: '/admin/ui/sw.js' });
-    expect(res.statusCode).toBe(200);
-    expect(res.headers['content-type']).toMatch(/javascript/);
-    expect(res.body).toContain("addEventListener('fetch'");
-  });
+    const res = await app.inject({ method: 'GET', url: '/admin/ui/sw.js' })
+    expect(res.statusCode).toBe(200)
+    expect(res.headers['content-type']).toMatch(/javascript/)
+    expect(res.body).toContain("addEventListener('fetch'")
+  })
 
   it('manifest uses relative URLs, warm-charcoal brand colors and split icon purposes', async () => {
-    const res = await app.inject({ method: 'GET', url: '/admin/ui/manifest.webmanifest' });
-    expect(res.statusCode).toBe(200);
-    const manifest = res.json();
+    const res = await app.inject({ method: 'GET', url: '/admin/ui/manifest.webmanifest' })
+    expect(res.statusCode).toBe(200)
+    const manifest = res.json()
     // 상대 경로 — 임베드(/admin/ui/)·데모(/) 양쪽에서 manifest URL 기준으로 해석된다.
-    expect(manifest.start_url).toBe('./');
-    expect(manifest.scope).toBe('./');
+    expect(manifest.start_url).toBe('./')
+    expect(manifest.scope).toBe('./')
     // 디자인 토큰 --app-bg(dark) = oklch(0.175 0.006 80) 의 sRGB — slate 가 아닌 웜 차콜.
-    expect(manifest.theme_color).toBe('#12100e');
-    expect(manifest.background_color).toBe('#12100e');
+    expect(manifest.theme_color).toBe('#12100e')
+    expect(manifest.background_color).toBe('#12100e')
     // 아이콘은 any / maskable 분리 항목 (combined 'any maskable' 금지).
-    expect(manifest.icons.length).toBeGreaterThan(0);
+    expect(manifest.icons.length).toBeGreaterThan(0)
     for (const icon of manifest.icons) {
-      expect(icon.src.startsWith('./'), `src=${icon.src}`).toBe(true);
-      expect(['any', 'maskable']).toContain(icon.purpose);
+      expect(icon.src.startsWith('./'), `src=${icon.src}`).toBe(true)
+      expect(['any', 'maskable']).toContain(icon.purpose)
     }
-    const purposes = manifest.icons.map((icon: { purpose: string }) => icon.purpose);
-    expect(purposes).toContain('any');
-    expect(purposes).toContain('maskable');
-  });
+    const purposes = manifest.icons.map((icon: { purpose: string }) => icon.purpose)
+    expect(purposes).toContain('any')
+    expect(purposes).toContain('maskable')
+  })
 
   it('GET /admin/ui/favicon.svg serves a solid-background (maskable-safe) brand icon', async () => {
-    const res = await app.inject({ method: 'GET', url: '/admin/ui/favicon.svg' });
-    expect(res.statusCode).toBe(200);
-    expect(res.headers['content-type']).toMatch(/svg/);
+    const res = await app.inject({ method: 'GET', url: '/admin/ui/favicon.svg' })
+    expect(res.statusCode).toBe(200)
+    expect(res.headers['content-type']).toMatch(/svg/)
     // full-bleed 배경 rect — maskable 크롭에서 투명 모서리가 노출되지 않는다.
-    expect(res.body).toContain('<rect');
+    expect(res.body).toContain('<rect')
     // 과거의 일반 파랑(#2563eb) 글로브가 아니라 brand violet accent 여야 한다.
-    expect(res.body).not.toContain('#2563eb');
-  });
+    expect(res.body).not.toContain('#2563eb')
+  })
 
   it('built index.html declares light/dark theme-color metas + the svg favicon', () => {
-    const html = readFileSync(resolve(adminPublic, 'index.html'), 'utf8');
-    expect(html).toContain('name="theme-color"');
-    expect(html).toContain('media="(prefers-color-scheme: light)"');
-    expect(html).toContain('media="(prefers-color-scheme: dark)"');
-    expect(html).toMatch(/<link rel="icon" type="image\/svg\+xml" href="[^"]*favicon\.svg" \/>/);
-  });
-});
+    const html = readFileSync(resolve(adminPublic, 'index.html'), 'utf8')
+    expect(html).toContain('name="theme-color"')
+    expect(html).toContain('media="(prefers-color-scheme: light)"')
+    expect(html).toContain('media="(prefers-color-scheme: dark)"')
+    expect(html).toMatch(/<link rel="icon" type="image\/svg\+xml" href="[^"]*favicon\.svg" \/>/)
+  })
+})

@@ -1,14 +1,14 @@
-import type { ReactNode } from 'react';
+import type { ReactNode } from 'react'
 
 type EmptyStateProps = {
   /** Primary line — what's empty. Keep it short. */
-  title: string;
+  title: string
   /** Optional second line — teach the next step, don't just restate the title. */
-  hint?: ReactNode;
+  hint?: ReactNode
   /** Override the default mark. */
-  icon?: ReactNode;
-  'data-testid'?: string;
-};
+  icon?: ReactNode
+  'data-testid'?: string
+}
 
 /**
  * Centered empty state. Teaches the interface instead of stating "nothing here":
@@ -23,7 +23,7 @@ export function EmptyState({ title, hint, icon, ...rest }: EmptyStateProps) {
       <p className="text-sm font-medium text-ink-muted">{title}</p>
       {hint ? <p className="mt-1 max-w-sm text-xs text-ink-subtle">{hint}</p> : null}
     </div>
-  );
+  )
 }
 
 function DefaultMark() {
@@ -43,5 +43,5 @@ function DefaultMark() {
       <path d="M3 7.5v9L12 21l9-4.5v-9" />
       <path d="M12 12v9" opacity="0.55" />
     </svg>
-  );
+  )
 }

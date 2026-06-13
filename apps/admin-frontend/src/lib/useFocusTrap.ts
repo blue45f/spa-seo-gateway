@@ -1,7 +1,7 @@
-import { type RefObject, useEffect } from 'react';
+import { type RefObject, useEffect } from 'react'
 
 const FOCUSABLE =
-  'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+  'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
 
 /**
  * `active` 동안 `ref` 컨테이너 안으로 Tab 포커스를 가둔다(마지막↔처음 순환).
@@ -13,33 +13,33 @@ const FOCUSABLE =
  */
 export function useFocusTrap(ref: RefObject<HTMLElement | null>, active: boolean): void {
   useEffect(() => {
-    if (!active || !ref.current) return undefined;
-    const node: HTMLElement = ref.current;
+    if (!active || !ref.current) return undefined
+    const node: HTMLElement = ref.current
     function onKey(e: KeyboardEvent) {
-      if (e.key !== 'Tab') return;
-      const raw = Array.from(node.querySelectorAll<HTMLElement>(FOCUSABLE));
-      const visible = raw.filter((el) => el.offsetParent !== null);
-      const focusables = visible.length ? visible : raw;
+      if (e.key !== 'Tab') return
+      const raw = Array.from(node.querySelectorAll<HTMLElement>(FOCUSABLE))
+      const visible = raw.filter((el) => el.offsetParent !== null)
+      const focusables = visible.length ? visible : raw
       if (focusables.length === 0) {
-        e.preventDefault();
-        node.focus();
-        return;
+        e.preventDefault()
+        node.focus()
+        return
       }
-      const first = focusables[0];
-      const last = focusables[focusables.length - 1];
-      const current = document.activeElement;
+      const first = focusables[0]
+      const last = focusables[focusables.length - 1]
+      const current = document.activeElement
       if (e.shiftKey) {
         // 컨테이너 자체(진입 포커스)거나 첫 요소면 마지막으로 순환 — 배경 이탈 방지
         if (current === node || current === first || !node.contains(current)) {
-          e.preventDefault();
-          last.focus();
+          e.preventDefault()
+          last.focus()
         }
       } else if (current === last) {
-        e.preventDefault();
-        first.focus();
+        e.preventDefault()
+        first.focus()
       }
     }
-    node.addEventListener('keydown', onKey);
-    return () => node.removeEventListener('keydown', onKey);
-  }, [ref, active]);
+    node.addEventListener('keydown', onKey)
+    return () => node.removeEventListener('keydown', onKey)
+  }, [ref, active])
 }

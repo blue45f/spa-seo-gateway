@@ -1,9 +1,10 @@
-import { Menu } from 'lucide-react';
-import { useStore } from '../lib/store';
+import { Menu } from 'lucide-react'
+
+import { useStore } from '../lib/store'
 
 export function MobileMenu() {
-  const open = useStore((s) => s.sidebarOpen);
-  const toggle = useStore((s) => s.toggleSidebar);
+  const open = useStore((s) => s.sidebarOpen)
+  const toggle = useStore((s) => s.toggleSidebar)
   return (
     <button
       type="button"
@@ -15,5 +16,5 @@ export function MobileMenu() {
     >
       <Menu aria-hidden="true" className="h-5 w-5" strokeWidth={1.75} />
     </button>
-  );
+  )
 }

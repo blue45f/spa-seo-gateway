@@ -1,6 +1,6 @@
-import type { Lang } from './types';
+import type { Lang } from './types'
 
-type Strings = Record<string, string>;
+type Strings = Record<string, string>
 
 const ko: Strings = {
   // Nav
@@ -448,7 +448,7 @@ const ko: Strings = {
   'policy.source': 'TermsDesk 원문',
   'policy.error': '문서를 불러오지 못했습니다.',
   'policy.retry': '다시 시도',
-};
+}
 
 const en: Strings = {
   // Nav
@@ -898,10 +898,10 @@ const en: Strings = {
   'policy.source': 'View on TermsDesk',
   'policy.error': 'Failed to load the document.',
   'policy.retry': 'Retry',
-};
+}
 
-const dicts: Record<Lang, Strings> = { ko, en };
+const dicts: Record<Lang, Strings> = { ko, en }
 
 export function translate(lang: Lang, key: string, fallback?: string): string {
-  return dicts[lang]?.[key] ?? dicts.ko[key] ?? fallback ?? key;
+  return dicts[lang]?.[key] ?? dicts.ko[key] ?? fallback ?? key
 }

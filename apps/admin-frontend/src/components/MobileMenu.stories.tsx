@@ -1,5 +1,6 @@
-import type { Meta, StoryObj } from '@storybook/react';
-import { MobileMenu } from './MobileMenu';
+import { MobileMenu } from './MobileMenu'
+
+import type { Meta, StoryObj } from '@storybook/react'
 
 const meta = {
   title: 'Components/MobileMenu',
@@ -15,10 +16,10 @@ const meta = {
     },
     viewport: { defaultViewport: 'mobile1' },
   },
-} satisfies Meta<typeof MobileMenu>;
+} satisfies Meta<typeof MobileMenu>
 
-export default meta;
-type Story = StoryObj<typeof meta>;
+export default meta
+type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
   render: () => (
@@ -29,4 +30,4 @@ export const Default: Story = {
       </div>
     </div>
   ),
-};
+}

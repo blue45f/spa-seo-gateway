@@ -9,16 +9,18 @@ import {
   Settings,
   ShieldCheck,
   Zap,
-} from 'lucide-react';
-import { useState } from 'react';
-import { Link, useOutletContext } from 'react-router-dom';
-import { formatUptime } from '../lib/format';
-import { useStore } from '../lib/store';
-import type { PublicInfo } from '../lib/types';
+} from 'lucide-react'
+import { useState } from 'react'
+import { Link, useOutletContext } from 'react-router-dom'
 
-type Ctx = { publicInfo: PublicInfo | null };
+import { formatUptime } from '../lib/format'
+import { useStore } from '../lib/store'
 
-const DOCS_BASE = 'https://github.com/blue45f/spa-seo-gateway/blob/main/docs';
+import type { PublicInfo } from '../lib/types'
+
+type Ctx = { publicInfo: PublicInfo | null }
+
+const DOCS_BASE = 'https://github.com/blue45f/spa-seo-gateway/blob/main/docs'
 
 /** Quickstart steps. Step 1 has no link; the rest lead with a nav link, then a t()-keyed tail. */
 const QUICKSTART: Array<{ to?: string; navKey?: string; bodyKey: string }> = [
@@ -27,7 +29,7 @@ const QUICKSTART: Array<{ to?: string; navKey?: string; bodyKey: string }> = [
   { to: '/routes', navKey: 'nav.routes', bodyKey: 'welcome.qs3' },
   { to: '/warm', navKey: 'nav.warm', bodyKey: 'welcome.qs4' },
   { to: '/metrics', navKey: 'nav.metrics', bodyKey: 'welcome.qs5' },
-];
+]
 
 const RESOURCES: Array<{ icon: LucideIcon; href: string; labelKey: string }> = [
   {
@@ -44,7 +46,7 @@ const RESOURCES: Array<{ icon: LucideIcon; href: string; labelKey: string }> = [
   { icon: Globe, href: `${DOCS_BASE}/CMS-MODE.md`, labelKey: 'welcome.links.cmsMode' },
   { icon: Rocket, href: `${DOCS_BASE}/DEPLOYMENT.md`, labelKey: 'welcome.links.deployment' },
   { icon: Network, href: `${DOCS_BASE}/ARCHITECTURE.md`, labelKey: 'welcome.links.architecture' },
-];
+]
 
 // Technical architecture diagram — locale-neutral (English) so it reads the same in both languages.
 const ARCH_DIAGRAM = `Bot ─→ Edge/CDN ──→ spa-seo-gateway
@@ -57,18 +59,18 @@ const ARCH_DIAGRAM = `Bot ─→ Edge/CDN ──→ spa-seo-gateway
                                  ├─ quality gate
                                  ├─ cache.set
                                  └─ response
-Human ──→ Edge/CDN ──→ origin (gateway: 204 or proxy)`;
+Human ──→ Edge/CDN ──→ origin (gateway: 204 or proxy)`
 
 export function Welcome() {
-  const { publicInfo } = useOutletContext<Ctx>();
-  const t = useStore((s) => s.t);
+  const { publicInfo } = useOutletContext<Ctx>()
+  const t = useStore((s) => s.t)
   const [demoChecks, setDemoChecks] = useState({
     test: false,
     routes: false,
     warm: false,
     metrics: false,
-  });
-  const demoRate = Math.round((Object.values(demoChecks).filter(Boolean).length / 4) * 100);
+  })
+  const demoRate = Math.round((Object.values(demoChecks).filter(Boolean).length / 4) * 100)
 
   return (
     <section className="space-y-6" data-testid="page-welcome">
@@ -176,7 +178,7 @@ export function Welcome() {
         </div>
       </div>
     </section>
-  );
+  )
 }
 
 function Stat({ label, value, truncate }: { label: string; value: string; truncate?: boolean }) {
@@ -185,7 +187,7 @@ function Stat({ label, value, truncate }: { label: string; value: string; trunca
       <div className="text-xs text-ink-subtle">{label}</div>
       <div className={`font-mono mt-1 text-ink ${truncate ? 'truncate' : ''}`}>{value}</div>
     </div>
-  );
+  )
 }
 
 function Card({ icon: Icon, title, body }: { icon: LucideIcon; title: string; body: string }) {
@@ -195,5 +197,5 @@ function Card({ icon: Icon, title, body }: { icon: LucideIcon; title: string; bo
       <h3 className="font-semibold mt-2 text-ink">{title}</h3>
       <p className="text-sm text-ink-muted mt-1">{body}</p>
     </div>
-  );
+  )
 }

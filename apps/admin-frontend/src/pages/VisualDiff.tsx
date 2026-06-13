@@ -1,36 +1,38 @@
-import { CircleCheck } from 'lucide-react';
-import { type FormEvent, useState } from 'react';
-import { AuthGate } from '../components/AuthGate';
-import { api, errorMessage } from '../lib/api';
-import { useStore } from '../lib/store';
-import type { VisualDiffResult } from '../lib/types';
+import { CircleCheck } from 'lucide-react'
+import { type FormEvent, useState } from 'react'
+
+import { AuthGate } from '../components/AuthGate'
+import { api, errorMessage } from '../lib/api'
+import { useStore } from '../lib/store'
+
+import type { VisualDiffResult } from '../lib/types'
 
 export function VisualDiff() {
   return (
     <AuthGate>
       <VisualDiffBody />
     </AuthGate>
-  );
+  )
 }
 
-type Mode = 'auto' | 'create' | 'compare';
+type Mode = 'auto' | 'create' | 'compare'
 
 function VisualDiffBody() {
-  const t = useStore((s) => s.t);
-  const pushToast = useStore((s) => s.pushToast);
-  const setError = useStore((s) => s.setGlobalError);
-  const [url, setUrl] = useState('');
-  const [mode, setMode] = useState<Mode>('auto');
-  const [threshold, setThreshold] = useState(0.1);
-  const [fullPage, setFullPage] = useState(false);
-  const [running, setRunning] = useState(false);
-  const [result, setResult] = useState<VisualDiffResult | null>(null);
+  const t = useStore((s) => s.t)
+  const pushToast = useStore((s) => s.pushToast)
+  const setError = useStore((s) => s.setGlobalError)
+  const [url, setUrl] = useState('')
+  const [mode, setMode] = useState<Mode>('auto')
+  const [threshold, setThreshold] = useState(0.1)
+  const [fullPage, setFullPage] = useState(false)
+  const [running, setRunning] = useState(false)
+  const [result, setResult] = useState<VisualDiffResult | null>(null)
 
   async function run(e: FormEvent) {
-    e.preventDefault();
-    if (!url.trim() || running) return;
-    setRunning(true);
-    setResult(null);
+    e.preventDefault()
+    if (!url.trim() || running) return
+    setRunning(true)
+    setResult(null)
     try {
       const r = await api<{ ok: true; result: VisualDiffResult }>(
         'POST',
@@ -40,19 +42,19 @@ function VisualDiffBody() {
           mode,
           threshold,
           fullPage,
-        },
-      );
-      setResult(r.result);
+        }
+      )
+      setResult(r.result)
       pushToast(
         r.result.baselineCreated ? t('visual.created') : `diff ${r.result.diffPercent.toFixed(2)}%`,
-        'success',
-      );
+        'success'
+      )
     } catch (e) {
-      const msg = errorMessage(e);
-      setError(msg);
-      pushToast(t('toast.visual.failed'), 'error');
+      const msg = errorMessage(e)
+      setError(msg)
+      pushToast(t('toast.visual.failed'), 'error')
     } finally {
-      setRunning(false);
+      setRunning(false)
     }
   }
 
@@ -161,5 +163,5 @@ function VisualDiffBody() {
         </div>
       ) : null}
     </section>
-  );
+  )
 }

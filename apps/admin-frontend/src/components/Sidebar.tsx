@@ -1,50 +1,52 @@
-import { ExternalLink, Languages, Monitor, Moon, Rows3, Rows4, Sun, X } from 'lucide-react';
-import { Link, useLocation } from 'react-router-dom';
-import { api } from '../lib/api';
-import { type GatewayMode, type NavItem, navItemsForLang } from '../lib/nav';
-import { useStore } from '../lib/store';
-import { NavIcon } from './NavIcon';
+import { ExternalLink, Languages, Monitor, Moon, Rows3, Rows4, Sun, X } from 'lucide-react'
+import { Link, useLocation } from 'react-router-dom'
+
+import { api } from '../lib/api'
+import { type GatewayMode, type NavItem, navItemsForLang } from '../lib/nav'
+import { useStore } from '../lib/store'
+
+import { NavIcon } from './NavIcon'
 
 type SidebarProps = {
-  publicMode?: GatewayMode;
-};
+  publicMode?: GatewayMode
+}
 
 export function Sidebar({ publicMode }: SidebarProps) {
-  const lang = useStore((s) => s.lang);
-  const themeMode = useStore((s) => s.themeMode);
-  const setThemeMode = useStore((s) => s.setThemeMode);
-  const density = useStore((s) => s.density);
-  const toggleDensity = useStore((s) => s.toggleDensity);
-  const authed = useStore((s) => s.authed);
-  const sidebarOpen = useStore((s) => s.sidebarOpen);
-  const setSidebarOpen = useStore((s) => s.setSidebarOpen);
-  const toggleLang = useStore((s) => s.toggleLang);
-  const t = useStore((s) => s.t);
-  const setAuthed = useStore((s) => s.setAuthed);
-  const pushToast = useStore((s) => s.pushToast);
+  const lang = useStore((s) => s.lang)
+  const themeMode = useStore((s) => s.themeMode)
+  const setThemeMode = useStore((s) => s.setThemeMode)
+  const density = useStore((s) => s.density)
+  const toggleDensity = useStore((s) => s.toggleDensity)
+  const authed = useStore((s) => s.authed)
+  const sidebarOpen = useStore((s) => s.sidebarOpen)
+  const setSidebarOpen = useStore((s) => s.setSidebarOpen)
+  const toggleLang = useStore((s) => s.toggleLang)
+  const t = useStore((s) => s.t)
+  const setAuthed = useStore((s) => s.setAuthed)
+  const pushToast = useStore((s) => s.pushToast)
 
-  const ThemeIcon = themeMode === 'system' ? Monitor : themeMode === 'dark' ? Moon : Sun;
-  const DensityIcon = density === 'compact' ? Rows4 : Rows3;
+  const ThemeIcon = themeMode === 'system' ? Monitor : themeMode === 'dark' ? Moon : Sun
+  const DensityIcon = density === 'compact' ? Rows4 : Rows3
 
   const items: Array<NavItem & { label: string; subtitle: string }> = navItemsForLang(
     lang,
-    publicMode,
-  );
-  const location = useLocation();
+    publicMode
+  )
+  const location = useLocation()
 
   function isActive(path: string) {
-    if (path === '/') return location.pathname === '/' || location.pathname === '';
-    return location.pathname === path || location.pathname.startsWith(`${path}/`);
+    if (path === '/') return location.pathname === '/' || location.pathname === ''
+    return location.pathname === path || location.pathname.startsWith(`${path}/`)
   }
 
   async function logout() {
     try {
-      await api('POST', '/admin/api/logout', undefined, { publicEndpoint: true });
+      await api('POST', '/admin/api/logout', undefined, { publicEndpoint: true })
     } catch {
       // ignore — best effort
     }
-    setAuthed(false);
-    pushToast(t('auth.logout', 'logged out'), 'info');
+    setAuthed(false)
+    pushToast(t('auth.logout', 'logged out'), 'info')
   }
 
   return (
@@ -76,7 +78,7 @@ export function Sidebar({ publicMode }: SidebarProps) {
       </div>
       <nav className="flex-1 px-2 py-3 space-y-0.5 text-sm overflow-y-auto" aria-label="Primary">
         {items.map((item) => {
-          const active = isActive(item.path);
+          const active = isActive(item.path)
           return (
             <Link
               key={item.id}
@@ -92,7 +94,7 @@ export function Sidebar({ publicMode }: SidebarProps) {
                 <span className="text-[10px] uppercase tracking-wider text-ok-rail">public</span>
               ) : null}
             </Link>
-          );
+          )
         })}
       </nav>
       <div className="px-3 py-3 border-t border-rail-line text-xs space-y-2.5">
@@ -160,5 +162,5 @@ export function Sidebar({ publicMode }: SidebarProps) {
         </button>
       </div>
     </aside>
-  );
+  )
 }

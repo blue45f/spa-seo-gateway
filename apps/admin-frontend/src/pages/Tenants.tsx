@@ -1,21 +1,23 @@
-import { type FormEvent, useCallback, useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { AuthGate } from '../components/AuthGate';
-import { EmptyState } from '../components/EmptyState';
-import { Field } from '../components/Field';
-import { Modal } from '../components/Modal';
-import { api, errorMessage } from '../lib/api';
-import { generateApiKey } from '../lib/apikey';
-import { useDialog } from '../lib/dialog';
-import { useStore } from '../lib/store';
-import type { Tenant, TenantPlan } from '../lib/types';
+import { type FormEvent, useCallback, useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
+
+import { AuthGate } from '../components/AuthGate'
+import { EmptyState } from '../components/EmptyState'
+import { Field } from '../components/Field'
+import { Modal } from '../components/Modal'
+import { api, errorMessage } from '../lib/api'
+import { generateApiKey } from '../lib/apikey'
+import { useDialog } from '../lib/dialog'
+import { useStore } from '../lib/store'
+
+import type { Tenant, TenantPlan } from '../lib/types'
 
 export function Tenants() {
   return (
     <AuthGate>
       <TenantsBody />
     </AuthGate>
-  );
+  )
 }
 
 const EMPTY_TENANT: Tenant = {
@@ -26,95 +28,95 @@ const EMPTY_TENANT: Tenant = {
   routes: [],
   plan: 'free',
   enabled: true,
-};
+}
 
-const PLANS: TenantPlan[] = ['free', 'pro', 'enterprise'];
+const PLANS: TenantPlan[] = ['free', 'pro', 'enterprise']
 
 const PLAN_PILL: Record<TenantPlan, string> = {
   free: 'badge badge--neutral',
   pro: 'badge badge--ok',
   enterprise: 'badge badge--warn',
-};
+}
 
 function TenantsBody() {
-  const t = useStore((s) => s.t);
-  const setError = useStore((s) => s.setGlobalError);
-  const pushToast = useStore((s) => s.pushToast);
-  const { confirm } = useDialog();
-  const [tenants, setTenants] = useState<Tenant[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [editing, setEditing] = useState<Tenant | null>(null);
+  const t = useStore((s) => s.t)
+  const setError = useStore((s) => s.setGlobalError)
+  const pushToast = useStore((s) => s.pushToast)
+  const { confirm } = useDialog()
+  const [tenants, setTenants] = useState<Tenant[]>([])
+  const [loading, setLoading] = useState(false)
+  const [editing, setEditing] = useState<Tenant | null>(null)
   // 삭제 in-flight 인 행 id — 중복 클릭/동시 DELETE 차단 (전역 loading 재사용 금지)
-  const [removingId, setRemovingId] = useState<string | null>(null);
+  const [removingId, setRemovingId] = useState<string | null>(null)
 
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const check = () => setIsMobile(window.innerWidth < 768);
-    check();
-    window.addEventListener('resize', check);
-    return () => window.removeEventListener('resize', check);
-  }, []);
+    if (typeof window === 'undefined') return
+    const check = () => setIsMobile(window.innerWidth < 768)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
 
   const load = useCallback(async () => {
-    setLoading(true);
+    setLoading(true)
     try {
-      const r = await api<{ ok: true; tenants: Tenant[] }>('GET', '/admin/api/tenants');
-      setTenants(r.tenants ?? []);
-      setError('');
+      const r = await api<{ ok: true; tenants: Tenant[] }>('GET', '/admin/api/tenants')
+      setTenants(r.tenants ?? [])
+      setError('')
     } catch (e) {
-      const msg = errorMessage(e);
-      setError(msg);
+      const msg = errorMessage(e)
+      setError(msg)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  }, [setError]);
+  }, [setError])
 
   useEffect(() => {
-    void load();
-  }, [load]);
+    void load()
+  }, [load])
 
   async function save(tenant: Tenant) {
     try {
-      await api('POST', '/admin/api/tenants', tenant);
-      pushToast(`${t('toast.tenant.saved')}: ${tenant.id}`, 'success');
-      setEditing(null);
-      await load();
+      await api('POST', '/admin/api/tenants', tenant)
+      pushToast(`${t('toast.tenant.saved')}: ${tenant.id}`, 'success')
+      setEditing(null)
+      await load()
     } catch (e) {
-      const msg = errorMessage(e);
-      pushToast(msg, 'error');
+      const msg = errorMessage(e)
+      pushToast(msg, 'error')
     }
   }
 
   async function remove(id: string) {
-    if (removingId) return;
+    if (removingId) return
     const ok = await confirm({
       title: t('tenants.delete.confirm.title'),
       description: t('tenants.delete.confirm.desc'),
       confirmLabel: t('tenants.delete'),
       danger: true,
-    });
-    if (!ok) return;
-    setRemovingId(id);
+    })
+    if (!ok) return
+    setRemovingId(id)
     try {
-      await api('DELETE', `/admin/api/tenants/${encodeURIComponent(id)}`);
-      pushToast(`${t('toast.tenant.deleted')}: ${id}`, 'success');
-      await load();
+      await api('DELETE', `/admin/api/tenants/${encodeURIComponent(id)}`)
+      pushToast(`${t('toast.tenant.deleted')}: ${id}`, 'success')
+      await load()
     } catch (e) {
-      const msg = errorMessage(e);
-      pushToast(msg, 'error');
+      const msg = errorMessage(e)
+      pushToast(msg, 'error')
     } finally {
-      setRemovingId(null);
+      setRemovingId(null)
     }
   }
 
   async function copyKey(key: string) {
     try {
-      await navigator.clipboard?.writeText(key);
-      pushToast(t('tenants.copied'), 'success');
+      await navigator.clipboard?.writeText(key)
+      pushToast(t('tenants.copied'), 'success')
     } catch {
-      pushToast(t('toast.clipboard.denied'), 'warn');
+      pushToast(t('toast.clipboard.denied'), 'warn')
     }
   }
 
@@ -294,7 +296,7 @@ function TenantsBody() {
         <TenantForm tenant={editing} onCancel={() => setEditing(null)} onSave={save} />
       ) : null}
     </section>
-  );
+  )
 }
 
 function TenantForm({
@@ -302,30 +304,30 @@ function TenantForm({
   onCancel,
   onSave,
 }: {
-  tenant: Tenant;
-  onCancel(): void;
-  onSave(t: Tenant): Promise<void>;
+  tenant: Tenant
+  onCancel(): void
+  onSave(t: Tenant): Promise<void>
 }) {
-  const t = useStore((s) => s.t);
-  const [draft, setDraft] = useState<Tenant>(tenant);
-  const [submitting, setSubmitting] = useState(false);
+  const t = useStore((s) => s.t)
+  const [draft, setDraft] = useState<Tenant>(tenant)
+  const [submitting, setSubmitting] = useState(false)
 
   function update<K extends keyof Tenant>(key: K, value: Tenant[K]) {
-    setDraft((d) => ({ ...d, [key]: value }));
+    setDraft((d) => ({ ...d, [key]: value }))
   }
 
   async function submit(e: FormEvent) {
-    e.preventDefault();
-    if (submitting) return; // 중복 제출 방지
-    if (!/^[a-z0-9_-]+$/.test(draft.id)) return;
-    if (draft.apiKey.length < 20) return;
-    if (!draft.name || !draft.origin) return;
-    setSubmitting(true);
+    e.preventDefault()
+    if (submitting) return // 중복 제출 방지
+    if (!/^[a-z0-9_-]+$/.test(draft.id)) return
+    if (draft.apiKey.length < 20) return
+    if (!draft.name || !draft.origin) return
+    setSubmitting(true)
     try {
-      await onSave(draft);
+      await onSave(draft)
     } finally {
       // save 는 실패 시 모달을 열어두므로(재시도) 항상 버튼을 되살린다
-      setSubmitting(false);
+      setSubmitting(false)
     }
   }
 
@@ -427,5 +429,5 @@ function TenantForm({
         </div>
       </form>
     </Modal>
-  );
+  )
 }

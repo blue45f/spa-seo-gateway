@@ -1,16 +1,19 @@
-import type { Meta, StoryObj } from '@storybook/react';
-import { useEffect } from 'react';
-import { useStore } from '../lib/store';
-import { ShortcutsModal } from './ShortcutsModal';
+import { useEffect } from 'react'
+
+import { useStore } from '../lib/store'
+
+import { ShortcutsModal } from './ShortcutsModal'
+
+import type { Meta, StoryObj } from '@storybook/react'
 
 function SeedOpen({ open }: { open: boolean }) {
   useEffect(() => {
-    useStore.setState({ shortcutsOpen: open });
+    useStore.setState({ shortcutsOpen: open })
     return () => {
-      useStore.setState({ shortcutsOpen: false });
-    };
-  }, [open]);
-  return null;
+      useStore.setState({ shortcutsOpen: false })
+    }
+  }, [open])
+  return null
 }
 
 const meta = {
@@ -26,10 +29,10 @@ const meta = {
       },
     },
   },
-} satisfies Meta<typeof ShortcutsModal>;
+} satisfies Meta<typeof ShortcutsModal>
 
-export default meta;
-type Story = StoryObj<typeof meta>;
+export default meta
+type Story = StoryObj<typeof meta>
 
 export const Open: Story = {
   render: () => (
@@ -38,7 +41,7 @@ export const Open: Story = {
       <ShortcutsModal />
     </>
   ),
-};
+}
 
 export const Closed: Story = {
   render: () => (
@@ -48,4 +51,4 @@ export const Closed: Story = {
       <ShortcutsModal />
     </div>
   ),
-};
+}

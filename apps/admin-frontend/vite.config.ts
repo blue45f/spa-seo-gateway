@@ -1,8 +1,8 @@
-import { resolve } from 'node:path';
-import babel from '@rolldown/plugin-babel';
-import tailwindcss from '@tailwindcss/vite';
-import react, { reactCompilerPreset } from '@vitejs/plugin-react';
-import { defineConfig } from 'vitest/config';
+import { resolve } from 'node:path'
+import babel from '@rolldown/plugin-babel'
+import tailwindcss from '@tailwindcss/vite'
+import react, { reactCompilerPreset } from '@vitejs/plugin-react'
+import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
   // Fastify 가 /admin/ui 아래에서 서빙 — 자산도 같은 prefix 로 절대경로 발급.
@@ -25,11 +25,11 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           if (id.includes('node_modules')) {
-            if (id.includes('@radix-ui')) return 'radix';
+            if (id.includes('@radix-ui')) return 'radix'
             if (id.includes('react-dom') || id.includes('react/') || id.includes('react-router')) {
-              return 'react-vendor';
+              return 'react-vendor'
             }
-            if (id.includes('zustand')) return 'state';
+            if (id.includes('zustand')) return 'state'
           }
         },
       },
@@ -56,4 +56,4 @@ export default defineConfig({
       exclude: ['src/**/*.test.{ts,tsx}', 'src/**/*.stories.{ts,tsx}', 'src/main.tsx'],
     },
   },
-});
+})

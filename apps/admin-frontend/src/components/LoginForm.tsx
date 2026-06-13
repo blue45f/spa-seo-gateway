@@ -1,32 +1,33 @@
-import { type FormEvent, useState } from 'react';
-import { api, errorMessage } from '../lib/api';
-import { useStore } from '../lib/store';
+import { type FormEvent, useState } from 'react'
+
+import { api, errorMessage } from '../lib/api'
+import { useStore } from '../lib/store'
 
 export function LoginForm() {
-  const t = useStore((s) => s.t);
-  const setAuthed = useStore((s) => s.setAuthed);
-  const pushToast = useStore((s) => s.pushToast);
-  const setGlobalError = useStore((s) => s.setGlobalError);
-  const [token, setToken] = useState('');
-  const [submitting, setSubmitting] = useState(false);
+  const t = useStore((s) => s.t)
+  const setAuthed = useStore((s) => s.setAuthed)
+  const pushToast = useStore((s) => s.pushToast)
+  const setGlobalError = useStore((s) => s.setGlobalError)
+  const [token, setToken] = useState('')
+  const [submitting, setSubmitting] = useState(false)
 
   async function submit(e: FormEvent) {
-    e.preventDefault();
-    const trimmed = token.trim();
-    if (!trimmed || submitting) return;
-    setSubmitting(true);
+    e.preventDefault()
+    const trimmed = token.trim()
+    if (!trimmed || submitting) return
+    setSubmitting(true)
     try {
-      await api('POST', '/admin/api/login', { token: trimmed }, { publicEndpoint: true });
-      setAuthed(true);
-      setGlobalError('');
-      setToken('');
-      pushToast(t('auth.authenticated', 'authenticated'), 'success');
+      await api('POST', '/admin/api/login', { token: trimmed }, { publicEndpoint: true })
+      setAuthed(true)
+      setGlobalError('')
+      setToken('')
+      pushToast(t('auth.authenticated', 'authenticated'), 'success')
     } catch (e) {
-      const msg = errorMessage(e);
-      setGlobalError(msg);
-      pushToast(msg, 'error');
+      const msg = errorMessage(e)
+      setGlobalError(msg)
+      pushToast(msg, 'error')
     } finally {
-      setSubmitting(false);
+      setSubmitting(false)
     }
   }
 
@@ -50,5 +51,5 @@ export function LoginForm() {
         {submitting ? '…' : t('auth.login')}
       </button>
     </form>
-  );
+  )
 }

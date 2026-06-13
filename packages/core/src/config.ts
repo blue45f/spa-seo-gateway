@@ -1,13 +1,14 @@
-import { existsSync, readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
-import 'dotenv/config';
-import { z } from 'zod';
+import { existsSync, readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
+
+import 'dotenv/config'
+import { z } from 'zod'
 
 const csv = (s?: string) =>
   (s ?? '')
     .split(',')
     .map((v) => v.trim())
-    .filter(Boolean);
+    .filter(Boolean)
 
 const ResourceType = z.enum([
   'image',
@@ -19,9 +20,9 @@ const ResourceType = z.enum([
   'fetch',
   'websocket',
   'other',
-]);
+])
 
-const WaitUntil = z.enum(['load', 'domcontentloaded', 'networkidle0', 'networkidle2']);
+const WaitUntil = z.enum(['load', 'domcontentloaded', 'networkidle0', 'networkidle2'])
 
 const RouteOverride = z.object({
   pattern: z.string().describe('URL pathname regex (e.g. "^/products/")'),
@@ -48,12 +49,12 @@ const RouteOverride = z.object({
         ogTitle: z.string().optional(),
         ogDescription: z.string().optional(),
         weight: z.coerce.number().nonnegative().default(1),
-      }),
+      })
     )
     .optional(),
-});
+})
 
-export type RouteOverride = z.infer<typeof RouteOverride>;
+export type RouteOverride = z.infer<typeof RouteOverride>
 
 const Schema = z.object({
   server: z.object({
@@ -200,14 +201,14 @@ const Schema = z.object({
     })
     .optional()
     .transform(
-      (v) => v ?? { enabled: false, intervalMs: 6 * 60 * 60 * 1000, max: 500, concurrency: 2 },
+      (v) => v ?? { enabled: false, intervalMs: 6 * 60 * 60 * 1000, max: 500, concurrency: 2 }
     ),
-});
+})
 
-export const ConfigSchema = Schema;
-export type Config = z.infer<typeof Schema>;
+export const ConfigSchema = Schema
+export type Config = z.infer<typeof Schema>
 
-const env = process.env;
+const env = process.env
 
 function fromEnv(): Record<string, unknown> {
   return {
@@ -278,60 +279,60 @@ function fromEnv(): Record<string, unknown> {
       max: env.WARM_CRON_MAX,
       concurrency: env.WARM_CRON_CONCURRENCY,
     },
-  };
+  }
 }
 
 function fromFile(): Record<string, unknown> {
-  const explicit = env.GATEWAY_CONFIG_FILE;
-  const candidates = explicit ? [explicit] : ['seo-gateway.config.json', '.seo-gateway.json'];
+  const explicit = env.GATEWAY_CONFIG_FILE
+  const candidates = explicit ? [explicit] : ['seo-gateway.config.json', '.seo-gateway.json']
   for (const c of candidates) {
-    const p = resolve(process.cwd(), c);
-    if (!existsSync(p)) continue;
+    const p = resolve(process.cwd(), c)
+    if (!existsSync(p)) continue
     try {
-      const raw = readFileSync(p, 'utf8');
-      const parsed = JSON.parse(raw) as Record<string, unknown>;
-      console.info(`config file loaded: ${p}`);
-      return parsed;
+      const raw = readFileSync(p, 'utf8')
+      const parsed = JSON.parse(raw) as Record<string, unknown>
+      console.info(`config file loaded: ${p}`)
+      return parsed
     } catch (e) {
-      console.error(`failed to read ${p}:`, (e as Error).message);
-      process.exit(1);
+      console.error(`failed to read ${p}:`, (e as Error).message)
+      process.exit(1)
     }
   }
-  return {};
+  return {}
 }
 
 function isPlainObject(v: unknown): v is Record<string, unknown> {
-  return typeof v === 'object' && v !== null && !Array.isArray(v);
+  return typeof v === 'object' && v !== null && !Array.isArray(v)
 }
 
 function deepMerge(
   base: Record<string, unknown>,
-  override: Record<string, unknown>,
+  override: Record<string, unknown>
 ): Record<string, unknown> {
-  const out: Record<string, unknown> = { ...base };
+  const out: Record<string, unknown> = { ...base }
   for (const [k, v] of Object.entries(override)) {
-    if (v === undefined) continue;
-    const b = out[k];
+    if (v === undefined) continue
+    const b = out[k]
     if (isPlainObject(v) && isPlainObject(b)) {
-      out[k] = deepMerge(b, v);
+      out[k] = deepMerge(b, v)
     } else {
-      out[k] = v;
+      out[k] = v
     }
   }
-  return out;
+  return out
 }
 
-const merged = deepMerge(fromFile(), fromEnv());
-const parsed = Schema.safeParse(merged);
+const merged = deepMerge(fromFile(), fromEnv())
+const parsed = Schema.safeParse(merged)
 
 if (!parsed.success) {
-  console.error('Invalid configuration:', JSON.stringify(parsed.error.format(), null, 2));
-  process.exit(1);
+  console.error('Invalid configuration:', JSON.stringify(parsed.error.format(), null, 2))
+  process.exit(1)
 }
 
-export const config: Config = parsed.data;
+export const config: Config = parsed.data
 
 if (config.mode === 'proxy' && !config.originUrl) {
-  console.error('GATEWAY_MODE=proxy requires ORIGIN_URL');
-  process.exit(1);
+  console.error('GATEWAY_MODE=proxy requires ORIGIN_URL')
+  process.exit(1)
 }

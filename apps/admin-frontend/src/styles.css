@@ -1,9 +1,9 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 @custom-variant dark (&:where(.dark, .dark *));
 
 /* compact density — proportionally tightens rem-based spacing + type */
-:root[data-density="compact"] {
+:root[data-density='compact'] {
   font-size: 90%;
 }
 
@@ -93,7 +93,7 @@
 @theme inline {
   --font-sans: ui-sans-serif, -apple-system, system-ui, sans-serif;
   --font-mono:
-    ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", "Menlo", "Consolas", monospace;
+    ui-monospace, 'SF Mono', 'JetBrains Mono', 'Cascadia Code', 'Menlo', 'Consolas', monospace;
 
   --color-surface: var(--app-bg);
   --color-panel: var(--app-panel);
@@ -149,7 +149,7 @@
   kbd,
   samp {
     font-variant-numeric: tabular-nums;
-    font-feature-settings: "ss01", "zero";
+    font-feature-settings: 'ss01', 'zero';
   }
 }
 
@@ -181,7 +181,7 @@
     white-space: nowrap;
   }
   .badge::before {
-    content: "";
+    content: '';
     width: 0.375rem;
     height: 0.375rem;
     border-radius: 999px;
@@ -345,7 +345,6 @@
 
 @layer utilities {
   [x-cloak] {
-    /* biome-ignore lint/complexity/noImportantStyles: required for x-cloak to win against Tailwind display utilities */
     display: none !important;
   }
   pre {
@@ -521,25 +520,20 @@
   .btn-ghost,
   .btn-danger,
   .input {
-    /* biome-ignore lint/complexity/noImportantStyles: must override Tailwind transition utilities for reduced-motion users */
     animation: none !important;
-    /* biome-ignore lint/complexity/noImportantStyles: must override Tailwind transition utilities for reduced-motion users */
     transition: none !important;
   }
   /* sparkline 은 모션을 꺼도 선은 온전히 그려져 있어야 한다(데이터 보조선) */
   .spark path {
-    /* biome-ignore lint/complexity/noImportantStyles: keep the trend line fully drawn for reduced-motion users */
     stroke-dashoffset: 0 !important;
   }
   /* no tactile press displacement for reduced-motion users */
   .btn-primary:active,
   .btn-ghost:active,
   .btn-danger:active {
-    /* biome-ignore lint/complexity/noImportantStyles: must override the :active transform for reduced-motion users */
     transform: none !important;
   }
   aside {
-    /* biome-ignore lint/complexity/noImportantStyles: must override Tailwind transition utilities for reduced-motion users */
     transition: none !important;
   }
 }

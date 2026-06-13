@@ -1,4 +1,4 @@
-import { Component, type ErrorInfo, type ReactNode } from 'react';
+import { Component, type ErrorInfo, type ReactNode } from 'react'
 
 /**
  * 페이지 단위 React 에러 바운더리.
@@ -10,32 +10,32 @@ import { Component, type ErrorInfo, type ReactNode } from 'react';
  * - dev 에서는 stack 까지 노출.
  */
 type Props = {
-  children: ReactNode;
+  children: ReactNode
   /** 선택: 커스텀 fallback. 미지정 시 기본 fallback 사용. */
-  fallback?: (error: Error, reset: () => void) => ReactNode;
-};
+  fallback?: (error: Error, reset: () => void) => ReactNode
+}
 
-type State = { error: Error | null };
+type State = { error: Error | null }
 
 export class ErrorBoundary extends Component<Props, State> {
-  state: State = { error: null };
+  state: State = { error: null }
 
   static getDerivedStateFromError(error: Error): State {
-    return { error };
+    return { error }
   }
 
   componentDidCatch(error: Error, info: ErrorInfo): void {
     // 콘솔에만 보고. 외부 reporter (Sentry 등) 는 의도적으로 의존성 추가 안 함.
-    console.error('[admin-ui] uncaught render error', error, info.componentStack);
+    console.error('[admin-ui] uncaught render error', error, info.componentStack)
   }
 
   reset = (): void => {
-    this.setState({ error: null });
-  };
+    this.setState({ error: null })
+  }
 
   render(): ReactNode {
     if (this.state.error) {
-      if (this.props.fallback) return this.props.fallback(this.state.error, this.reset);
+      if (this.props.fallback) return this.props.fallback(this.state.error, this.reset)
       return (
         <div
           role="alert"
@@ -59,7 +59,7 @@ export class ErrorBoundary extends Component<Props, State> {
             <button
               type="button"
               onClick={() => {
-                if (typeof window !== 'undefined') window.location.reload();
+                if (typeof window !== 'undefined') window.location.reload()
               }}
               className="btn-ghost px-3 py-1.5 text-xs font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
             >
@@ -67,8 +67,8 @@ export class ErrorBoundary extends Component<Props, State> {
             </button>
           </div>
         </div>
-      );
+      )
     }
-    return this.props.children;
+    return this.props.children
   }
 }

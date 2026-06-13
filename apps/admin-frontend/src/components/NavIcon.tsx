@@ -17,7 +17,7 @@ import {
   Route,
   ShieldCheck,
   Sparkles,
-} from 'lucide-react';
+} from 'lucide-react'
 
 /**
  * Maps a nav item id to a cohesive line icon. Keyed by id so nav.ts stays the
@@ -42,9 +42,9 @@ const NAV_ICONS: Record<string, LucideIcon> = {
   api: Plug,
   library: Package,
   help: CircleQuestionMark,
-};
+}
 
 export function NavIcon({ id, className }: { id: string; className?: string }) {
-  const Icon = NAV_ICONS[id] ?? Sparkles;
-  return <Icon className={className} strokeWidth={1.75} aria-hidden="true" />;
+  const Icon = NAV_ICONS[id] ?? Sparkles
+  return <Icon className={className} strokeWidth={1.75} aria-hidden="true" />
 }

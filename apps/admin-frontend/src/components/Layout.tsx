@@ -1,44 +1,46 @@
-import { X } from 'lucide-react';
-import { Suspense, useEffect } from 'react';
-import { Link, Outlet, useLocation } from 'react-router-dom';
-import { api } from '../lib/api';
-import { useStore } from '../lib/store';
-import type { PublicInfo } from '../lib/types';
-import { ErrorBoundary } from './ErrorBoundary';
-import { Header } from './Header';
-import { MobileMenu } from './MobileMenu';
-import { RouteAnnouncer } from './RouteAnnouncer';
-import { Sidebar } from './Sidebar';
+import { X } from 'lucide-react'
+import { Suspense, useEffect } from 'react'
+import { Link, Outlet, useLocation } from 'react-router-dom'
+
+import { api } from '../lib/api'
+import { useStore } from '../lib/store'
+
+import { ErrorBoundary } from './ErrorBoundary'
+import { Header } from './Header'
+import { MobileMenu } from './MobileMenu'
+import { RouteAnnouncer } from './RouteAnnouncer'
+import { Sidebar } from './Sidebar'
+
+import type { PublicInfo } from '../lib/types'
 
 export function Layout() {
-  const t = useStore((s) => s.t);
-  const publicInfo = useStore((s) => s.publicInfo);
-  const setPublicInfo = useStore((s) => s.setPublicInfo);
-  const setSidebarOpen = useStore((s) => s.setSidebarOpen);
-  const sidebarOpen = useStore((s) => s.sidebarOpen);
-  const location = useLocation();
+  const t = useStore((s) => s.t)
+  const publicInfo = useStore((s) => s.publicInfo)
+  const setPublicInfo = useStore((s) => s.setPublicInfo)
+  const setSidebarOpen = useStore((s) => s.setSidebarOpen)
+  const sidebarOpen = useStore((s) => s.sidebarOpen)
+  const location = useLocation()
 
   // 라우트 변경 시 모바일 사이드바 닫기 — UX 일관성
-  // biome-ignore lint/correctness/useExhaustiveDependencies: location.pathname triggers the effect on every route change
   useEffect(() => {
     if (typeof window !== 'undefined' && window.innerWidth < 1024) {
-      setSidebarOpen(false);
+      setSidebarOpen(false)
     }
-  }, [location.pathname, setSidebarOpen]);
+  }, [location.pathname, setSidebarOpen])
 
   useEffect(() => {
-    let cancelled = false;
+    let cancelled = false
     api<PublicInfo>('GET', '/admin/api/public/info', undefined, { publicEndpoint: true })
       .then((info) => {
-        if (!cancelled) setPublicInfo(info);
+        if (!cancelled) setPublicInfo(info)
       })
       .catch(() => {
-        if (!cancelled) setPublicInfo(null);
-      });
+        if (!cancelled) setPublicInfo(null)
+      })
     return () => {
-      cancelled = true;
-    };
-  }, [setPublicInfo]);
+      cancelled = true
+    }
+  }, [setPublicInfo])
 
   // ⌘S 와 Escape 는 페이지 별 / App 레벨에서 자체 처리하므로 root div 에 핸들러 불필요.
   return (
@@ -120,13 +122,13 @@ export function Layout() {
         </footer>
       </div>
     </div>
-  );
+  )
 }
 
 function GlobalErrorBanner() {
-  const error = useStore((s) => s.globalError);
-  const setError = useStore((s) => s.setGlobalError);
-  if (!error) return null;
+  const error = useStore((s) => s.globalError)
+  const setError = useStore((s) => s.setGlobalError)
+  if (!error) return null
   return (
     <div
       role="alert"
@@ -143,5 +145,5 @@ function GlobalErrorBanner() {
         <X className="h-4 w-4" aria-hidden="true" />
       </button>
     </div>
-  );
+  )
 }

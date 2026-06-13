@@ -7,25 +7,25 @@
  * 환경 변수:
  *   SEO_GATEWAY_HOST=spa-seo-gateway.your-cluster.internal   # Cloud Run / Fly.io 호스트
  */
-import { type NextRequest, NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server'
 
 export const config = {
   matcher: ['/((?!_next|api|favicon.ico|robots.txt|sitemap.xml).*)'],
-};
+}
 
 const BOT_RE =
-  /(?:googlebot|bingbot|yeti|naverbot|baiduspider|duckduckbot|yandexbot|facebookexternalhit|twitterbot|slackbot|linkedinbot|telegrambot|whatsapp|kakaotalk-scrap|discordbot|applebot)/i;
+  /(?:googlebot|bingbot|yeti|naverbot|baiduspider|duckduckbot|yandexbot|facebookexternalhit|twitterbot|slackbot|linkedinbot|telegrambot|whatsapp|kakaotalk-scrap|discordbot|applebot)/i
 
 export function middleware(req: NextRequest) {
-  const ua = req.headers.get('user-agent') ?? '';
-  if (!BOT_RE.test(ua)) return NextResponse.next();
+  const ua = req.headers.get('user-agent') ?? ''
+  if (!BOT_RE.test(ua)) return NextResponse.next()
 
-  const gw = process.env.SEO_GATEWAY_HOST;
-  if (!gw) return NextResponse.next();
+  const gw = process.env.SEO_GATEWAY_HOST
+  if (!gw) return NextResponse.next()
 
-  const url = req.nextUrl.clone();
-  url.hostname = gw;
+  const url = req.nextUrl.clone()
+  url.hostname = gw
   return NextResponse.rewrite(url, {
     headers: { 'x-spa-seo-bot': '1' },
-  });
+  })
 }

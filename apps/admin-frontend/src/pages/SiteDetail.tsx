@@ -1,98 +1,99 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
-import { AuthGate } from '../components/AuthGate';
-import { EmptyState } from '../components/EmptyState';
-import { Field } from '../components/Field';
-import { RoutesEditor } from '../components/RoutesEditor';
-import { DetailSkeleton } from '../components/Skeleton';
-import { api, errorMessage } from '../lib/api';
-import { cleanRoutes } from '../lib/routes';
-import { useStore } from '../lib/store';
-import type { ScopedRoute, Site } from '../lib/types';
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { Link, useParams } from 'react-router-dom'
+
+import { AuthGate } from '../components/AuthGate'
+import { EmptyState } from '../components/EmptyState'
+import { Field } from '../components/Field'
+import { RoutesEditor } from '../components/RoutesEditor'
+import { DetailSkeleton } from '../components/Skeleton'
+import { api, errorMessage } from '../lib/api'
+import { cleanRoutes } from '../lib/routes'
+import { useStore } from '../lib/store'
+
+import type { ScopedRoute, Site } from '../lib/types'
 
 export function SiteDetail() {
   return (
     <AuthGate>
       <SiteDetailBody />
     </AuthGate>
-  );
+  )
 }
 
 function SiteDetailBody() {
-  const params = useParams();
-  const id = params.id ?? '';
-  const t = useStore((s) => s.t);
-  const setError = useStore((s) => s.setGlobalError);
-  const pushToast = useStore((s) => s.pushToast);
-  const [site, setSite] = useState<Site | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [missing, setMissing] = useState(false);
+  const params = useParams()
+  const id = params.id ?? ''
+  const t = useStore((s) => s.t)
+  const setError = useStore((s) => s.setGlobalError)
+  const pushToast = useStore((s) => s.pushToast)
+  const [site, setSite] = useState<Site | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [missing, setMissing] = useState(false)
 
-  const ctrlRef = useRef<AbortController | null>(null);
+  const ctrlRef = useRef<AbortController | null>(null)
 
   const load = useCallback(async () => {
     // 이전 요청 취소 — /sites/A → /sites/B 네비게이션 시 A 응답이 B 를 덮어쓰지 않게.
-    ctrlRef.current?.abort();
-    const ctrl = new AbortController();
-    ctrlRef.current = ctrl;
-    setLoading(true);
-    setMissing(false);
+    ctrlRef.current?.abort()
+    const ctrl = new AbortController()
+    ctrlRef.current = ctrl
+    setLoading(true)
+    setMissing(false)
     try {
       const r = await api<{ ok: true; sites: Site[] }>('GET', '/admin/api/sites', undefined, {
         signal: ctrl.signal,
-      });
-      if (ctrl.signal.aborted) return;
-      const found = (r.sites ?? []).find((s) => s.id === id);
-      if (!found) setMissing(true);
-      else setSite(found);
-      setError('');
+      })
+      if (ctrl.signal.aborted) return
+      const found = (r.sites ?? []).find((s) => s.id === id)
+      if (!found) setMissing(true)
+      else setSite(found)
+      setError('')
     } catch (e) {
-      if ((e as Error).name === 'AbortError') return;
-      const msg = errorMessage(e);
-      setError(msg);
+      if ((e as Error).name === 'AbortError') return
+      const msg = errorMessage(e)
+      setError(msg)
     } finally {
-      if (!ctrl.signal.aborted) setLoading(false);
+      if (!ctrl.signal.aborted) setLoading(false)
     }
-  }, [id, setError]);
+  }, [id, setError])
 
   useEffect(() => {
-    void load();
-    return () => ctrlRef.current?.abort();
-  }, [load]);
+    void load()
+    return () => ctrlRef.current?.abort()
+  }, [load])
 
   async function save() {
-    if (!site) return;
-    setSaving(true);
+    if (!site) return
+    setSaving(true)
     try {
-      const cleaned = { ...site, routes: cleanRoutes(site.routes) };
-      await api('POST', '/admin/api/sites', cleaned);
-      pushToast(`${t('toast.site.saved')}: ${site.id}`, 'success');
-      await load();
+      const cleaned = { ...site, routes: cleanRoutes(site.routes) }
+      await api('POST', '/admin/api/sites', cleaned)
+      pushToast(`${t('toast.site.saved')}: ${site.id}`, 'success')
+      await load()
     } catch (e) {
-      const msg = errorMessage(e);
-      pushToast(msg, 'error');
+      const msg = errorMessage(e)
+      pushToast(msg, 'error')
     } finally {
-      setSaving(false);
+      setSaving(false)
     }
   }
 
   // ⌘/Ctrl + S 저장
   // save 는 site 의 클로저에 의존 — site/saving 변할 때마다 핸들러 갱신
-  // biome-ignore lint/correctness/useExhaustiveDependencies: save is intentionally captured via the site/saving closure; re-binding on save would churn the global listener
   useEffect(() => {
     function handler(e: KeyboardEvent) {
-      const meta = e.metaKey || e.ctrlKey;
+      const meta = e.metaKey || e.ctrlKey
       if (meta && e.key.toLowerCase() === 's') {
-        e.preventDefault();
-        if (site && !saving) void save();
+        e.preventDefault()
+        if (site && !saving) void save()
       }
     }
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [site, saving]);
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [site, saving])
 
-  if (loading) return <DetailSkeleton rows={5} />;
+  if (loading) return <DetailSkeleton rows={5} />
   if (missing) {
     return (
       <section className="space-y-4" data-testid="page-site-detail">
@@ -105,9 +106,9 @@ function SiteDetailBody() {
           }
         />
       </section>
-    );
+    )
   }
-  if (!site) return null;
+  if (!site) return null
 
   return (
     <section className="space-y-4" data-testid="page-site-detail">
@@ -203,5 +204,5 @@ function SiteDetailBody() {
         />
       </div>
     </section>
-  );
+  )
 }

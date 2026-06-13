@@ -1,5 +1,6 @@
-import { createElement, useEffect, useState } from 'react';
-import { Skeleton } from '../components/Skeleton';
+import { createElement, useEffect, useState } from 'react'
+
+import { Skeleton } from '../components/Skeleton'
 import {
   fetchPolicyDocument,
   formatPolicyDate,
@@ -8,14 +9,14 @@ import {
   type PolicySlug,
   parsePolicyBody,
   policyPublicUrl,
-} from '../lib/policy';
-import { useStore } from '../lib/store';
+} from '../lib/policy'
+import { useStore } from '../lib/store'
 
 /** 신뢰 표면에 노출하는 content hash 축약 길이(앞 12자). */
-const SHORT_HASH_LENGTH = 12;
+const SHORT_HASH_LENGTH = 12
 
 const LINK_CLASS =
-  'link rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent';
+  'link rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent'
 
 function PolicyBody({ blocks }: { blocks: PolicyBlock[] }) {
   return (
@@ -26,63 +27,58 @@ function PolicyBody({ blocks }: { blocks: PolicyBlock[] }) {
           return createElement(
             `h${Math.min(block.level + 1, 6)}`,
             { key: index, className: 'pt-2 font-semibold text-ink' },
-            block.text,
-          );
+            block.text
+          )
         }
         if (block.kind === 'list') {
-          const ListTag = block.ordered ? 'ol' : 'ul';
+          const ListTag = block.ordered ? 'ol' : 'ul'
           return (
             <ListTag
-              // biome-ignore lint/suspicious/noArrayIndexKey: 정적 문서 블록은 재정렬되지 않는다
               key={index}
               className={`${block.ordered ? 'list-decimal' : 'list-disc'} space-y-1 pl-5`}
             >
               {block.items.map((item, itemIndex) => (
-                // biome-ignore lint/suspicious/noArrayIndexKey: 정적 문서 블록은 재정렬되지 않는다
                 <li key={itemIndex}>{item}</li>
               ))}
             </ListTag>
-          );
+          )
         }
         if (block.kind === 'divider') {
-          // biome-ignore lint/suspicious/noArrayIndexKey: 정적 문서 블록은 재정렬되지 않는다
-          return <hr key={index} className="border-line" />;
+          return <hr key={index} className="border-line" />
         }
         return (
-          // biome-ignore lint/suspicious/noArrayIndexKey: 정적 문서 블록은 재정렬되지 않는다
           <p key={index} className="whitespace-pre-line">
             {block.text}
           </p>
-        );
+        )
       })}
     </div>
-  );
+  )
 }
 
 /** TermsDesk 정본을 그대로 렌더하는 법적 고지 페이지 — /terms · /privacy 공용. */
 export function Policy({ slug }: { slug: PolicySlug }) {
-  const t = useStore((s) => s.t);
-  const lang = useStore((s) => s.lang);
-  const [doc, setDoc] = useState<PolicyDocument | null>(null);
-  const [failed, setFailed] = useState(false);
-  const [attempt, setAttempt] = useState(0);
+  const t = useStore((s) => s.t)
+  const lang = useStore((s) => s.lang)
+  const [doc, setDoc] = useState<PolicyDocument | null>(null)
+  const [failed, setFailed] = useState(false)
+  const [attempt, setAttempt] = useState(0)
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: attempt 는 재시도(재fetch) 트리거 전용
   useEffect(() => {
-    const ctrl = new AbortController();
-    setDoc(null);
-    setFailed(false);
+    const ctrl = new AbortController()
+    setDoc(null)
+    setFailed(false)
     fetchPolicyDocument(slug, ctrl.signal)
       .then((d) => setDoc(d))
       .catch(() => {
-        if (!ctrl.signal.aborted) setFailed(true);
-      });
-    return () => ctrl.abort();
-  }, [slug, attempt]);
+        if (!ctrl.signal.aborted) setFailed(true)
+      })
+    return () => ctrl.abort()
+  }, [slug, attempt])
 
-  const titleKey = slug === 'privacy-policy' ? 'policy.privacy.title' : 'policy.terms.title';
-  const externalUrl = policyPublicUrl(slug);
-  const loading = !doc && !failed;
+  const titleKey = slug === 'privacy-policy' ? 'policy.privacy.title' : 'policy.terms.title'
+  const externalUrl = policyPublicUrl(slug)
+  const loading = !doc && !failed
 
   return (
     <article className="max-w-3xl space-y-6" data-testid="page-policy">
@@ -150,5 +146,5 @@ export function Policy({ slug }: { slug: PolicySlug }) {
         </>
       ) : null}
     </article>
-  );
+  )
 }

@@ -1,21 +1,22 @@
-import { type ComponentType, lazy, useEffect } from 'react';
-import { Route, Routes } from 'react-router-dom';
-import { CommandPalette } from './components/CommandPalette';
-import { DialogHost } from './components/DialogHost';
-import { ErrorBoundary } from './components/ErrorBoundary';
-import { Layout } from './components/Layout';
-import { ShortcutsModal } from './components/ShortcutsModal';
-import { ToastContainer } from './components/ToastContainer';
-import { Tour } from './components/Tour';
-import { api } from './lib/api';
-import { useStore } from './lib/store';
-// Eager: 자주 들어오는 페이지 + 초기 진입점 (Welcome/Dashboard/Routes).
-import { Dashboard } from './pages/Dashboard';
-import { NotFound } from './pages/NotFound';
-import { RoutesPage } from './pages/Routes';
-import { Welcome } from './pages/Welcome';
+import { type ComponentType, lazy, useEffect } from 'react'
+import { Route, Routes } from 'react-router-dom'
 
-const CHUNK_RETRY_KEY = 'seo-admin-chunk-retry';
+import { CommandPalette } from './components/CommandPalette'
+import { DialogHost } from './components/DialogHost'
+import { ErrorBoundary } from './components/ErrorBoundary'
+import { Layout } from './components/Layout'
+import { ShortcutsModal } from './components/ShortcutsModal'
+import { ToastContainer } from './components/ToastContainer'
+import { Tour } from './components/Tour'
+import { api } from './lib/api'
+import { useStore } from './lib/store'
+// Eager: 자주 들어오는 페이지 + 초기 진입점 (Welcome/Dashboard/Routes).
+import { Dashboard } from './pages/Dashboard'
+import { NotFound } from './pages/NotFound'
+import { RoutesPage } from './pages/Routes'
+import { Welcome } from './pages/Welcome'
+
+const CHUNK_RETRY_KEY = 'seo-admin-chunk-retry'
 
 /**
  * 동적 import 실패 시 1회 전체 새로고침 후 재시도 — 배포로 청크 해시가 바뀐 stale 탭 복구.
@@ -25,146 +26,146 @@ const CHUNK_RETRY_KEY = 'seo-admin-chunk-retry';
 // 던질 수 있다 — 가드를 못 읽으면 '이미 재시도함'으로 취급해 새로고침 루프를 원천 차단한다.
 function hasRetryGuard(): boolean {
   try {
-    return window.sessionStorage.getItem(CHUNK_RETRY_KEY) !== null;
+    return window.sessionStorage.getItem(CHUNK_RETRY_KEY) !== null
   } catch {
-    return true;
+    return true
   }
 }
 
 function armRetryGuard(): boolean {
   try {
-    window.sessionStorage.setItem(CHUNK_RETRY_KEY, '1');
-    return true;
+    window.sessionStorage.setItem(CHUNK_RETRY_KEY, '1')
+    return true
   } catch {
-    return false;
+    return false
   }
 }
 
 function clearRetryGuard(): void {
   try {
-    window.sessionStorage.removeItem(CHUNK_RETRY_KEY);
+    window.sessionStorage.removeItem(CHUNK_RETRY_KEY)
   } catch {
     // 스토리지 접근 불가 환경 — 가드 자체가 없으니 지울 것도 없다
   }
 }
 
-// biome-ignore lint/suspicious/noExplicitAny: mirrors React.lazy's own ComponentType<any> bound
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- mirrors React.lazy's own ComponentType<any> bound
 function lazyRetry<T extends ComponentType<any>>(load: () => Promise<{ default: T }>) {
   return lazy(() =>
     load()
       .then((module) => {
-        clearRetryGuard();
-        return module;
+        clearRetryGuard()
+        return module
       })
       .catch((error: unknown) => {
         // 가드를 기록할 수 있을 때만 새로고침 — 기록 실패 시 reload 하면 무한 루프가 된다
         if (!hasRetryGuard() && armRetryGuard()) {
-          window.location.reload();
+          window.location.reload()
           // 새로고침이 끼어들 때까지 Suspense fallback 유지
-          return new Promise<{ default: T }>(() => {});
+          return new Promise<{ default: T }>(() => {})
         }
         // 이미 한 번 새로고침한 세션 — 가드를 풀고 ErrorBoundary 로 전달
-        clearRetryGuard();
-        throw error;
-      }),
-  );
+        clearRetryGuard()
+        throw error
+      })
+  )
 }
 
 // Lazy: 보조/저빈도 페이지 — 초기 번들에서 분리.
 const AgentDashboard = lazyRetry(() =>
-  import('./pages/AgentDashboard').then((m) => ({ default: m.AgentDashboard })),
-);
-const AiSchema = lazyRetry(() => import('./pages/AiSchema').then((m) => ({ default: m.AiSchema })));
+  import('./pages/AgentDashboard').then((m) => ({ default: m.AgentDashboard }))
+)
+const AiSchema = lazyRetry(() => import('./pages/AiSchema').then((m) => ({ default: m.AiSchema })))
 const ApiExplorer = lazyRetry(() =>
-  import('./pages/ApiExplorer').then((m) => ({ default: m.ApiExplorer })),
-);
-const AuditLog = lazyRetry(() => import('./pages/AuditLog').then((m) => ({ default: m.AuditLog })));
-const Cache = lazyRetry(() => import('./pages/Cache').then((m) => ({ default: m.Cache })));
-const Help = lazyRetry(() => import('./pages/Help').then((m) => ({ default: m.Help })));
-const Library = lazyRetry(() => import('./pages/Library').then((m) => ({ default: m.Library })));
+  import('./pages/ApiExplorer').then((m) => ({ default: m.ApiExplorer }))
+)
+const AuditLog = lazyRetry(() => import('./pages/AuditLog').then((m) => ({ default: m.AuditLog })))
+const Cache = lazyRetry(() => import('./pages/Cache').then((m) => ({ default: m.Cache })))
+const Help = lazyRetry(() => import('./pages/Help').then((m) => ({ default: m.Help })))
+const Library = lazyRetry(() => import('./pages/Library').then((m) => ({ default: m.Library })))
 const Lighthouse = lazyRetry(() =>
-  import('./pages/Lighthouse').then((m) => ({ default: m.Lighthouse })),
-);
-const Metrics = lazyRetry(() => import('./pages/Metrics').then((m) => ({ default: m.Metrics })));
-const Policy = lazyRetry(() => import('./pages/Policy').then((m) => ({ default: m.Policy })));
+  import('./pages/Lighthouse').then((m) => ({ default: m.Lighthouse }))
+)
+const Metrics = lazyRetry(() => import('./pages/Metrics').then((m) => ({ default: m.Metrics })))
+const Policy = lazyRetry(() => import('./pages/Policy').then((m) => ({ default: m.Policy })))
 const RenderTest = lazyRetry(() =>
-  import('./pages/RenderTest').then((m) => ({ default: m.RenderTest })),
-);
+  import('./pages/RenderTest').then((m) => ({ default: m.RenderTest }))
+)
 const SiteDetail = lazyRetry(() =>
-  import('./pages/SiteDetail').then((m) => ({ default: m.SiteDetail })),
-);
-const Sites = lazyRetry(() => import('./pages/Sites').then((m) => ({ default: m.Sites })));
+  import('./pages/SiteDetail').then((m) => ({ default: m.SiteDetail }))
+)
+const Sites = lazyRetry(() => import('./pages/Sites').then((m) => ({ default: m.Sites })))
 const TenantDetail = lazyRetry(() =>
-  import('./pages/TenantDetail').then((m) => ({ default: m.TenantDetail })),
-);
-const Tenants = lazyRetry(() => import('./pages/Tenants').then((m) => ({ default: m.Tenants })));
+  import('./pages/TenantDetail').then((m) => ({ default: m.TenantDetail }))
+)
+const Tenants = lazyRetry(() => import('./pages/Tenants').then((m) => ({ default: m.Tenants })))
 const VisualDiff = lazyRetry(() =>
-  import('./pages/VisualDiff').then((m) => ({ default: m.VisualDiff })),
-);
-const Warm = lazyRetry(() => import('./pages/Warm').then((m) => ({ default: m.Warm })));
+  import('./pages/VisualDiff').then((m) => ({ default: m.VisualDiff }))
+)
+const Warm = lazyRetry(() => import('./pages/Warm').then((m) => ({ default: m.Warm })))
 
 export function App() {
-  const setAuthed = useStore((s) => s.setAuthed);
-  const setAdminEnabled = useStore((s) => s.setAdminEnabled);
-  const theme = useStore((s) => s.theme);
-  const openCmd = useStore((s) => s.openCmd);
-  const closeCmd = useStore((s) => s.closeCmd);
-  const closeShortcuts = useStore((s) => s.closeShortcuts);
-  const openShortcuts = useStore((s) => s.openShortcuts);
+  const setAuthed = useStore((s) => s.setAuthed)
+  const setAdminEnabled = useStore((s) => s.setAdminEnabled)
+  const theme = useStore((s) => s.theme)
+  const openCmd = useStore((s) => s.openCmd)
+  const closeCmd = useStore((s) => s.closeCmd)
+  const closeShortcuts = useStore((s) => s.closeShortcuts)
+  const openShortcuts = useStore((s) => s.openShortcuts)
 
   // initial auth check + theme sync
   useEffect(() => {
     if (typeof document !== 'undefined') {
-      document.documentElement.classList.toggle('dark', theme === 'dark');
+      document.documentElement.classList.toggle('dark', theme === 'dark')
     }
-  }, [theme]);
+  }, [theme])
 
   useEffect(() => {
-    let cancelled = false;
+    let cancelled = false
     api<{ ok: true; authenticated: boolean; adminEnabled: boolean }>(
       'GET',
       '/admin/api/whoami',
       undefined,
-      { publicEndpoint: true },
+      { publicEndpoint: true }
     )
       .then((r) => {
-        if (cancelled) return;
-        setAuthed(!!r.authenticated);
-        setAdminEnabled(!!r.adminEnabled);
+        if (cancelled) return
+        setAuthed(!!r.authenticated)
+        setAdminEnabled(!!r.adminEnabled)
       })
       .catch(() => {
-        if (!cancelled) setAuthed(false);
-      });
+        if (!cancelled) setAuthed(false)
+      })
     return () => {
-      cancelled = true;
-    };
-  }, [setAuthed, setAdminEnabled]);
+      cancelled = true
+    }
+  }, [setAuthed, setAdminEnabled])
 
   // global keyboard shortcuts
   useEffect(() => {
     function handler(e: KeyboardEvent) {
       if (e.key === 'Escape') {
-        closeCmd();
-        closeShortcuts();
-        return;
+        closeCmd()
+        closeShortcuts()
+        return
       }
-      const meta = e.metaKey || e.ctrlKey;
+      const meta = e.metaKey || e.ctrlKey
       if (meta && e.key.toLowerCase() === 'k') {
-        e.preventDefault();
+        e.preventDefault()
         // 팔레트 열림 상태는 핸들러 내부에서 지연 조회 — 토글마다 리스너를 재구독하지 않기 위해
-        if (useStore.getState().cmdPaletteOpen) closeCmd();
-        else openCmd();
-        return;
+        if (useStore.getState().cmdPaletteOpen) closeCmd()
+        else openCmd()
+        return
       }
       // '?' shortcut — help modal. shift+slash or just '?' depending on layout.
       if (e.key === '?' && !meta && !(e.target instanceof HTMLInputElement)) {
-        e.preventDefault();
-        openShortcuts();
+        e.preventDefault()
+        openShortcuts()
       }
     }
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [openCmd, closeCmd, openShortcuts, closeShortcuts]);
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [openCmd, closeCmd, openShortcuts, closeShortcuts])
 
   return (
     <>
@@ -206,5 +207,5 @@ export function App() {
         <DialogHost />
       </ErrorBoundary>
     </>
-  );
+  )
 }

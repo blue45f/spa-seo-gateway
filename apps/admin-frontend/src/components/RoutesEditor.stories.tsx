@@ -1,7 +1,9 @@
-import type { Meta, StoryObj } from '@storybook/react';
-import { useState } from 'react';
-import type { ScopedRoute } from '../lib/types';
-import { RoutesEditor } from './RoutesEditor';
+import { useState } from 'react'
+
+import { RoutesEditor } from './RoutesEditor'
+
+import type { ScopedRoute } from '../lib/types'
+import type { Meta, StoryObj } from '@storybook/react'
 
 const SAMPLE: ScopedRoute[] = [
   {
@@ -23,7 +25,7 @@ const SAMPLE: ScopedRoute[] = [
     pattern: '^/admin/.*',
     ignore: true,
   },
-];
+]
 
 const meta = {
   title: 'Components/RoutesEditor',
@@ -41,20 +43,20 @@ const meta = {
   argTypes: {
     reorderable: { control: 'boolean' },
   },
-} satisfies Meta<typeof RoutesEditor>;
+} satisfies Meta<typeof RoutesEditor>
 
-export default meta;
-type Story = StoryObj<typeof meta>;
+export default meta
+type Story = StoryObj<typeof meta>
 
 /** Renders the editor with a local `useState` so changes round-trip during demos. */
 function Stateful({
   initial,
   reorderable = true,
 }: {
-  initial: ScopedRoute[];
-  reorderable?: boolean;
+  initial: ScopedRoute[]
+  reorderable?: boolean
 }) {
-  const [routes, setRoutes] = useState(initial);
+  const [routes, setRoutes] = useState(initial)
   return (
     <div className="space-y-3">
       <RoutesEditor routes={routes} onChange={setRoutes} reorderable={reorderable} />
@@ -65,12 +67,12 @@ function Stateful({
         </pre>
       </details>
     </div>
-  );
+  )
 }
 
 export const Default: Story = {
   render: () => <Stateful initial={SAMPLE} />,
-};
+}
 
 export const Empty: Story = {
   render: () => <Stateful initial={[]} />,
@@ -79,7 +81,7 @@ export const Empty: Story = {
       description: { story: 'Empty list — the editor shows the `routes.empty` placeholder.' },
     },
   },
-};
+}
 
 export const ReorderDisabled: Story = {
   render: () => <Stateful initial={SAMPLE} reorderable={false} />,
@@ -88,7 +90,7 @@ export const ReorderDisabled: Story = {
       description: { story: 'Pass `reorderable={false}` to disable drag-and-drop reordering.' },
     },
   },
-};
+}
 
 export const SingleRow: Story = {
   render: () => (
@@ -102,4 +104,4 @@ export const SingleRow: Story = {
       ]}
     />
   ),
-};
+}

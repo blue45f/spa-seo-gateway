@@ -1,74 +1,76 @@
-import { CircleCheck, CircleX } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
-import { AuthGate } from '../components/AuthGate';
-import { EmptyState } from '../components/EmptyState';
-import { api, errorMessage } from '../lib/api';
-import { useStore } from '../lib/store';
-import type { AuditEvent } from '../lib/types';
+import { CircleCheck, CircleX } from 'lucide-react'
+import { useCallback, useEffect, useState } from 'react'
+
+import { AuthGate } from '../components/AuthGate'
+import { EmptyState } from '../components/EmptyState'
+import { api, errorMessage } from '../lib/api'
+import { useStore } from '../lib/store'
+
+import type { AuditEvent } from '../lib/types'
 
 export function AuditLog() {
   return (
     <AuthGate>
       <AuditLogBody />
     </AuthGate>
-  );
+  )
 }
 
 function AuditLogBody() {
-  const t = useStore((s) => s.t);
-  const pushToast = useStore((s) => s.pushToast);
-  const setError = useStore((s) => s.setGlobalError);
-  const [events, setEvents] = useState<AuditEvent[]>([]);
-  const [verified, setVerified] = useState<boolean | null>(null);
-  const [brokenAt, setBrokenAt] = useState<number | null>(null);
-  const [busy, setBusy] = useState(false);
+  const t = useStore((s) => s.t)
+  const pushToast = useStore((s) => s.pushToast)
+  const setError = useStore((s) => s.setGlobalError)
+  const [events, setEvents] = useState<AuditEvent[]>([])
+  const [verified, setVerified] = useState<boolean | null>(null)
+  const [brokenAt, setBrokenAt] = useState<number | null>(null)
+  const [busy, setBusy] = useState(false)
 
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const check = () => setIsMobile(window.innerWidth < 768);
-    check();
-    window.addEventListener('resize', check);
-    return () => window.removeEventListener('resize', check);
-  }, []);
+    if (typeof window === 'undefined') return
+    const check = () => setIsMobile(window.innerWidth < 768)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
 
   const load = useCallback(async () => {
-    setBusy(true);
+    setBusy(true)
     try {
-      const r = await api<{ ok: true; events: AuditEvent[] }>('GET', '/admin/api/audit');
-      setEvents(r.events ?? []);
-      setError('');
+      const r = await api<{ ok: true; events: AuditEvent[] }>('GET', '/admin/api/audit')
+      setEvents(r.events ?? [])
+      setError('')
     } catch (e) {
-      const msg = errorMessage(e);
-      setError(msg);
+      const msg = errorMessage(e)
+      setError(msg)
     } finally {
-      setBusy(false);
+      setBusy(false)
     }
-  }, [setError]);
+  }, [setError])
 
   useEffect(() => {
-    void load();
-  }, [load]);
+    void load()
+  }, [load])
 
   async function verify() {
-    setBusy(true);
+    setBusy(true)
     try {
       const r = await api<{ ok: true; verified: boolean; brokenAt: number | null }>(
         'GET',
-        '/admin/api/audit/verify',
-      );
-      setVerified(r.verified);
-      setBrokenAt(r.brokenAt);
+        '/admin/api/audit/verify'
+      )
+      setVerified(r.verified)
+      setBrokenAt(r.brokenAt)
       pushToast(
         r.verified ? t('audit.ok') : `${t('audit.broken')} (idx ${r.brokenAt})`,
-        r.verified ? 'success' : 'error',
-      );
+        r.verified ? 'success' : 'error'
+      )
     } catch (e) {
-      const msg = errorMessage(e);
-      setError(msg);
+      const msg = errorMessage(e)
+      setError(msg)
     } finally {
-      setBusy(false);
+      setBusy(false)
     }
   }
 
@@ -118,7 +120,6 @@ function AuditLogBody() {
         /* Mobile Timeline view */
         <div className="space-y-4 relative before:absolute before:inset-y-0 before:left-3.5 before:w-0.5 before:bg-line">
           {events.map((e, i) => (
-            // biome-ignore lint/suspicious/noArrayIndexKey: audit log is append-only and never reorders
             <div key={`${e.ts}-${i}`} className="relative pl-8">
               <span
                 className={`absolute left-[9px] top-4 w-[10px] h-[10px] rounded-full border-2 border-surface ${e.outcome === 'ok' ? 'bg-ok' : 'bg-err'}`}
@@ -166,7 +167,6 @@ function AuditLogBody() {
             </thead>
             <tbody className="divide-y divide-line">
               {events.map((e, i) => (
-                // biome-ignore lint/suspicious/noArrayIndexKey: audit log is append-only and never reorders
                 <tr key={`${e.ts}-${i}`} className="hover:bg-panel-2">
                   <td className="px-3 py-2 font-mono text-xs whitespace-nowrap">
                     {e.ts?.slice(11, 19) ?? '-'}
@@ -192,5 +192,5 @@ function AuditLogBody() {
         </div>
       )}
     </section>
-  );
+  )
 }

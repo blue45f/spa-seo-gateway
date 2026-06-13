@@ -1,50 +1,52 @@
-import { type FormEvent, useState } from 'react';
-import { AuthGate } from '../components/AuthGate';
-import { EmptyState } from '../components/EmptyState';
-import { DetailSkeleton } from '../components/Skeleton';
-import { api, errorMessage } from '../lib/api';
-import { confidenceColor } from '../lib/format';
-import { useStore } from '../lib/store';
-import type { SchemaSuggestion } from '../lib/types';
+import { type FormEvent, useState } from 'react'
+
+import { AuthGate } from '../components/AuthGate'
+import { EmptyState } from '../components/EmptyState'
+import { DetailSkeleton } from '../components/Skeleton'
+import { api, errorMessage } from '../lib/api'
+import { confidenceColor } from '../lib/format'
+import { useStore } from '../lib/store'
+
+import type { SchemaSuggestion } from '../lib/types'
 
 export function AiSchema() {
   return (
     <AuthGate>
       <AiSchemaBody />
     </AuthGate>
-  );
+  )
 }
 
 function AiSchemaBody() {
-  const t = useStore((s) => s.t);
-  const pushToast = useStore((s) => s.pushToast);
-  const setError = useStore((s) => s.setGlobalError);
-  const [url, setUrl] = useState('');
-  const [running, setRunning] = useState(false);
-  const [suggestions, setSuggestions] = useState<SchemaSuggestion[]>([]);
-  const [hasRun, setHasRun] = useState(false);
+  const t = useStore((s) => s.t)
+  const pushToast = useStore((s) => s.pushToast)
+  const setError = useStore((s) => s.setGlobalError)
+  const [url, setUrl] = useState('')
+  const [running, setRunning] = useState(false)
+  const [suggestions, setSuggestions] = useState<SchemaSuggestion[]>([])
+  const [hasRun, setHasRun] = useState(false)
 
   async function run(e: FormEvent) {
-    e.preventDefault();
-    if (!url.trim() || running) return;
-    setRunning(true);
-    setHasRun(true);
-    setSuggestions([]);
+    e.preventDefault()
+    if (!url.trim() || running) return
+    setRunning(true)
+    setHasRun(true)
+    setSuggestions([])
     try {
       const r = await api<{ ok: true; suggestions: SchemaSuggestion[] }>(
         'POST',
         '/admin/api/ai/schema',
-        { url: url.trim() },
-      );
-      setSuggestions(r.suggestions ?? []);
-      if ((r.suggestions ?? []).length === 0) pushToast(t('ai.empty'), 'warn');
-      else pushToast(`${r.suggestions.length} ${t('toast.ai.suggestions')}`, 'success');
+        { url: url.trim() }
+      )
+      setSuggestions(r.suggestions ?? [])
+      if ((r.suggestions ?? []).length === 0) pushToast(t('ai.empty'), 'warn')
+      else pushToast(`${r.suggestions.length} ${t('toast.ai.suggestions')}`, 'success')
     } catch (e) {
-      const msg = errorMessage(e);
-      setError(msg);
-      pushToast(t('toast.ai.failed'), 'error');
+      const msg = errorMessage(e)
+      setError(msg)
+      pushToast(t('toast.ai.failed'), 'error')
     } finally {
-      setRunning(false);
+      setRunning(false)
     }
   }
 
@@ -81,11 +83,7 @@ function AiSchemaBody() {
         <EmptyState data-testid="ai-empty" title={t('ai.empty')} hint={t('ai.empty.hint')} />
       ) : (
         suggestions.map((s, i) => (
-          <div
-            // biome-ignore lint/suspicious/noArrayIndexKey: AI suggestions are append-only and never reorder within a session
-            key={`${s.type}-${i}`}
-            className="panel p-3 text-sm"
-          >
+          <div key={`${s.type}-${i}`} className="panel p-3 text-sm">
             <div className="flex items-center gap-2 mb-2">
               <span className="badge badge--neutral">{s.type}</span>
               <span className="text-xs text-ink-subtle">confidence:</span>
@@ -136,5 +134,5 @@ setAiSchemaAdapter(createOpenAiSchemaAdapter({
         </div>
       </div>
     </section>
-  );
+  )
 }

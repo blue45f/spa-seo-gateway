@@ -1,13 +1,16 @@
-import type { Meta, StoryObj } from '@storybook/react';
-import { useEffect } from 'react';
-import { useStore } from '../lib/store';
-import { LoginForm } from './LoginForm';
+import { useEffect } from 'react'
+
+import { useStore } from '../lib/store'
+
+import { LoginForm } from './LoginForm'
+
+import type { Meta, StoryObj } from '@storybook/react'
 
 function SeedAuth({ authed }: { authed: boolean }) {
   useEffect(() => {
-    useStore.setState({ authed });
-  }, [authed]);
-  return null;
+    useStore.setState({ authed })
+  }, [authed])
+  return null
 }
 
 const meta = {
@@ -22,10 +25,10 @@ const meta = {
       },
     },
   },
-} satisfies Meta<typeof LoginForm>;
+} satisfies Meta<typeof LoginForm>
 
-export default meta;
-type Story = StoryObj<typeof meta>;
+export default meta
+type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
   render: () => (
@@ -34,7 +37,7 @@ export const Default: Story = {
       <LoginForm />
     </div>
   ),
-};
+}
 
 /**
  * In production the submit button is disabled until the token is non-empty.
@@ -50,4 +53,4 @@ export const DisabledInitially: Story = {
       <LoginForm />
     </div>
   ),
-};
+}

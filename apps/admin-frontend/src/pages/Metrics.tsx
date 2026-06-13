@@ -1,84 +1,85 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { AuthGate } from '../components/AuthGate';
-import { Figure } from '../components/Figure';
-import { CardGridSkeleton } from '../components/Skeleton';
-import { Sparkline } from '../components/Sparkline';
-import { errorMessage, fetchText } from '../lib/api';
-import { type ParsedMetrics, parsePrometheus, summarize } from '../lib/metrics';
-import { useStore } from '../lib/store';
+import { useCallback, useEffect, useRef, useState } from 'react'
+
+import { AuthGate } from '../components/AuthGate'
+import { Figure } from '../components/Figure'
+import { CardGridSkeleton } from '../components/Skeleton'
+import { Sparkline } from '../components/Sparkline'
+import { errorMessage, fetchText } from '../lib/api'
+import { type ParsedMetrics, parsePrometheus, summarize } from '../lib/metrics'
+import { useStore } from '../lib/store'
 
 /** 추세선이 의미를 갖도록 최근 폴링 N회의 표본만 보관. */
-const TREND_CAP = 24;
-const intFmt = (n: number) => String(Math.round(n));
-const pctFmt = (n: number) => `${n.toFixed(1)}%`;
+const TREND_CAP = 24
+const intFmt = (n: number) => String(Math.round(n))
+const pctFmt = (n: number) => `${n.toFixed(1)}%`
 
 export function Metrics() {
   return (
     <AuthGate>
       <MetricsBody />
     </AuthGate>
-  );
+  )
 }
 
 function MetricsBody() {
-  const t = useStore((s) => s.t);
-  const setError = useStore((s) => s.setGlobalError);
-  const [parsed, setParsed] = useState<ParsedMetrics | null>(null);
-  const [raw, setRaw] = useState('');
-  const [autoRefresh, setAutoRefresh] = useState(true);
-  const [updated, setUpdated] = useState('');
+  const t = useStore((s) => s.t)
+  const setError = useStore((s) => s.setGlobalError)
+  const [parsed, setParsed] = useState<ParsedMetrics | null>(null)
+  const [raw, setRaw] = useState('')
+  const [autoRefresh, setAutoRefresh] = useState(true)
+  const [updated, setUpdated] = useState('')
   // 폴링마다 hit ratio(%) 를 적재해 헤드라인 옆 추세선을 만든다(최근 TREND_CAP 회).
-  const [hitTrend, setHitTrend] = useState<number[]>([]);
-  const trendRef = useRef<number[]>([]);
+  const [hitTrend, setHitTrend] = useState<number[]>([])
+  const trendRef = useRef<number[]>([])
 
-  const ctrlRef = useRef<AbortController | null>(null);
+  const ctrlRef = useRef<AbortController | null>(null)
 
   const load = useCallback(async () => {
     // 이전 요청을 취소해, 느린 응답이 더 새 데이터를 덮어쓰는 레이스를 막는다.
-    ctrlRef.current?.abort();
-    const ctrl = new AbortController();
-    ctrlRef.current = ctrl;
+    ctrlRef.current?.abort()
+    const ctrl = new AbortController()
+    ctrlRef.current = ctrl
     try {
-      const text = await fetchText('/metrics', ctrl.signal);
-      if (ctrl.signal.aborted) return;
-      setRaw(text);
-      const next = summarize(parsePrometheus(text));
-      setParsed(next);
+      const text = await fetchText('/metrics', ctrl.signal)
+      if (ctrl.signal.aborted) return
+      setRaw(text)
+      const next = summarize(parsePrometheus(text))
+      setParsed(next)
       if (next.cards.hitRatioValue != null) {
-        trendRef.current = [...trendRef.current, next.cards.hitRatioValue].slice(-TREND_CAP);
-        setHitTrend(trendRef.current);
+        trendRef.current = [...trendRef.current, next.cards.hitRatioValue].slice(-TREND_CAP)
+        setHitTrend(trendRef.current)
       }
-      setUpdated(new Date().toLocaleTimeString());
-      setError('');
+      setUpdated(new Date().toLocaleTimeString())
+      setError('')
     } catch (e) {
-      if ((e as Error).name === 'AbortError') return; // 교체/언마운트 취소는 무시
-      setError(errorMessage(e));
+      if ((e as Error).name === 'AbortError') return // 교체/언마운트 취소는 무시
+      setError(errorMessage(e))
     }
-  }, [setError]);
+  }, [setError])
 
   // 초기 로드 + unmount 시 진행 중 요청 취소
   useEffect(() => {
-    void load();
-    return () => ctrlRef.current?.abort();
-  }, [load]);
+    void load()
+    return () => ctrlRef.current?.abort()
+  }, [load])
 
   // 5s 자동 갱신 — 숨김 탭에선 스킵, 복귀 시 즉시 갱신
   useEffect(() => {
-    if (!autoRefresh) return undefined;
+    if (!autoRefresh) return undefined
     const id = setInterval(() => {
-      if (document.visibilityState === 'visible') void load();
-    }, 5000);
+      if (document.visibilityState === 'visible') void load()
+    }, 5000)
     const onVisible = () => {
-      if (document.visibilityState === 'visible') void load();
-    };
-    document.addEventListener('visibilitychange', onVisible);
+      if (document.visibilityState === 'visible') void load()
+    }
+    document.addEventListener('visibilitychange', onVisible)
     return () => {
-      clearInterval(id);
-      document.removeEventListener('visibilitychange', onVisible);
-    };
-  }, [autoRefresh, load]);
+      clearInterval(id)
+      document.removeEventListener('visibilitychange', onVisible)
+    }
+  }, [autoRefresh, load])
 
-  if (!parsed) return <CardGridSkeleton count={3} />;
+  if (!parsed) return <CardGridSkeleton count={3} />
 
   return (
     <section className="space-y-4" data-testid="page-metrics">
@@ -205,43 +206,43 @@ function MetricsBody() {
         </pre>
       </details>
     </section>
-  );
+  )
 }
 
 /** p95 latency → status tone: green <1s, amber <3s, red ≥3s. */
 function latencyTone(ms: number): 'ok' | 'warn' | 'err' {
-  if (ms < 1000) return 'ok';
-  if (ms < 3000) return 'warn';
-  return 'err';
+  if (ms < 1000) return 'ok'
+  if (ms < 3000) return 'warn'
+  return 'err'
 }
 
 /** Percentile print: '-' when missing, '>30s' for the +Inf / NaN bucket, else the ms value. */
 function pp(v?: number): string {
-  if (v == null) return '-';
-  return Number.isFinite(v) ? String(v) : '>30s';
+  if (v == null) return '-'
+  return Number.isFinite(v) ? String(v) : '>30s'
 }
 
 const TONE_BAR: Record<'ok' | 'warn' | 'err', string> = {
   ok: 'bg-ok',
   warn: 'bg-warn',
   err: 'bg-err',
-};
+}
 
 /**
  * Horizontal p95-latency bars per histogram key — at-a-glance render health.
  * Decorative (aria-hidden): the table below carries the same data for SR users.
  */
 function LatencyBars({ rows }: { rows: { key: string; p95?: number }[] }) {
-  const withP95 = rows.filter((r): r is { key: string; p95: number } => r.p95 != null);
-  if (withP95.length === 0) return null;
+  const withP95 = rows.filter((r): r is { key: string; p95: number } => r.p95 != null)
+  if (withP95.length === 0) return null
   // Scale only against finite p95s — a +Inf / NaN bucket must not poison Math.max.
-  const max = Math.max(...withP95.map((r) => r.p95).filter(Number.isFinite), 1);
+  const max = Math.max(...withP95.map((r) => r.p95).filter(Number.isFinite), 1)
   return (
     <div className="mb-4 space-y-1.5" aria-hidden="true">
       {withP95.map((r) => {
-        const finite = Number.isFinite(r.p95);
-        const tone = finite ? latencyTone(r.p95) : 'err';
-        const width = finite ? Math.max(2, Math.min(100, (r.p95 / max) * 100)) : 100;
+        const finite = Number.isFinite(r.p95)
+        const tone = finite ? latencyTone(r.p95) : 'err'
+        const width = finite ? Math.max(2, Math.min(100, (r.p95 / max) * 100)) : 100
         return (
           <div
             key={r.key}
@@ -265,8 +266,8 @@ function LatencyBars({ rows }: { rows: { key: string; p95?: number }[] }) {
               </span>
             </div>
           </div>
-        );
+        )
       })}
     </div>
-  );
+  )
 }

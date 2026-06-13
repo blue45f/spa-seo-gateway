@@ -1,32 +1,33 @@
-import * as Dialog from '@radix-ui/react-dialog';
-import { X } from 'lucide-react';
-import type { ReactNode } from 'react';
-import { useId } from 'react';
+import * as Dialog from '@radix-ui/react-dialog'
+import { X } from 'lucide-react'
+import { useId } from 'react'
+
+import type { ReactNode } from 'react'
 
 type ModalProps = {
-  open: boolean;
-  onClose(): void;
-  title: ReactNode;
-  children: ReactNode;
+  open: boolean
+  onClose(): void
+  title: ReactNode
+  children: ReactNode
   /** 화면이 좁아도 모달 폭이 너무 좁아지지 않도록 max-w 클래스 지정 */
-  size?: 'md' | 'lg' | 'xl';
-};
+  size?: 'md' | 'lg' | 'xl'
+}
 
 const SIZE_CLASS: Record<NonNullable<ModalProps['size']>, string> = {
   md: 'max-w-md',
   lg: 'max-w-xl',
   xl: 'max-w-2xl',
-};
+}
 
 export function Modal({ open, onClose, title, children, size = 'lg' }: ModalProps) {
-  const titleId = useId();
+  const titleId = useId()
 
   // Radix Dialog 가 focus-trap / Escape / scroll-lock / 트리거 포커스 복원을 모두 처리.
   return (
     <Dialog.Root
       open={open}
       onOpenChange={(o) => {
-        if (!o) onClose();
+        if (!o) onClose()
       }}
     >
       <Dialog.Portal>
@@ -55,5 +56,5 @@ export function Modal({ open, onClose, title, children, size = 'lg' }: ModalProp
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>
-  );
+  )
 }

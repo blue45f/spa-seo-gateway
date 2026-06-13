@@ -1,125 +1,126 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
-import { AuthGate } from '../components/AuthGate';
-import { EmptyState } from '../components/EmptyState';
-import { Field } from '../components/Field';
-import { RoutesEditor } from '../components/RoutesEditor';
-import { DetailSkeleton } from '../components/Skeleton';
-import { api, errorMessage } from '../lib/api';
-import { generateApiKey } from '../lib/apikey';
-import { useDialog } from '../lib/dialog';
-import { cleanRoutes } from '../lib/routes';
-import { useStore } from '../lib/store';
-import type { ScopedRoute, Tenant, TenantPlan } from '../lib/types';
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { Link, useParams } from 'react-router-dom'
 
-const PLANS: TenantPlan[] = ['free', 'pro', 'enterprise'];
+import { AuthGate } from '../components/AuthGate'
+import { EmptyState } from '../components/EmptyState'
+import { Field } from '../components/Field'
+import { RoutesEditor } from '../components/RoutesEditor'
+import { DetailSkeleton } from '../components/Skeleton'
+import { api, errorMessage } from '../lib/api'
+import { generateApiKey } from '../lib/apikey'
+import { useDialog } from '../lib/dialog'
+import { cleanRoutes } from '../lib/routes'
+import { useStore } from '../lib/store'
+
+import type { ScopedRoute, Tenant, TenantPlan } from '../lib/types'
+
+const PLANS: TenantPlan[] = ['free', 'pro', 'enterprise']
 
 export function TenantDetail() {
   return (
     <AuthGate>
       <TenantDetailBody />
     </AuthGate>
-  );
+  )
 }
 
 function TenantDetailBody() {
-  const params = useParams();
-  const id = params.id ?? '';
-  const t = useStore((s) => s.t);
-  const setError = useStore((s) => s.setGlobalError);
-  const pushToast = useStore((s) => s.pushToast);
-  const { confirm } = useDialog();
-  const [tenant, setTenant] = useState<Tenant | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [missing, setMissing] = useState(false);
+  const params = useParams()
+  const id = params.id ?? ''
+  const t = useStore((s) => s.t)
+  const setError = useStore((s) => s.setGlobalError)
+  const pushToast = useStore((s) => s.pushToast)
+  const { confirm } = useDialog()
+  const [tenant, setTenant] = useState<Tenant | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [missing, setMissing] = useState(false)
 
-  const ctrlRef = useRef<AbortController | null>(null);
+  const ctrlRef = useRef<AbortController | null>(null)
 
   const load = useCallback(async () => {
     // 이전 요청 취소 — /tenants/A → /tenants/B 네비게이션 시 A 응답이 B 를 덮어쓰지 않게.
-    ctrlRef.current?.abort();
-    const ctrl = new AbortController();
-    ctrlRef.current = ctrl;
-    setLoading(true);
-    setMissing(false);
+    ctrlRef.current?.abort()
+    const ctrl = new AbortController()
+    ctrlRef.current = ctrl
+    setLoading(true)
+    setMissing(false)
     try {
       const r = await api<{ ok: true; tenants: Tenant[] }>('GET', '/admin/api/tenants', undefined, {
         signal: ctrl.signal,
-      });
-      if (ctrl.signal.aborted) return;
-      const found = (r.tenants ?? []).find((tn) => tn.id === id);
-      if (!found) setMissing(true);
-      else setTenant(found);
-      setError('');
+      })
+      if (ctrl.signal.aborted) return
+      const found = (r.tenants ?? []).find((tn) => tn.id === id)
+      if (!found) setMissing(true)
+      else setTenant(found)
+      setError('')
     } catch (e) {
-      if ((e as Error).name === 'AbortError') return;
-      const msg = errorMessage(e);
-      setError(msg);
+      if ((e as Error).name === 'AbortError') return
+      const msg = errorMessage(e)
+      setError(msg)
     } finally {
-      if (!ctrl.signal.aborted) setLoading(false);
+      if (!ctrl.signal.aborted) setLoading(false)
     }
-  }, [id, setError]);
+  }, [id, setError])
 
   useEffect(() => {
-    void load();
-    return () => ctrlRef.current?.abort();
-  }, [load]);
+    void load()
+    return () => ctrlRef.current?.abort()
+  }, [load])
 
   async function save() {
-    if (!tenant) return;
-    setSaving(true);
+    if (!tenant) return
+    setSaving(true)
     try {
-      const cleaned = { ...tenant, routes: cleanRoutes(tenant.routes) };
-      await api('POST', '/admin/api/tenants', cleaned);
-      pushToast(`${t('toast.tenant.saved')}: ${tenant.id}`, 'success');
-      await load();
+      const cleaned = { ...tenant, routes: cleanRoutes(tenant.routes) }
+      await api('POST', '/admin/api/tenants', cleaned)
+      pushToast(`${t('toast.tenant.saved')}: ${tenant.id}`, 'success')
+      await load()
     } catch (e) {
-      const msg = errorMessage(e);
-      pushToast(msg, 'error');
+      const msg = errorMessage(e)
+      pushToast(msg, 'error')
     } finally {
-      setSaving(false);
+      setSaving(false)
     }
   }
 
   async function rotateApiKey() {
-    if (!tenant) return;
+    if (!tenant) return
     const ok = await confirm({
       title: t('tenants.detail.rotate.confirm.title'),
       description: t('tenants.detail.rotate.confirm.desc'),
       confirmLabel: t('tenants.detail.rotate'),
       danger: true,
-    });
-    if (!ok) return;
-    setTenant({ ...tenant, apiKey: generateApiKey() });
-    pushToast(t('toast.apikey.changed'), 'warn');
+    })
+    if (!ok) return
+    setTenant({ ...tenant, apiKey: generateApiKey() })
+    pushToast(t('toast.apikey.changed'), 'warn')
   }
 
   async function copyKey() {
-    if (!tenant) return;
+    if (!tenant) return
     try {
-      await navigator.clipboard?.writeText(tenant.apiKey);
-      pushToast(t('tenants.copied'), 'success');
+      await navigator.clipboard?.writeText(tenant.apiKey)
+      pushToast(t('tenants.copied'), 'success')
     } catch {
-      pushToast(t('toast.clipboard.denied'), 'warn');
+      pushToast(t('toast.clipboard.denied'), 'warn')
     }
   }
 
   // ⌘/Ctrl + S
-  // biome-ignore lint/correctness/useExhaustiveDependencies: save is intentionally captured via the tenant/saving closure; re-binding on save would churn the global listener
   useEffect(() => {
     function handler(e: KeyboardEvent) {
-      const meta = e.metaKey || e.ctrlKey;
+      const meta = e.metaKey || e.ctrlKey
       if (meta && e.key.toLowerCase() === 's') {
-        e.preventDefault();
-        if (tenant && !saving) void save();
+        e.preventDefault()
+        if (tenant && !saving) void save()
       }
     }
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [tenant, saving]);
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [tenant, saving])
 
-  if (loading) return <DetailSkeleton rows={5} />;
+  if (loading) return <DetailSkeleton rows={5} />
   if (missing) {
     return (
       <section className="space-y-4" data-testid="page-tenant-detail">
@@ -132,9 +133,9 @@ function TenantDetailBody() {
           }
         />
       </section>
-    );
+    )
   }
-  if (!tenant) return null;
+  if (!tenant) return null
 
   return (
     <section className="space-y-4" data-testid="page-tenant-detail">
@@ -233,5 +234,5 @@ function TenantDetailBody() {
         />
       </div>
     </section>
-  );
+  )
 }

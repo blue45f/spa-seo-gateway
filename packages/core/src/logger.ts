@@ -1,5 +1,6 @@
-import pino from 'pino';
-import { config } from './config.js';
+import pino from 'pino'
+
+import { config } from './config.js'
 
 export const logger = pino({
   level: config.log.level,
@@ -10,6 +11,6 @@ export const logger = pino({
       }
     : undefined,
   base: { service: 'spa-seo-gateway' },
-});
+})
 
-export type Logger = typeof logger;
+export type Logger = typeof logger

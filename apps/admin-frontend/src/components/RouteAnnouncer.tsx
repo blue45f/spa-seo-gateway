@@ -1,4 +1,4 @@
-import { useRouteAnnouncer } from '../lib/useRouteAnnouncer';
+import { useRouteAnnouncer } from '../lib/useRouteAnnouncer'
 
 /**
  * SPA 라우트 전환을 스크린리더에 알리는 visually-hidden live region.
@@ -10,7 +10,7 @@ import { useRouteAnnouncer } from '../lib/useRouteAnnouncer';
  * Layout 의 chrome 레이어에 한 번만 마운트한다. 기존 화면 스타일에는 영향이 없다.
  */
 export function RouteAnnouncer() {
-  const message = useRouteAnnouncer();
+  const message = useRouteAnnouncer()
   return (
     <p
       role="status"
@@ -21,5 +21,5 @@ export function RouteAnnouncer() {
     >
       {message}
     </p>
-  );
+  )
 }
