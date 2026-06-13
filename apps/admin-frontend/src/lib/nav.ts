@@ -34,6 +34,13 @@ export const NAV_ITEMS: NavItem[] = [
     subtitleKey: 'nav.dashboard.sub',
   },
   {
+    id: 'antigravity',
+    path: '/antigravity',
+    labelKey: 'nav.antigravity',
+    subtitleKey: 'nav.antigravity.sub',
+    public: true,
+  },
+  {
     id: 'routes',
     path: '/routes',
     labelKey: 'nav.routes',

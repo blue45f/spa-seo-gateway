@@ -9,12 +9,13 @@ import {
 } from '../../lib/nav';
 
 describe('navItems', () => {
-  it('contains all 16 tabs (14 base + sites + tenants)', () => {
-    expect(NAV_ITEMS).toHaveLength(16);
+  it('contains all 17 tabs (15 base + sites + tenants)', () => {
+    expect(NAV_ITEMS).toHaveLength(17);
     const ids = NAV_ITEMS.map((n) => n.id);
     for (const id of [
       'welcome',
       'dashboard',
+      'antigravity',
       'routes',
       'cache',
       'warm',
@@ -70,6 +71,7 @@ describe('navItems', () => {
 
   it('marks public-only tabs', () => {
     expect(requiresAuth('welcome')).toBe(false);
+    expect(requiresAuth('antigravity')).toBe(false);
     expect(requiresAuth('api')).toBe(false);
     expect(requiresAuth('library')).toBe(false);
     expect(requiresAuth('help')).toBe(false);

@@ -127,6 +127,151 @@ describe('multi-tenant API integration', () => {
     await app.close();
   });
 
+  it('manages tenant members with admin auth and owner protections', async () => {
+    const store = new FileTenantStore(join(tmp, 'members.json'));
+    const app = await buildApp(async (a) => {
+      await registerMultiTenant(a, { store, adminToken: ADMIN_TOKEN });
+    });
+
+    const created = await app.inject({
+      method: 'POST',
+      url: '/admin/api/tenants',
+      headers: { 'x-admin-token': ADMIN_TOKEN, 'content-type': 'application/json' },
+      payload: {
+        id: 'team',
+        name: 'Team',
+        origin: 'https://team.example.com',
+        apiKey: 'tk_team_aaaaaaaaaaaaaaaaaaaa',
+        ownerEmail: ' Owner@Example.COM ',
+      },
+    });
+    expect(created.statusCode).toBe(200);
+    expect(created.json().tenant.members).toEqual([
+      expect.objectContaining({ email: 'owner@example.com', role: 'owner', status: 'active' }),
+    ]);
+
+    const noAuth = await app.inject({
+      method: 'GET',
+      url: '/admin/api/tenants/team/members',
+    });
+    expect(noAuth.statusCode).toBe(401);
+
+    const list = await app.inject({
+      method: 'GET',
+      url: '/admin/api/tenants/team/members',
+      headers: { 'x-admin-token': ADMIN_TOKEN },
+    });
+    expect(list.statusCode).toBe(200);
+    expect(list.json().members.map((m: { email: string }) => m.email)).toEqual([
+      'owner@example.com',
+    ]);
+
+    const demoteLastOwner = await app.inject({
+      method: 'POST',
+      url: '/admin/api/tenants/team/members',
+      headers: { 'x-admin-token': ADMIN_TOKEN, 'content-type': 'application/json' },
+      payload: { email: 'OWNER@example.com', role: 'admin', status: 'active' },
+    });
+    expect(demoteLastOwner.statusCode).toBe(409);
+
+    const addedEditor = await app.inject({
+      method: 'POST',
+      url: '/admin/api/tenants/team/members',
+      headers: { 'x-admin-token': ADMIN_TOKEN, 'content-type': 'application/json' },
+      payload: { email: ' Editor@Example.COM ', role: 'editor', status: 'invited' },
+    });
+    expect(addedEditor.statusCode).toBe(200);
+    expect(addedEditor.json().member.email).toBe('editor@example.com');
+
+    const updatedEditor = await app.inject({
+      method: 'POST',
+      url: '/admin/api/tenants/team/members',
+      headers: { 'x-admin-token': ADMIN_TOKEN, 'content-type': 'application/json' },
+      payload: { email: 'editor@example.com', role: 'admin', status: 'active' },
+    });
+    expect(updatedEditor.statusCode).toBe(200);
+    expect(updatedEditor.json().tenant.members).toHaveLength(2);
+    expect(
+      updatedEditor
+        .json()
+        .tenant.members.find((m: { email: string }) => m.email === 'editor@example.com').role,
+    ).toBe('admin');
+
+    const removedEditor = await app.inject({
+      method: 'DELETE',
+      url: '/admin/api/tenants/team/members/editor%40example.com',
+      headers: { 'x-admin-token': ADMIN_TOKEN },
+    });
+    expect(removedEditor.statusCode).toBe(200);
+    expect(removedEditor.json().tenant.members).toHaveLength(1);
+
+    const removeLastOwner = await app.inject({
+      method: 'DELETE',
+      url: '/admin/api/tenants/team/members/owner%40example.com',
+      headers: { 'x-admin-token': ADMIN_TOKEN },
+    });
+    expect(removeLastOwner.statusCode).toBe(409);
+
+    const preserved = await app.inject({
+      method: 'POST',
+      url: '/admin/api/tenants',
+      headers: { 'x-admin-token': ADMIN_TOKEN, 'content-type': 'application/json' },
+      payload: {
+        id: 'team',
+        name: 'Team Renamed',
+        origin: 'https://team.example.com',
+        apiKey: 'tk_team_aaaaaaaaaaaaaaaaaaaa',
+        plan: 'pro',
+      },
+    });
+    expect(preserved.statusCode).toBe(200);
+    expect(preserved.json().tenant.members).toHaveLength(1);
+    expect(preserved.json().tenant.members[0].email).toBe('owner@example.com');
+
+    const bypassOwnerProtection = await app.inject({
+      method: 'POST',
+      url: '/admin/api/tenants',
+      headers: { 'x-admin-token': ADMIN_TOKEN, 'content-type': 'application/json' },
+      payload: {
+        id: 'team',
+        name: 'Team Renamed',
+        origin: 'https://team.example.com',
+        apiKey: 'tk_team_aaaaaaaaaaaaaaaaaaaa',
+        plan: 'pro',
+        members: [],
+      },
+    });
+    expect(bypassOwnerProtection.statusCode).toBe(409);
+
+    await app.close();
+  });
+
+  it('requires the first tenant member to be an owner', async () => {
+    const store = new FileTenantStore(join(tmp, 'first-owner.json'));
+    await store.upsert({
+      id: 'fresh',
+      name: 'Fresh',
+      origin: 'https://fresh.example.com',
+      apiKey: 'tk_fresh_aaaaaaaaaaaaaaaaaaaa',
+      routes: [],
+      plan: 'free',
+      enabled: true,
+    });
+    const app = await buildApp(async (a) => {
+      await registerMultiTenant(a, { store, adminToken: ADMIN_TOKEN });
+    });
+
+    const res = await app.inject({
+      method: 'POST',
+      url: '/admin/api/tenants/fresh/members',
+      headers: { 'x-admin-token': ADMIN_TOKEN, 'content-type': 'application/json' },
+      payload: { email: 'admin@example.com', role: 'admin', status: 'active' },
+    });
+    expect(res.statusCode).toBe(409);
+
+    await app.close();
+  });
+
   it('rejects unknown tenant on render path', async () => {
     const store = new FileTenantStore(join(tmp, 'unknown.json'));
     const app = await buildApp(async (a) => {

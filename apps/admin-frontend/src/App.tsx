@@ -71,6 +71,9 @@ function lazyRetry<T extends ComponentType<any>>(load: () => Promise<{ default: 
 }
 
 // Lazy: 보조/저빈도 페이지 — 초기 번들에서 분리.
+const AgentDashboard = lazyRetry(() =>
+  import('./pages/AgentDashboard').then((m) => ({ default: m.AgentDashboard })),
+);
 const AiSchema = lazyRetry(() => import('./pages/AiSchema').then((m) => ({ default: m.AiSchema })));
 const ApiExplorer = lazyRetry(() =>
   import('./pages/ApiExplorer').then((m) => ({ default: m.ApiExplorer })),
@@ -169,6 +172,7 @@ export function App() {
         <Route element={<Layout />}>
           <Route index element={<Welcome />} />
           <Route path="dashboard" element={<Dashboard />} />
+          <Route path="antigravity" element={<AgentDashboard />} />
           <Route path="routes" element={<RoutesPage />} />
           <Route path="cache" element={<Cache />} />
           <Route path="warm" element={<Warm />} />

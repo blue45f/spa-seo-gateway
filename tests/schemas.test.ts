@@ -1,6 +1,6 @@
 import { SiteSchema } from '@heejun/spa-seo-gateway-cms';
 import { ConfigSchema } from '@heejun/spa-seo-gateway-core';
-import { TenantSchema } from '@heejun/spa-seo-gateway-multi-tenant';
+import { TenantMemberSchema, TenantSchema } from '@heejun/spa-seo-gateway-multi-tenant';
 import { describe, expect, it } from 'vitest';
 
 describe('TenantSchema', () => {
@@ -42,6 +42,30 @@ describe('TenantSchema', () => {
     const r = TenantSchema.safeParse(rest);
     expect(r.success).toBe(true);
     if (r.success) expect(r.data.plan).toBe('free');
+  });
+
+  it('defaults members to an empty list when missing', () => {
+    const r = TenantSchema.safeParse(valid);
+    expect(r.success).toBe(true);
+    if (r.success) expect(r.data.members).toEqual([]);
+  });
+
+  it('normalizes member emails and rejects normalized duplicates', () => {
+    const member = TenantMemberSchema.parse({
+      email: ' Owner@Example.COM ',
+      role: 'owner',
+      status: 'active',
+    });
+    expect(member.email).toBe('owner@example.com');
+
+    const duplicate = TenantSchema.safeParse({
+      ...valid,
+      members: [
+        { email: 'owner@example.com', role: 'owner', status: 'active' },
+        { email: ' OWNER@example.com ', role: 'admin', status: 'active' },
+      ],
+    });
+    expect(duplicate.success).toBe(false);
   });
 
   it('validates nested route override', () => {

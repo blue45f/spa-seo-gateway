@@ -10,6 +10,8 @@ dist/
 !.vscode/extensions.json
 coverage/
 .cache/
+# Python virtualenv (scratch tooling)
+.venv/
 puppeteer-cache/
 .vercel
 apps/demo/public/

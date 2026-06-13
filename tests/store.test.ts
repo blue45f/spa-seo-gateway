@@ -117,6 +117,21 @@ describe('FileTenantStore', () => {
     expect(all.length).toBe(1);
     expect(all[0]?.id).toBe('valid');
   });
+
+  it('persists normalized tenant members', async () => {
+    const path = join(tmpRoot, 'tenants.json');
+    const store = new FileTenantStore(path);
+    await store.upsert({
+      ...tenant('membered'),
+      members: [{ email: ' Owner@Example.COM ', role: 'owner', status: 'active' }],
+    });
+
+    const fresh = new FileTenantStore(path);
+    const after = await fresh.byId('membered');
+    expect(after?.members).toEqual([
+      { email: 'owner@example.com', role: 'owner', status: 'active' },
+    ]);
+  });
 });
 
 describe('InMemorySiteStore', () => {
