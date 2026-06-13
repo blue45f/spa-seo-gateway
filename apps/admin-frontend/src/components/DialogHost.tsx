@@ -62,6 +62,10 @@ function DialogModal({ request }: { request: DialogRequest }) {
   const inRouter = useInRouterContext()
 
   return (
+    // 네이티브 <dialog>::backdrop 클릭으로 취소하는 편의 핸들러. 키보드 취소(Escape)는
+    // showModal() 이 플랫폼 차원에서 제공한다(상단 주석 참고). jsx-a11y 는 <dialog> 를
+    // 비대화형으로 보고 오탐을 내므로 이 요소만 비활성화한다.
+    // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions
     <dialog
       ref={dialogRef}
       className="app-dialog m-auto w-full max-w-md rounded-lg border border-line bg-panel text-ink shadow-2xl p-0"

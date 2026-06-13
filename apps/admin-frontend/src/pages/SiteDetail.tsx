@@ -63,7 +63,7 @@ function SiteDetailBody() {
     return () => ctrlRef.current?.abort()
   }, [load])
 
-  async function save() {
+  const save = useCallback(async () => {
     if (!site) return
     setSaving(true)
     try {
@@ -77,10 +77,9 @@ function SiteDetailBody() {
     } finally {
       setSaving(false)
     }
-  }
+  }, [site, pushToast, t, load])
 
-  // ⌘/Ctrl + S 저장
-  // save 는 site 의 클로저에 의존 — site/saving 변할 때마다 핸들러 갱신
+  // ⌘/Ctrl + S 저장 — save 가 useCallback 으로 안정화돼 deps 에 그대로 넣을 수 있다.
   useEffect(() => {
     function handler(e: KeyboardEvent) {
       const meta = e.metaKey || e.ctrlKey
@@ -91,7 +90,7 @@ function SiteDetailBody() {
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
-  }, [site, saving])
+  }, [site, saving, save])
 
   if (loading) return <DetailSkeleton rows={5} />
   if (missing) {

@@ -21,6 +21,10 @@ overrides:
   # ESLint 코어는 ajv@^6 의 draft-04 메타스키마(ajv 7+ 에서 제거됨)에 의존하므로
   # 보안용 전역 ajv>=8 오버라이드를 eslint 하위에서만 6.x 로 되돌린다.
   eslint>ajv: '^6.12.6'
+  # eslint-plugin-jsx-a11y(react() 가 끌어옴)는 minimatch v3 의 default 호출 시그니처에
+  # 의존하는데, 전역 minimatch>=10 핀에서는 `_minimatch.default is not a function` 로
+  # 깨진다. 보안용 전역 핀은 유지하면서 jsx-a11y 하위에서만 3.x 로 되돌린다.
+  eslint-plugin-jsx-a11y>minimatch: '^3.1.2'
   smol-toml: '>=1.6.1'
   path-to-regexp: '>=6.3.0'
   uuid: '>=11.1.1'

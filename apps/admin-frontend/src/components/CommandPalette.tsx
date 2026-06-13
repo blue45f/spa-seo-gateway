@@ -64,6 +64,10 @@ export function CommandPalette() {
   }
 
   return (
+    // 배경(scrim) 클릭은 닫기 편의 기능일 뿐이며, 키보드 닫기(Escape)는 App.tsx 의
+    // 전역 keydown 핸들러가 이미 제공한다. jsx-a11y 는 같은 요소에 키 핸들러가 없다는
+    // 이유로 오탐을 내므로 이 요소만 비활성화한다.
+    // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
     <div
       className="fixed inset-0 z-[80] bg-scrim flex items-start justify-center pt-24 px-4"
       onClick={(e) => {

@@ -68,7 +68,7 @@ function TenantDetailBody() {
     return () => ctrlRef.current?.abort()
   }, [load])
 
-  async function save() {
+  const save = useCallback(async () => {
     if (!tenant) return
     setSaving(true)
     try {
@@ -82,7 +82,7 @@ function TenantDetailBody() {
     } finally {
       setSaving(false)
     }
-  }
+  }, [tenant, pushToast, t, load])
 
   async function rotateApiKey() {
     if (!tenant) return
@@ -107,7 +107,7 @@ function TenantDetailBody() {
     }
   }
 
-  // ⌘/Ctrl + S
+  // ⌘/Ctrl + S — save 가 useCallback 으로 안정화돼 deps 에 그대로 넣을 수 있다.
   useEffect(() => {
     function handler(e: KeyboardEvent) {
       const meta = e.metaKey || e.ctrlKey
@@ -118,7 +118,7 @@ function TenantDetailBody() {
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
-  }, [tenant, saving])
+  }, [tenant, saving, save])
 
   if (loading) return <DetailSkeleton rows={5} />
   if (missing) {
