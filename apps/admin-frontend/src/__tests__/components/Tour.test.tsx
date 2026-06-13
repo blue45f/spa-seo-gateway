@@ -29,7 +29,8 @@ describe('Tour', () => {
     useStore.setState({ tourSeen: false, tourStep: 0 });
     renderWithRouter(<Tour />);
     expect(screen.getByTestId('tour')).toBeInTheDocument();
-    fireEvent.keyDown(window, { key: 'Escape' });
+    // Radix DismissableLayer listens at the document level for Escape.
+    fireEvent.keyDown(document, { key: 'Escape' });
     expect(useStore.getState().tourSeen).toBe(true);
     expect(screen.queryByTestId('tour')).not.toBeInTheDocument();
   });

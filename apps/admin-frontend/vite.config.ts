@@ -25,6 +25,7 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           if (id.includes('node_modules')) {
+            if (id.includes('@radix-ui')) return 'radix';
             if (id.includes('react-dom') || id.includes('react/') || id.includes('react-router')) {
               return 'react-vendor';
             }

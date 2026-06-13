@@ -1,8 +1,7 @@
-import { useEffect, useId, useRef } from 'react';
+import * as Dialog from '@radix-ui/react-dialog';
+import { useEffect, useId } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStore } from '../lib/store';
-import { useFocusRestore } from '../lib/useFocusRestore';
-import { useFocusTrap } from '../lib/useFocusTrap';
 import { NavIcon } from './NavIcon';
 
 const STEPS = [
@@ -66,12 +65,7 @@ export function Tour() {
   const t = useStore((s) => s.t);
   const navigate = useNavigate();
   const titleId = useId();
-  const panelRef = useRef<HTMLDivElement>(null);
   const tourVisible = !tourSeen && tourStep >= 0 && tourStep < STEPS.length;
-
-  // 트리거로 포커스 복원 + Tab 포커스 트랩 (공유 훅)
-  useFocusRestore(tourVisible);
-  useFocusTrap(panelRef, tourVisible);
 
   // 첫 방문 시 자동 시작
   useEffect(() => {
@@ -82,84 +76,71 @@ export function Tour() {
     return undefined;
   }, [tourSeen, tourStep, startTour]);
 
-  // 단계 전환 + (재)오픈 시 패널로 포커스 이동 (다이얼로그 접근성).
-  // tourSeen 만 바뀌며 같은 step 으로 다시 열려도 키보드 진입점이 생기도록 tourVisible 도 본다.
-  // biome-ignore lint/correctness/useExhaustiveDependencies: tourStep is an intentional refocus trigger
-  useEffect(() => {
-    if (!tourVisible) return;
-    panelRef.current?.focus();
-  }, [tourStep, tourVisible]);
-
-  // Escape 로 투어 종료 — 다른 모달들과 일관 (Modal.tsx 패턴)
-  useEffect(() => {
-    if (!tourVisible) return undefined;
-    function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') endTour();
-    }
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [tourVisible, endTour]);
-
   if (!tourVisible) return null;
   const step = STEPS[tourStep];
   const title = lang === 'ko' ? step.titleKo : step.titleEn;
   const body = lang === 'ko' ? step.bodyKo : step.bodyEn;
 
+  // Radix Dialog 가 focus-trap / Escape / scroll-lock / 트리거 포커스 복원을 처리.
+  // key={tourStep} 으로 단계 전환 시 Content 가 재마운트되어 새 단계로 포커스가 이동.
   return (
-    <div
-      className="fixed inset-0 z-[90] bg-scrim-strong flex items-center justify-center p-4"
-      data-testid="tour"
+    <Dialog.Root
+      open
+      onOpenChange={(o) => {
+        if (!o) endTour();
+      }}
     >
-      <div
-        ref={panelRef}
-        tabIndex={-1}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={titleId}
-        className="bg-panel border border-line rounded-xl shadow-2xl max-w-md w-full p-6 focus-visible:outline-none"
-      >
-        <div className="flex items-center gap-3 mb-3">
-          <span
-            aria-hidden="true"
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent-soft text-accent"
-          >
-            <NavIcon id={step.id} className="h-5 w-5" />
-          </span>
-          <div>
-            <div className="text-xs text-ink-subtle">
-              {tourStep + 1} / {STEPS.length}
+      <Dialog.Portal>
+        <Dialog.Overlay className="fixed inset-0 z-[90] bg-scrim-strong flex items-center justify-center p-4" />
+        <Dialog.Content
+          key={tourStep}
+          data-testid="tour"
+          aria-labelledby={titleId}
+          className="fixed left-1/2 top-1/2 z-[90] -translate-x-1/2 -translate-y-1/2 bg-panel border border-line rounded-xl shadow-2xl max-w-md w-full p-6 focus-visible:outline-none"
+        >
+          <div className="flex items-center gap-3 mb-3">
+            <span
+              aria-hidden="true"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent-soft text-accent"
+            >
+              <NavIcon id={step.id} className="h-5 w-5" />
+            </span>
+            <div>
+              <div className="text-xs text-ink-subtle">
+                {tourStep + 1} / {STEPS.length}
+              </div>
+              <Dialog.Title id={titleId} className="font-bold text-lg">
+                {title}
+              </Dialog.Title>
             </div>
-            <h3 id={titleId} className="font-bold text-lg">
-              {title}
-            </h3>
           </div>
-        </div>
-        <p className="text-sm text-ink-muted">{body}</p>
-        <div className="flex gap-2 mt-5">
-          <button
-            type="button"
-            className="text-sm text-ink-subtle hover:text-ink-muted rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-            onClick={endTour}
-          >
-            {t('tour.skip')}
-          </button>
-          <button
-            type="button"
-            className="btn-primary ml-auto px-4 py-2 text-sm"
-            onClick={() => {
-              const next = tourStep + 1;
-              if (next >= STEPS.length) {
-                endTour();
-                return;
-              }
-              tourNext();
-              navigate(STEPS[next].path);
-            }}
-          >
-            {tourStep < STEPS.length - 1 ? t('tour.next') : t('tour.start')}
-          </button>
-        </div>
-      </div>
-    </div>
+          <p className="text-sm text-ink-muted">{body}</p>
+          <div className="flex gap-2 mt-5">
+            <button
+              type="button"
+              className="text-sm text-ink-subtle hover:text-ink-muted rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+              onClick={endTour}
+            >
+              {t('tour.skip')}
+            </button>
+            <button
+              type="button"
+              className="btn-primary ml-auto px-4 py-2 text-sm"
+              onClick={() => {
+                const next = tourStep + 1;
+                if (next >= STEPS.length) {
+                  endTour();
+                  return;
+                }
+                tourNext();
+                navigate(STEPS[next].path);
+              }}
+            >
+              {tourStep < STEPS.length - 1 ? t('tour.next') : t('tour.start')}
+            </button>
+          </div>
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
   );
 }
