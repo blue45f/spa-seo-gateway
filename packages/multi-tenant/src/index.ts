@@ -31,32 +31,72 @@ import {
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { z } from 'zod';
 
-export const TenantSchema = z.object({
-  id: z
-    .string()
-    .min(1)
-    .regex(/^[a-z0-9_-]+$/, 'lowercase alphanumeric/-/_'),
-  name: z.string().min(1),
-  origin: z.string().url(),
-  apiKey: z.string().min(20),
-  routes: z
-    .array(
-      z.object({
-        pattern: z.string(),
-        ttlMs: z.coerce.number().int().positive().optional(),
-        waitUntil: z.enum(['load', 'domcontentloaded', 'networkidle0', 'networkidle2']).optional(),
-        waitSelector: z.string().optional(),
-        waitMs: z.coerce.number().int().nonnegative().optional(),
-        ignore: z.coerce.boolean().optional(),
-      }),
-    )
-    .default([]),
-  plan: z.enum(['free', 'pro', 'enterprise']).default('free'),
-  enabled: z.coerce.boolean().default(true),
+const optionalTrimmedString = z.preprocess(
+  (value) => (typeof value === 'string' && value.trim() === '' ? undefined : value),
+  z.string().trim().min(1).optional(),
+);
+
+export const TenantMemberEmailSchema = z.preprocess(
+  (value) => (typeof value === 'string' ? value.trim().toLowerCase() : value),
+  z.email(),
+);
+
+export const TenantMemberSchema = z.object({
+  email: TenantMemberEmailSchema,
+  role: z.enum(['owner', 'admin', 'editor', 'viewer']),
+  status: z.enum(['active', 'invited', 'suspended']).default('active'),
+  name: optionalTrimmedString,
   createdAt: z.coerce.number().int().optional(),
+  updatedAt: z.coerce.number().int().optional(),
 });
 
-export type Tenant = z.infer<typeof TenantSchema>;
+export type TenantMember = z.infer<typeof TenantMemberSchema>;
+
+export const TenantSchema = z
+  .object({
+    id: z
+      .string()
+      .min(1)
+      .regex(/^[a-z0-9_-]+$/, 'lowercase alphanumeric/-/_'),
+    name: z.string().min(1),
+    origin: z.string().url(),
+    apiKey: z.string().min(20),
+    routes: z
+      .array(
+        z.object({
+          pattern: z.string(),
+          ttlMs: z.coerce.number().int().positive().optional(),
+          waitUntil: z
+            .enum(['load', 'domcontentloaded', 'networkidle0', 'networkidle2'])
+            .optional(),
+          waitSelector: z.string().optional(),
+          waitMs: z.coerce.number().int().nonnegative().optional(),
+          ignore: z.coerce.boolean().optional(),
+        }),
+      )
+      .default([]),
+    members: z.array(TenantMemberSchema).default([]),
+    plan: z.enum(['free', 'pro', 'enterprise']).default('free'),
+    enabled: z.coerce.boolean().default(true),
+    createdAt: z.coerce.number().int().optional(),
+  })
+  .superRefine((tenant, ctx) => {
+    const seen = new Set<string>();
+    tenant.members.forEach((member, index) => {
+      if (seen.has(member.email)) {
+        ctx.addIssue({
+          code: 'custom',
+          message: 'duplicate member email',
+          path: ['members', index, 'email'],
+        });
+        return;
+      }
+      seen.add(member.email);
+    });
+  });
+
+type ParsedTenant = z.infer<typeof TenantSchema>;
+export type Tenant = Omit<ParsedTenant, 'members'> & { members?: TenantMember[] };
 
 export type TenantStore = {
   list(): Promise<Tenant[]>;
@@ -107,7 +147,12 @@ export class FileTenantStore implements TenantStore {
       const raw = await readFile(this.path, 'utf8');
       const parsed = JSON.parse(raw);
       if (!Array.isArray(parsed)) return [];
-      return parsed.filter((p): p is Tenant => TenantSchema.safeParse(p).success);
+      const tenants: Tenant[] = [];
+      for (const item of parsed) {
+        const result = TenantSchema.safeParse(item);
+        if (result.success) tenants.push(result.data);
+      }
+      return tenants;
     } catch {
       return [];
     }
@@ -141,12 +186,17 @@ export class FileTenantStore implements TenantStore {
     );
   }
   async upsert(t: Tenant) {
+    const parsed = TenantSchema.parse(t);
     const all = await this.readAll();
-    const idx = all.findIndex((x) => x.id === t.id);
-    if (idx >= 0) all[idx] = t;
-    else all.push({ ...t, createdAt: t.createdAt ?? Date.now() });
+    const idx = all.findIndex((x) => x.id === parsed.id);
+    const next =
+      idx >= 0
+        ? { ...parsed, createdAt: parsed.createdAt ?? all[idx]?.createdAt }
+        : { ...parsed, createdAt: parsed.createdAt ?? Date.now() };
+    if (idx >= 0) all[idx] = next;
+    else all.push(next);
     await this.writeAll(all);
-    return t;
+    return next;
   }
   async remove(id: string) {
     const all = await this.readAll();
@@ -209,6 +259,75 @@ function matchTenantRoute(t: Tenant, targetUrl: string): RouteOverride | null {
   return null;
 }
 
+function objectBody(body: unknown): Record<string, unknown> {
+  return body && typeof body === 'object' && !Array.isArray(body)
+    ? (body as Record<string, unknown>)
+    : {};
+}
+
+function normalizeTenantMembers(members: Tenant['members']): TenantMember[] {
+  const parsed = z.array(TenantMemberSchema).safeParse(members ?? []);
+  return parsed.success ? parsed.data : [];
+}
+
+function withNormalizedMembers(tenant: Tenant): Tenant {
+  return { ...tenant, members: normalizeTenantMembers(tenant.members) };
+}
+
+function decodeParam(value: string): string {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+}
+
+function parseMemberEmail(value: unknown): string | null {
+  const parsed = TenantMemberEmailSchema.safeParse(value);
+  return parsed.success ? parsed.data : null;
+}
+
+function memberOwnerError(before: TenantMember[], after: TenantMember[]): string | null {
+  if (before.length === 0 && after.length > 0 && !after.some((member) => member.role === 'owner')) {
+    return 'first member must be an owner';
+  }
+
+  const beforeOwners = before.filter((member) => member.role === 'owner').length;
+  const afterOwners = after.filter((member) => member.role === 'owner').length;
+  if (beforeOwners > 0 && afterOwners === 0) {
+    return 'at least one owner is required';
+  }
+
+  const beforeActiveOwners = before.filter(
+    (member) => member.role === 'owner' && member.status === 'active',
+  ).length;
+  const afterActiveOwners = after.filter(
+    (member) => member.role === 'owner' && member.status === 'active',
+  ).length;
+  if (beforeActiveOwners > 0 && afterActiveOwners === 0) {
+    return 'at least one active owner is required';
+  }
+
+  return null;
+}
+
+function seedOwnerMember(tenant: Tenant, ownerEmail: string): Tenant {
+  if ((tenant.members?.length ?? 0) > 0) return tenant;
+  const now = Date.now();
+  return {
+    ...tenant,
+    members: [
+      {
+        email: ownerEmail,
+        role: 'owner',
+        status: 'active',
+        createdAt: now,
+        updatedAt: now,
+      },
+    ],
+  };
+}
+
 export type RegisterOptions = {
   store: TenantStore;
   /**
@@ -259,17 +378,45 @@ export async function registerMultiTenant(
   // ── tenant CRUD ─────────────────────────────────────────────────────
   app.get('/admin/api/tenants', async (req, reply) => {
     if (!guardAdmin(req, reply)) return;
-    return { ok: true, tenants: await store.list() };
+    const tenants = (await store.list()).map(withNormalizedMembers);
+    return { ok: true, tenants };
   });
 
-  app.post<{ Body: Tenant }>('/admin/api/tenants', async (req, reply) => {
+  app.post<{ Body: unknown }>('/admin/api/tenants', async (req, reply) => {
     if (!guardAdmin(req, reply)) return;
-    const parsed = TenantSchema.safeParse(req.body);
-    if (!parsed.success) {
-      reply.code(400).send({ ok: false, error: parsed.error.format() });
+    const body = objectBody(req.body);
+    const hasMembers = Object.hasOwn(body, 'members');
+    const ownerEmail =
+      body.ownerEmail === undefined ? undefined : parseMemberEmail(body.ownerEmail);
+    if (body.ownerEmail !== undefined && !ownerEmail) {
+      reply.code(400).send({ ok: false, error: 'ownerEmail must be a valid email' });
       return;
     }
-    return { ok: true, tenant: await store.upsert(parsed.data) };
+
+    const parsed = TenantSchema.safeParse(req.body);
+    if (!parsed.success) {
+      reply.code(400).send({ ok: false, error: z.treeifyError(parsed.error) });
+      return;
+    }
+    const existing = await store.byId(parsed.data.id);
+    const beforeMembers = normalizeTenantMembers(existing?.members);
+    let nextTenant: Tenant = parsed.data;
+
+    if (!hasMembers && existing) {
+      nextTenant = { ...nextTenant, members: beforeMembers };
+    }
+    if (ownerEmail) {
+      nextTenant = seedOwnerMember(nextTenant, ownerEmail);
+    }
+
+    const afterMembers = normalizeTenantMembers(nextTenant.members);
+    const ownerError = memberOwnerError(beforeMembers, afterMembers);
+    if (ownerError) {
+      reply.code(409).send({ ok: false, error: ownerError });
+      return;
+    }
+
+    return { ok: true, tenant: await store.upsert({ ...nextTenant, members: afterMembers }) };
   });
 
   app.delete<{ Params: { id: string } }>('/admin/api/tenants/:id', async (req, reply) => {
@@ -278,6 +425,98 @@ export async function registerMultiTenant(
     if (!ok) reply.code(404);
     return { ok };
   });
+
+  // ── tenant members ─────────────────────────────────────────────────
+  app.get<{ Params: { id: string } }>('/admin/api/tenants/:id/members', async (req, reply) => {
+    if (!guardAdmin(req, reply)) return;
+    const tenant = await store.byId(req.params.id);
+    if (!tenant) {
+      reply.code(404).send({ ok: false, error: 'tenant not found' });
+      return;
+    }
+    return { ok: true, members: normalizeTenantMembers(tenant.members) };
+  });
+
+  app.post<{ Params: { id: string }; Body: unknown }>(
+    '/admin/api/tenants/:id/members',
+    async (req, reply) => {
+      if (!guardAdmin(req, reply)) return;
+      const parsed = TenantMemberSchema.safeParse(req.body);
+      if (!parsed.success) {
+        reply.code(400).send({ ok: false, error: z.treeifyError(parsed.error) });
+        return;
+      }
+
+      const tenant = await store.byId(req.params.id);
+      if (!tenant) {
+        reply.code(404).send({ ok: false, error: 'tenant not found' });
+        return;
+      }
+
+      const beforeMembers = normalizeTenantMembers(tenant.members);
+      const idx = beforeMembers.findIndex((member) => member.email === parsed.data.email);
+      const now = Date.now();
+      const nextMember: TenantMember =
+        idx >= 0
+          ? {
+              ...beforeMembers[idx],
+              ...parsed.data,
+              createdAt: beforeMembers[idx]?.createdAt ?? parsed.data.createdAt ?? now,
+              updatedAt: now,
+            }
+          : {
+              ...parsed.data,
+              createdAt: parsed.data.createdAt ?? now,
+              updatedAt: parsed.data.updatedAt ?? now,
+            };
+      const afterMembers =
+        idx >= 0
+          ? beforeMembers.map((member, index) => (index === idx ? nextMember : member))
+          : [...beforeMembers, nextMember];
+      const ownerError = memberOwnerError(beforeMembers, afterMembers);
+      if (ownerError) {
+        reply.code(409).send({ ok: false, error: ownerError });
+        return;
+      }
+
+      const saved = await store.upsert({ ...tenant, members: afterMembers });
+      return { ok: true, member: nextMember, tenant: withNormalizedMembers(saved) };
+    },
+  );
+
+  app.delete<{ Params: { id: string; email: string } }>(
+    '/admin/api/tenants/:id/members/:email',
+    async (req, reply) => {
+      if (!guardAdmin(req, reply)) return;
+      const email = parseMemberEmail(decodeParam(req.params.email));
+      if (!email) {
+        reply.code(400).send({ ok: false, error: 'email must be valid' });
+        return;
+      }
+
+      const tenant = await store.byId(req.params.id);
+      if (!tenant) {
+        reply.code(404).send({ ok: false, error: 'tenant not found' });
+        return;
+      }
+
+      const beforeMembers = normalizeTenantMembers(tenant.members);
+      const afterMembers = beforeMembers.filter((member) => member.email !== email);
+      if (afterMembers.length === beforeMembers.length) {
+        reply.code(404).send({ ok: false, error: 'member not found' });
+        return;
+      }
+
+      const ownerError = memberOwnerError(beforeMembers, afterMembers);
+      if (ownerError) {
+        reply.code(409).send({ ok: false, error: ownerError });
+        return;
+      }
+
+      const saved = await store.upsert({ ...tenant, members: afterMembers });
+      return { ok: true, tenant: withNormalizedMembers(saved) };
+    },
+  );
 
   // ── tenant resolver hook ────────────────────────────────────────────
   app.addHook('preHandler', async (req: FastifyRequest, _reply) => {

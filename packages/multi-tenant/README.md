@@ -36,7 +36,9 @@ await app.listen({ port: 3000 });
 | | 설명 |
 |--|--|
 | `TenantSchema` | zod 스키마 |
+| `TenantMemberSchema` | 테넌트 멤버 zod 스키마 (`owner/admin/editor/viewer`) |
 | `Tenant` | 추출 타입 |
+| `TenantMember` | 추출 타입 |
 | `TenantStore` | 인터페이스 (`list/byId/byApiKey/byHost/upsert/remove`) |
 | `InMemoryTenantStore` | 테스트용 |
 | `FileTenantStore(path)` | JSON 파일 영구화 (atomic rename) |
@@ -50,12 +52,17 @@ await app.listen({ port: 3000 });
 GET    /admin/api/tenants                  (마스터 admin)
 POST   /admin/api/tenants
 DELETE /admin/api/tenants/:id
+GET    /admin/api/tenants/:id/members
+POST   /admin/api/tenants/:id/members
+DELETE /admin/api/tenants/:id/members/:email
 GET    /admin/api/multi-tenant/stats
 POST   /admin/api/multi-tenant/cache/clear
 
 POST   /api/cache/invalidate               (테넌트 apiKey 인증)
 GET/HEAD /*                                 (테넌트 인지 렌더)
 ```
+
+`POST /admin/api/tenants` 는 생성 시 `ownerEmail` 을 함께 받으면 기본 owner 멤버를 seed 한다. 멤버 email 은 trim/lowercase 로 정규화되며, 마지막 owner 삭제/강등과 마지막 active owner 정지는 거부된다.
 
 ## 캐시 격리
 

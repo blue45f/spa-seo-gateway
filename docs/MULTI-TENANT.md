@@ -62,6 +62,41 @@ curl -X DELETE http://localhost:3000/admin/api/tenants/acme -H "x-admin-token: $
 curl http://localhost:3000/admin/api/multi-tenant/stats -H "x-admin-token: $ADMIN_TOKEN"
 ```
 
+### 테넌트 멤버
+
+테넌트 생성 시 `ownerEmail` 을 함께 보내면 기본 owner 멤버가 seed 된다.
+
+```bash
+curl -X POST http://localhost:3000/admin/api/tenants \
+  -H "x-admin-token: $ADMIN_TOKEN" \
+  -H "content-type: application/json" \
+  -d '{
+    "id": "acme",
+    "name": "ACME Inc",
+    "origin": "https://www.acme.com",
+    "apiKey": "tk_live_'$(openssl rand -hex 16)'",
+    "ownerEmail": "owner@acme.com"
+  }'
+```
+
+멤버 역할은 `owner|admin|editor|viewer`, 상태는 `active|invited|suspended` 를 지원한다. email 은 trim/lowercase 로 정규화되며 마지막 owner 삭제/강등 및 마지막 active owner 정지는 거부된다.
+
+```bash
+# 목록
+curl http://localhost:3000/admin/api/tenants/acme/members \
+  -H "x-admin-token: $ADMIN_TOKEN"
+
+# 추가 또는 업데이트
+curl -X POST http://localhost:3000/admin/api/tenants/acme/members \
+  -H "x-admin-token: $ADMIN_TOKEN" \
+  -H "content-type: application/json" \
+  -d '{"email":"editor@acme.com","role":"editor","status":"invited"}'
+
+# 삭제
+curl -X DELETE http://localhost:3000/admin/api/tenants/acme/members/editor%40acme.com \
+  -H "x-admin-token: $ADMIN_TOKEN"
+```
+
 ---
 
 ## 테넌트 식별 전략 (요청 → 어떤 테넌트?)

@@ -14,6 +14,10 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { buildApp } from '../apps/gateway/src/main.js';
 
 const TIMEOUT_MS = 5_000;
+// Booting + draining the full gateway app per test is heavy; allow extra
+// headroom so app.close() does not trip the default hook timeout under
+// parallel-suite CPU contention.
+const HOOK_TIMEOUT_MS = 60_000;
 
 let app: FastifyInstance;
 let baseUrl: string;
@@ -25,11 +29,11 @@ beforeEach(async () => {
   const addr = app.server.address();
   if (!addr || typeof addr === 'string') throw new Error('no listening address');
   baseUrl = `http://127.0.0.1:${addr.port}`;
-});
+}, HOOK_TIMEOUT_MS);
 
 afterEach(async () => {
   await app.close();
-});
+}, HOOK_TIMEOUT_MS);
 
 function f(path: string, init: RequestInit = {}): Promise<Response> {
   return fetch(`${baseUrl}${path}`, {

@@ -1,4 +1,5 @@
 import {
+  Bot,
   Building2,
   ChartColumn,
   CircleQuestionMark,
@@ -26,6 +27,7 @@ import {
 const NAV_ICONS: Record<string, LucideIcon> = {
   welcome: House,
   dashboard: LayoutDashboard,
+  antigravity: Bot,
   routes: Route,
   cache: Database,
   warm: Flame,
