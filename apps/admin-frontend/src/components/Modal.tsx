@@ -1,8 +1,7 @@
+import * as Dialog from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
 import type { ReactNode } from 'react';
-import { useEffect, useId, useRef } from 'react';
-import { useFocusRestore } from '../lib/useFocusRestore';
-import { useFocusTrap } from '../lib/useFocusTrap';
+import { useId } from 'react';
 
 type ModalProps = {
   open: boolean;
@@ -21,67 +20,40 @@ const SIZE_CLASS: Record<NonNullable<ModalProps['size']>, string> = {
 
 export function Modal({ open, onClose, title, children, size = 'lg' }: ModalProps) {
   const titleId = useId();
-  const dialogRef = useRef<HTMLDivElement>(null);
 
-  // 트리거로 포커스 복원 + Tab 포커스 트랩 (공유 훅).
-  useFocusRestore(open);
-  useFocusTrap(dialogRef, open);
-
-  // Escape 키로 닫기 — open 일 때만 등록.
-  useEffect(() => {
-    if (!open) return;
-    function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') onClose();
-    }
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [open, onClose]);
-
-  // body scroll 잠금 + 다이얼로그 진입 포커스.
-  useEffect(() => {
-    if (!open || typeof document === 'undefined') return;
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    // 다이얼로그 자체에 포커스 — 키보드 사용자에게 진입점 제공.
-    dialogRef.current?.focus();
-    return () => {
-      document.body.style.overflow = prevOverflow;
-    };
-  }, [open]);
-
-  if (!open) return null;
+  // Radix Dialog 가 focus-trap / Escape / scroll-lock / 트리거 포커스 복원을 모두 처리.
   return (
-    // biome-ignore lint/a11y/useKeyWithClickEvents: Escape key is handled by a window-level listener (see effect above); backdrop click is mouse-only
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby={titleId}
-      data-testid="modal"
-      className="fixed inset-0 z-[70] bg-scrim flex items-start justify-center pt-12 px-4"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
+    <Dialog.Root
+      open={open}
+      onOpenChange={(o) => {
+        if (!o) onClose();
       }}
     >
-      <div
-        ref={dialogRef}
-        tabIndex={-1}
-        className={`bg-panel border border-line rounded-lg shadow-2xl w-full ${SIZE_CLASS[size]} max-h-[80vh] overflow-y-auto focus:outline-none`}
-      >
-        <div className="px-5 py-3 border-b border-line flex items-center justify-between">
-          <div id={titleId} className="font-semibold">
-            {title}
+      <Dialog.Portal>
+        <Dialog.Overlay
+          data-testid="modal-backdrop"
+          className="fixed inset-0 z-[70] bg-scrim flex items-start justify-center pt-12 px-4"
+        />
+        <Dialog.Content
+          data-testid="modal"
+          aria-labelledby={titleId}
+          className={`fixed left-1/2 top-12 z-[70] -translate-x-1/2 bg-panel border border-line rounded-lg shadow-2xl w-full ${SIZE_CLASS[size]} max-h-[80vh] overflow-y-auto focus:outline-none`}
+        >
+          <div className="px-5 py-3 border-b border-line flex items-center justify-between">
+            <Dialog.Title id={titleId} className="font-semibold">
+              {title}
+            </Dialog.Title>
+            <Dialog.Close
+              type="button"
+              className="text-ink-subtle hover:text-ink rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+              aria-label="Close dialog"
+            >
+              <X className="h-5 w-5" aria-hidden="true" />
+            </Dialog.Close>
           </div>
-          <button
-            type="button"
-            className="text-ink-subtle hover:text-ink rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-            onClick={onClose}
-            aria-label="Close dialog"
-          >
-            <X className="h-5 w-5" aria-hidden="true" />
-          </button>
-        </div>
-        <div className="px-5 py-4">{children}</div>
-      </div>
-    </div>
+          <div className="px-5 py-4">{children}</div>
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
   );
 }

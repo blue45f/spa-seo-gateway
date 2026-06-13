@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@heejun/spa-seo-gateway-core": "workspace:*",
+    "@radix-ui/react-dialog": "^1.1.16",
     "lucide-react": "^1.17.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
