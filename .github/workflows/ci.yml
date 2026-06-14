@@ -36,7 +36,7 @@ jobs:
         run: pnpm --filter @spa-seo-gateway/admin-frontend run test:a11y
       - name: Upload a11y report
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: a11y-report
           path: apps/admin-frontend/playwright-report/
