@@ -6,7 +6,7 @@ import { DialogHost } from '../../components/DialogHost'
 import { useDialogStore } from '../../lib/dialog'
 import { useStore } from '../../lib/store'
 import { TenantDetail } from '../../pages/TenantDetail'
-import { resetStore } from '../test-utils'
+import { resetStore, withQueryClient } from '../test-utils'
 
 import type { Tenant } from '../../lib/types'
 
@@ -35,12 +35,14 @@ afterEach(() => {
 
 function renderAt(path: string) {
   return render(
-    <MemoryRouter initialEntries={[path]}>
-      <Routes>
-        <Route path="/tenants/:id" element={<TenantDetail />} />
-      </Routes>
-      <DialogHost />
-    </MemoryRouter>
+    withQueryClient(
+      <MemoryRouter initialEntries={[path]}>
+        <Routes>
+          <Route path="/tenants/:id" element={<TenantDetail />} />
+        </Routes>
+        <DialogHost />
+      </MemoryRouter>
+    )
   )
 }
 

@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { useEffect, useRef, useState } from 'react'
 
 import { AuthGate } from '../components/AuthGate'
 import { Figure } from '../components/Figure'
@@ -24,60 +25,44 @@ export function Metrics() {
 function MetricsBody() {
   const t = useStore((s) => s.t)
   const setError = useStore((s) => s.setGlobalError)
-  const [parsed, setParsed] = useState<ParsedMetrics | null>(null)
-  const [raw, setRaw] = useState('')
   const [autoRefresh, setAutoRefresh] = useState(true)
   const [updated, setUpdated] = useState('')
   // 폴링마다 hit ratio(%) 를 적재해 헤드라인 옆 추세선을 만든다(최근 TREND_CAP 회).
   const [hitTrend, setHitTrend] = useState<number[]>([])
   const trendRef = useRef<number[]>([])
 
-  const ctrlRef = useRef<AbortController | null>(null)
+  const { data, error, dataUpdatedAt, refetch } = useQuery({
+    queryKey: ['metrics'],
+    // /metrics raw 텍스트를 파싱한 결과를 캐시한다(원문도 함께 보관해 details 에 노출).
+    queryFn: async ({ signal }) => {
+      const text = await fetchText('/metrics', signal)
+      return { raw: text, parsed: summarize(parsePrometheus(text)) }
+    },
+    // 5s 자동 갱신 — autoRefresh on 일 때만. refetchIntervalInBackground=false(기본)라
+    // 숨김 탭에선 자동으로 멈춘다(종전 visibilitychange 스킵과 동치).
+    refetchInterval: autoRefresh ? 5000 : false,
+  })
+  const parsed: ParsedMetrics | null = data?.parsed ?? null
+  const raw = data?.raw ?? ''
 
-  const load = useCallback(async () => {
-    // 이전 요청을 취소해, 느린 응답이 더 새 데이터를 덮어쓰는 레이스를 막는다.
-    ctrlRef.current?.abort()
-    const ctrl = new AbortController()
-    ctrlRef.current = ctrl
-    try {
-      const text = await fetchText('/metrics', ctrl.signal)
-      if (ctrl.signal.aborted) return
-      setRaw(text)
-      const next = summarize(parsePrometheus(text))
-      setParsed(next)
-      if (next.cards.hitRatioValue != null) {
-        trendRef.current = [...trendRef.current, next.cards.hitRatioValue].slice(-TREND_CAP)
-        setHitTrend(trendRef.current)
-      }
-      setUpdated(new Date().toLocaleTimeString())
-      setError('')
-    } catch (e) {
-      if ((e as Error).name === 'AbortError') return // 교체/언마운트 취소는 무시
-      setError(errorMessage(e))
-    }
-  }, [setError])
+  const load = () => {
+    void refetch()
+  }
 
-  // 초기 로드 + unmount 시 진행 중 요청 취소
+  // 성공 응답마다(=dataUpdatedAt 변경) hit ratio 추세 적재 + 갱신 시각 기록 + 에러 클리어.
   useEffect(() => {
-    void load()
-    return () => ctrlRef.current?.abort()
-  }, [load])
+    if (!parsed) return
+    if (parsed.cards.hitRatioValue != null) {
+      trendRef.current = [...trendRef.current, parsed.cards.hitRatioValue].slice(-TREND_CAP)
+      setHitTrend(trendRef.current)
+    }
+    setUpdated(new Date().toLocaleTimeString())
+  }, [parsed, dataUpdatedAt])
 
-  // 5s 자동 갱신 — 숨김 탭에선 스킵, 복귀 시 즉시 갱신
+  // 전역 에러 배너 동기화 — 성공 시 비우고, 실패 시 메시지 표면화(종전 setError 동작 보존).
   useEffect(() => {
-    if (!autoRefresh) return undefined
-    const id = setInterval(() => {
-      if (document.visibilityState === 'visible') void load()
-    }, 5000)
-    const onVisible = () => {
-      if (document.visibilityState === 'visible') void load()
-    }
-    document.addEventListener('visibilitychange', onVisible)
-    return () => {
-      clearInterval(id)
-      document.removeEventListener('visibilitychange', onVisible)
-    }
-  }, [autoRefresh, load])
+    setError(error ? errorMessage(error) : '')
+  }, [error, setError])
 
   if (!parsed) return <CardGridSkeleton count={3} />
 

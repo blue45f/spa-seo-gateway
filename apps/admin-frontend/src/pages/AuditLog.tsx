@@ -1,5 +1,6 @@
+import { useQuery } from '@tanstack/react-query'
 import { CircleCheck, CircleX } from 'lucide-react'
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { AuthGate } from '../components/AuthGate'
 import { EmptyState } from '../components/EmptyState'
@@ -20,10 +21,10 @@ function AuditLogBody() {
   const t = useStore((s) => s.t)
   const pushToast = useStore((s) => s.pushToast)
   const setError = useStore((s) => s.setGlobalError)
-  const [events, setEvents] = useState<AuditEvent[]>([])
   const [verified, setVerified] = useState<boolean | null>(null)
   const [brokenAt, setBrokenAt] = useState<number | null>(null)
-  const [busy, setBusy] = useState(false)
+  // verify 진행 표시 — 읽기 fetch 의 isFetching 과 합쳐 종전 busy 동작을 재현.
+  const [verifying, setVerifying] = useState(false)
 
   const [isMobile, setIsMobile] = useState(false)
 
@@ -35,26 +36,40 @@ function AuditLogBody() {
     return () => window.removeEventListener('resize', check)
   }, [])
 
-  const load = useCallback(async () => {
-    setBusy(true)
-    try {
-      const r = await api<{ ok: true; events: AuditEvent[] }>('GET', '/admin/api/audit')
-      setEvents(r.events ?? [])
-      setError('')
-    } catch (e) {
-      const msg = errorMessage(e)
-      setError(msg)
-    } finally {
-      setBusy(false)
-    }
-  }, [setError])
+  const {
+    data: events = [],
+    isFetching,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ['audit'],
+    queryFn: async ({ signal }) => {
+      const r = await api<{ ok: true; events: AuditEvent[] }>(
+        'GET',
+        '/admin/api/audit',
+        undefined,
+        {
+          signal,
+        }
+      )
+      return r.events ?? []
+    },
+  })
 
+  // 종전 busy: 읽기 로드 중 + verify 중 둘 다 버튼 비활성.
+  const busy = isFetching || verifying
+
+  const load = () => {
+    void refetch()
+  }
+
+  // 전역 에러 배너 동기화 — 성공 시 비우고, 실패 시 메시지 표면화(종전 setError 동작 보존).
   useEffect(() => {
-    void load()
-  }, [load])
+    setError(error ? errorMessage(error) : '')
+  }, [error, setError])
 
   async function verify() {
-    setBusy(true)
+    setVerifying(true)
     try {
       const r = await api<{ ok: true; verified: boolean; brokenAt: number | null }>(
         'GET',
@@ -70,7 +85,7 @@ function AuditLogBody() {
       const msg = errorMessage(e)
       setError(msg)
     } finally {
-      setBusy(false)
+      setVerifying(false)
     }
   }
 

@@ -1,3 +1,4 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { type RenderOptions, type RenderResult, render } from '@testing-library/react'
 import { MemoryRouter, type MemoryRouterProps, Outlet, Route, Routes } from 'react-router-dom'
 
@@ -5,6 +6,33 @@ import { useStore } from '../lib/store'
 
 import type { PublicInfo } from '../lib/types'
 import type { ReactElement } from 'react'
+
+/**
+ * 테스트용 QueryClient — 매 render 마다 새 인스턴스라 캐시가 테스트 간 누수되지 않는다.
+ * retry off + 캐시 비활성으로 프로덕션 동작(1회 fetch, 재시도 없음)을 그대로 반영.
+ */
+function makeTestQueryClient(): QueryClient {
+  return new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+        refetchOnWindowFocus: false,
+        refetchOnReconnect: false,
+        staleTime: Number.POSITIVE_INFINITY,
+        gcTime: Number.POSITIVE_INFINITY,
+      },
+      mutations: { retry: false },
+    },
+  })
+}
+
+/**
+ * 자체 라우터 셋업(MemoryRouter)을 쓰는 테스트가 QueryClientProvider 만 손쉽게 두를 수
+ * 있게 하는 래퍼. 매 호출마다 새 QueryClient 라 테스트 간 캐시 누수가 없다.
+ */
+export function withQueryClient(ui: ReactElement): ReactElement {
+  return <QueryClientProvider client={makeTestQueryClient()}>{ui}</QueryClientProvider>
+}
 
 /**
  * Layout 의 OutletContext (publicInfo) 가 필요한 페이지를 테스트할 때 사용.
@@ -19,14 +47,17 @@ export function renderWithRouter(
   options?: RenderOptions
 ): RenderResult {
   const { initialEntries = ['/'], publicInfo = null } = opts
+  const queryClient = makeTestQueryClient()
   return render(
-    <MemoryRouter initialEntries={initialEntries}>
-      <Routes>
-        <Route element={<OutletShim publicInfo={publicInfo} />}>
-          <Route path="*" element={ui} />
-        </Route>
-      </Routes>
-    </MemoryRouter>,
+    <QueryClientProvider client={queryClient}>
+      <MemoryRouter initialEntries={initialEntries}>
+        <Routes>
+          <Route element={<OutletShim publicInfo={publicInfo} />}>
+            <Route path="*" element={ui} />
+          </Route>
+        </Routes>
+      </MemoryRouter>
+    </QueryClientProvider>,
     options
   )
 }

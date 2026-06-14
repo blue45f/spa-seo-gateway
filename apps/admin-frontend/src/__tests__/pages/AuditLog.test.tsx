@@ -80,8 +80,10 @@ describe('AuditLog page', () => {
     )
     globalThis.fetch = fetchMock
     renderWithRouter(<AuditLog />)
-    await waitFor(() => screen.getByText('체인 검증'))
-    fireEvent.click(screen.getByText('체인 검증'))
+    // 초기 audit 로드가 끝나면 busy 가 풀려 verify 버튼이 활성화된다 — 그때 클릭.
+    const verifyBtn = screen.getByText('체인 검증')
+    await waitFor(() => expect(verifyBtn).not.toBeDisabled())
+    fireEvent.click(verifyBtn)
     await waitFor(() => expect(screen.getAllByText('무결성 OK').length).toBeGreaterThan(0))
   })
 })
