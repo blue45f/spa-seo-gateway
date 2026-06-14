@@ -18,6 +18,7 @@ import {
 import { FileTenantStore, registerMultiTenant } from '@heejun/spa-seo-gateway-multi-tenant'
 import Fastify, { type FastifyInstance } from 'fastify'
 
+import { registerErrorHandler } from './error-handler.js'
 import { registerRoutes } from './routes.js'
 import { registerSecurityHeaders } from './security-headers.js'
 
@@ -40,6 +41,11 @@ export async function buildApp(
     keepAliveTimeout: 65_000,
     connectionTimeout: 0,
   })
+
+  // Canonical error envelope for any *thrown* / unhandled request error. Set
+  // before plugins/routes so it applies across every mode (proxy/saas/cms/
+  // render). Additive: explicit `reply.code().send()` paths are unaffected.
+  registerErrorHandler(app as unknown as Parameters<typeof registerErrorHandler>[0])
 
   await app.register(compress, {
     global: true,
