@@ -238,6 +238,32 @@ describe('gateway e2e — catch-all render bypass + bot path', () => {
   })
 })
 
+describe('gateway e2e — canonical error envelope', () => {
+  it('thrown/parse error returns canonical envelope preserving statusCode + message', async () => {
+    // Sending a malformed JSON body with application/json makes Fastify's body
+    // parser throw, which is routed through our global setErrorHandler.
+    const res = await f('/admin/cache/invalidate', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'x-admin-token': ADMIN_TOKEN,
+      },
+      body: '{ this is : not valid json',
+    })
+    expect(res.status).toBe(400)
+    const body = (await res.json()) as Record<string, unknown>
+    // Backward-compatible fields preserved verbatim.
+    expect(typeof body.statusCode).toBe('number')
+    expect(body.statusCode).toBe(400)
+    expect(typeof body.message).toBe('string')
+    expect((body.message as string).length).toBeGreaterThan(0)
+    // Additive canonical fields.
+    expect(body.path).toBe('/admin/cache/invalidate')
+    expect(typeof body.timestamp).toBe('string')
+    expect(() => new Date(body.timestamp as string).toISOString()).not.toThrow()
+  })
+})
+
 describe('gateway e2e — CORS preflight', () => {
   it('OPTIONS /health with Origin → allowed by @fastify/cors', async () => {
     const res = await f('/health', {
