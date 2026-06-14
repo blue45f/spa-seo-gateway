@@ -1,3 +1,4 @@
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 
@@ -31,42 +32,52 @@ function TenantDetailBody() {
   const setError = useStore((s) => s.setGlobalError)
   const pushToast = useStore((s) => s.pushToast)
   const { confirm } = useDialog()
+  const queryClient = useQueryClient()
+  // fetch 한 tenant 는 폼으로 직접 편집되므로 로컬 draft 로 들고 있는다.
   const [tenant, setTenant] = useState<Tenant | null>(null)
-  const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [missing, setMissing] = useState(false)
+  // 새 fetch 결과만 draft 에 재시드하기 위한 가드(편집 중 리렌더가 덮어쓰지 않게).
+  const seededAtRef = useRef(0)
 
-  const ctrlRef = useRef<AbortController | null>(null)
-
-  const load = useCallback(async () => {
-    // 이전 요청 취소 — /tenants/A → /tenants/B 네비게이션 시 A 응답이 B 를 덮어쓰지 않게.
-    ctrlRef.current?.abort()
-    const ctrl = new AbortController()
-    ctrlRef.current = ctrl
-    setLoading(true)
-    setMissing(false)
-    try {
+  const {
+    data: tenants,
+    isFetching,
+    isLoading,
+    error,
+    refetch,
+    dataUpdatedAt,
+  } = useQuery({
+    queryKey: ['tenants'],
+    queryFn: async ({ signal }) => {
       const r = await api<{ ok: true; tenants: Tenant[] }>('GET', '/admin/api/tenants', undefined, {
-        signal: ctrl.signal,
+        signal,
       })
-      if (ctrl.signal.aborted) return
-      const found = (r.tenants ?? []).find((tn) => tn.id === id)
-      if (!found) setMissing(true)
-      else setTenant(found)
-      setError('')
-    } catch (e) {
-      if ((e as Error).name === 'AbortError') return
-      const msg = errorMessage(e)
-      setError(msg)
-    } finally {
-      if (!ctrl.signal.aborted) setLoading(false)
-    }
-  }, [id, setError])
+      return r.tenants ?? []
+    },
+  })
 
+  const load = () => {
+    void refetch()
+  }
+
+  // fetch 결과가 갱신될 때마다 id 로 찾아 draft·missing 을 재계산(종전 load 동작 재현).
   useEffect(() => {
-    void load()
-    return () => ctrlRef.current?.abort()
-  }, [load])
+    if (!tenants || dataUpdatedAt === seededAtRef.current) return
+    seededAtRef.current = dataUpdatedAt
+    const found = tenants.find((tn) => tn.id === id)
+    if (!found) {
+      setMissing(true)
+    } else {
+      setMissing(false)
+      setTenant(found)
+    }
+  }, [tenants, dataUpdatedAt, id])
+
+  // 전역 에러 배너 동기화 — 성공 시 비우고, 실패 시 메시지 표면화(종전 setError 동작 보존).
+  useEffect(() => {
+    setError(error ? errorMessage(error) : '')
+  }, [error, setError])
 
   const save = useCallback(async () => {
     if (!tenant) return
@@ -75,14 +86,14 @@ function TenantDetailBody() {
       const cleaned = { ...tenant, routes: cleanRoutes(tenant.routes) }
       await api('POST', '/admin/api/tenants', cleaned)
       pushToast(`${t('toast.tenant.saved')}: ${tenant.id}`, 'success')
-      await load()
+      await queryClient.invalidateQueries({ queryKey: ['tenants'] })
     } catch (e) {
       const msg = errorMessage(e)
       pushToast(msg, 'error')
     } finally {
       setSaving(false)
     }
-  }, [tenant, pushToast, t, load])
+  }, [tenant, pushToast, t, queryClient])
 
   async function rotateApiKey() {
     if (!tenant) return
@@ -120,6 +131,8 @@ function TenantDetailBody() {
     return () => window.removeEventListener('keydown', handler)
   }, [tenant, saving, save])
 
+  // 종전 loading 의미: 초기 로드 또는 (save 후) 재로드 중에는 스켈레톤.
+  const loading = isFetching || (isLoading && !tenant && !missing)
   if (loading) return <DetailSkeleton rows={5} />
   if (missing) {
     return (

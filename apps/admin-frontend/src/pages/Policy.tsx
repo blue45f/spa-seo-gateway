@@ -1,11 +1,11 @@
-import { createElement, useEffect, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { createElement } from 'react'
 
 import { Skeleton } from '../components/Skeleton'
 import {
   fetchPolicyDocument,
   formatPolicyDate,
   type PolicyBlock,
-  type PolicyDocument,
   type PolicySlug,
   parsePolicyBody,
   policyPublicUrl,
@@ -60,25 +60,24 @@ function PolicyBody({ blocks }: { blocks: PolicyBlock[] }) {
 export function Policy({ slug }: { slug: PolicySlug }) {
   const t = useStore((s) => s.t)
   const lang = useStore((s) => s.lang)
-  const [doc, setDoc] = useState<PolicyDocument | null>(null)
-  const [failed, setFailed] = useState(false)
-  const [attempt, setAttempt] = useState(0)
 
-  useEffect(() => {
-    const ctrl = new AbortController()
-    setDoc(null)
-    setFailed(false)
-    fetchPolicyDocument(slug, ctrl.signal)
-      .then((d) => setDoc(d))
-      .catch(() => {
-        if (!ctrl.signal.aborted) setFailed(true)
-      })
-    return () => ctrl.abort()
-  }, [slug, attempt])
+  const {
+    data: doc = null,
+    isError,
+    isFetching,
+    refetch,
+  } = useQuery({
+    // slug 별 캐시 — /terms ↔ /privacy 전환 시 서로의 문서를 보여주지 않는다.
+    queryKey: ['policy', slug],
+    queryFn: ({ signal }) => fetchPolicyDocument(slug, signal),
+  })
 
   const titleKey = slug === 'privacy-policy' ? 'policy.privacy.title' : 'policy.terms.title'
   const externalUrl = policyPublicUrl(slug)
-  const loading = !doc && !failed
+  // 종전 동작 재현: in-flight 중에는 스켈레톤(재시도 fetch 포함). 재시도 중에는 stale 에러
+  // 표면을 감추고 로딩을 보여준다(종전 retry 가 doc/failed 를 리셋하고 로딩을 보인 것과 동치).
+  const loading = isFetching
+  const failed = isError && !isFetching
 
   return (
     <article className="max-w-3xl space-y-6" data-testid="page-policy">
@@ -100,7 +99,7 @@ export function Policy({ slug }: { slug: PolicySlug }) {
             <button
               type="button"
               className="btn-primary px-3 py-1.5 text-sm font-medium"
-              onClick={() => setAttempt((n) => n + 1)}
+              onClick={() => void refetch()}
             >
               {t('policy.retry')}
             </button>

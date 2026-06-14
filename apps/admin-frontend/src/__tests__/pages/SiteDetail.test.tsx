@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { useStore } from '../../lib/store'
 import { SiteDetail } from '../../pages/SiteDetail'
-import { resetStore } from '../test-utils'
+import { resetStore, withQueryClient } from '../test-utils'
 
 import type { Site } from '../../lib/types'
 
@@ -34,11 +34,13 @@ afterEach(() => {
 
 function renderAt(path: string) {
   return render(
-    <MemoryRouter initialEntries={[path]}>
-      <Routes>
-        <Route path="/sites/:id" element={<SiteDetail />} />
-      </Routes>
-    </MemoryRouter>
+    withQueryClient(
+      <MemoryRouter initialEntries={[path]}>
+        <Routes>
+          <Route path="/sites/:id" element={<SiteDetail />} />
+        </Routes>
+      </MemoryRouter>
+    )
   )
 }
 

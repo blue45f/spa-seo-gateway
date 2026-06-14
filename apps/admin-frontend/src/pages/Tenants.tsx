@@ -1,4 +1,5 @@
-import { type FormEvent, useCallback, useEffect, useState } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { type FormEvent, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 
 import { AuthGate } from '../components/AuthGate'
@@ -43,8 +44,7 @@ function TenantsBody() {
   const setError = useStore((s) => s.setGlobalError)
   const pushToast = useStore((s) => s.pushToast)
   const { confirm } = useDialog()
-  const [tenants, setTenants] = useState<Tenant[]>([])
-  const [loading, setLoading] = useState(false)
+  const queryClient = useQueryClient()
   const [editing, setEditing] = useState<Tenant | null>(null)
   // 삭제 in-flight 인 행 id — 중복 클릭/동시 DELETE 차단 (전역 loading 재사용 금지)
   const [removingId, setRemovingId] = useState<string | null>(null)
@@ -59,30 +59,36 @@ function TenantsBody() {
     return () => window.removeEventListener('resize', check)
   }, [])
 
-  const load = useCallback(async () => {
-    setLoading(true)
-    try {
-      const r = await api<{ ok: true; tenants: Tenant[] }>('GET', '/admin/api/tenants')
-      setTenants(r.tenants ?? [])
-      setError('')
-    } catch (e) {
-      const msg = errorMessage(e)
-      setError(msg)
-    } finally {
-      setLoading(false)
-    }
-  }, [setError])
+  const {
+    data: tenants = [],
+    isFetching: loading,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ['tenants'],
+    queryFn: async ({ signal }) => {
+      const r = await api<{ ok: true; tenants: Tenant[] }>('GET', '/admin/api/tenants', undefined, {
+        signal,
+      })
+      return r.tenants ?? []
+    },
+  })
 
+  const load = () => {
+    void refetch()
+  }
+
+  // 전역 에러 배너 동기화 — 성공 시 비우고, 실패 시 메시지 표면화(종전 setError 동작 보존).
   useEffect(() => {
-    void load()
-  }, [load])
+    setError(error ? errorMessage(error) : '')
+  }, [error, setError])
 
   async function save(tenant: Tenant) {
     try {
       await api('POST', '/admin/api/tenants', tenant)
       pushToast(`${t('toast.tenant.saved')}: ${tenant.id}`, 'success')
       setEditing(null)
-      await load()
+      await queryClient.invalidateQueries({ queryKey: ['tenants'] })
     } catch (e) {
       const msg = errorMessage(e)
       pushToast(msg, 'error')
@@ -102,7 +108,7 @@ function TenantsBody() {
     try {
       await api('DELETE', `/admin/api/tenants/${encodeURIComponent(id)}`)
       pushToast(`${t('toast.tenant.deleted')}: ${id}`, 'success')
-      await load()
+      await queryClient.invalidateQueries({ queryKey: ['tenants'] })
     } catch (e) {
       const msg = errorMessage(e)
       pushToast(msg, 'error')

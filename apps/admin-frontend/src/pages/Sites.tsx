@@ -1,4 +1,5 @@
-import { type FormEvent, useCallback, useEffect, useState } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { type FormEvent, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 
 import { AuthGate } from '../components/AuthGate'
@@ -33,8 +34,7 @@ function SitesBody() {
   const setError = useStore((s) => s.setGlobalError)
   const pushToast = useStore((s) => s.pushToast)
   const { confirm, prompt } = useDialog()
-  const [sites, setSites] = useState<Site[]>([])
-  const [loading, setLoading] = useState(false)
+  const queryClient = useQueryClient()
   const [editing, setEditing] = useState<Site | null>(null)
   // 행 단위 in-flight 액션 — 같은 행의 중복/동시 요청 차단 + 진행 표시 (전역 loading 재사용 금지)
   const [pending, setPending] = useState<{
@@ -52,30 +52,36 @@ function SitesBody() {
     return () => window.removeEventListener('resize', check)
   }, [])
 
-  const load = useCallback(async () => {
-    setLoading(true)
-    try {
-      const r = await api<{ ok: true; sites: Site[] }>('GET', '/admin/api/sites')
-      setSites(r.sites ?? [])
-      setError('')
-    } catch (e) {
-      const msg = errorMessage(e)
-      setError(msg)
-    } finally {
-      setLoading(false)
-    }
-  }, [setError])
+  const {
+    data: sites = [],
+    isFetching: loading,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ['sites'],
+    queryFn: async ({ signal }) => {
+      const r = await api<{ ok: true; sites: Site[] }>('GET', '/admin/api/sites', undefined, {
+        signal,
+      })
+      return r.sites ?? []
+    },
+  })
 
+  const load = () => {
+    void refetch()
+  }
+
+  // 전역 에러 배너 동기화 — 성공 시 비우고, 실패 시 메시지 표면화(종전 setError 동작 보존).
   useEffect(() => {
-    void load()
-  }, [load])
+    setError(error ? errorMessage(error) : '')
+  }, [error, setError])
 
   async function save(site: Site) {
     try {
       await api('POST', '/admin/api/sites', site)
       pushToast(`${t('toast.site.saved')}: ${site.id}`, 'success')
       setEditing(null)
-      await load()
+      await queryClient.invalidateQueries({ queryKey: ['sites'] })
     } catch (e) {
       const msg = errorMessage(e)
       pushToast(msg, 'error')
@@ -95,7 +101,7 @@ function SitesBody() {
     try {
       await api('DELETE', `/admin/api/sites/${encodeURIComponent(id)}`)
       pushToast(`${t('toast.site.deleted')}: ${id}`, 'success')
-      await load()
+      await queryClient.invalidateQueries({ queryKey: ['sites'] })
     } catch (e) {
       const msg = errorMessage(e)
       pushToast(msg, 'error')

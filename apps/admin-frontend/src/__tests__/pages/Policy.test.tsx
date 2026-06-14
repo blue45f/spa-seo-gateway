@@ -85,7 +85,8 @@ describe('Policy page', () => {
       await screen.findByRole('heading', { level: 2, name: '개인정보처리방침' })
     ).toBeInTheDocument()
     expect(fetchMock).toHaveBeenCalledWith(policyApiUrl('privacy-policy'), expect.anything())
-    expect(screen.getByRole('link', { name: /TermsDesk 원문/ })).toHaveAttribute(
+    // 문서 로드가 끝나면 신뢰 표면(원문 링크)이 footer 에 렌더된다.
+    expect(await screen.findByRole('link', { name: /TermsDesk 원문/ })).toHaveAttribute(
       'href',
       'https://termsdesk.vercel.app/p/spa-seo-gateway/privacy-policy'
     )

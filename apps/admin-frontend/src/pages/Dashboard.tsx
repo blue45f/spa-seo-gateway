@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { useEffect, useRef, useState } from 'react'
 
 import { AuthGate } from '../components/AuthGate'
 import { EmptyState } from '../components/EmptyState'
@@ -25,34 +26,40 @@ export function Dashboard() {
 function DashboardBody() {
   const t = useStore((s) => s.t)
   const setError = useStore((s) => s.setGlobalError)
-  const [info, setInfo] = useState<SiteInfo | null>(null)
-  const [loading, setLoading] = useState(false)
   // 갱신마다 누적 실패 합계를 적재해 추세선을 만든다(최근 TREND_CAP 회).
   const [failTrend, setFailTrend] = useState<number[]>([])
   const trendRef = useRef<number[]>([])
 
-  const load = useCallback(async () => {
-    setLoading(true)
-    try {
-      const r = await api<SiteInfo>('GET', '/admin/api/site')
-      setInfo(r)
-      const totalFails = r.breakers
-        ? Object.values(r.breakers).reduce((sum, b) => sum + (b.failures ?? 0), 0)
-        : 0
-      trendRef.current = [...trendRef.current, totalFails].slice(-TREND_CAP)
-      setFailTrend(trendRef.current)
-      setError('')
-    } catch (e) {
-      const msg = errorMessage(e)
-      setError(msg)
-    } finally {
-      setLoading(false)
-    }
-  }, [setError])
+  const {
+    data: info = null,
+    isFetching: loading,
+    error,
+    refetch,
+    dataUpdatedAt,
+  } = useQuery({
+    queryKey: ['site'],
+    queryFn: ({ signal }) => api<SiteInfo>('GET', '/admin/api/site', undefined, { signal }),
+  })
 
+  const load = () => {
+    void refetch()
+  }
+
+  // 성공 응답마다 실패 합계를 추세선에 적재 — dataUpdatedAt 이 바뀔 때만(=새 fetch 결과)
+  // 1회 실행해 종전 load() 의 누적 동작을 그대로 재현한다.
   useEffect(() => {
-    void load()
-  }, [load])
+    if (!info) return
+    const totalFails = info.breakers
+      ? Object.values(info.breakers).reduce((sum, b) => sum + (b.failures ?? 0), 0)
+      : 0
+    trendRef.current = [...trendRef.current, totalFails].slice(-TREND_CAP)
+    setFailTrend(trendRef.current)
+  }, [info, dataUpdatedAt])
+
+  // 전역 에러 배너 동기화 — 성공 시 비우고, 실패 시 메시지를 표면화(종전 setError 동작 보존).
+  useEffect(() => {
+    setError(error ? errorMessage(error) : '')
+  }, [error, setError])
 
   if (!info) {
     if (loading) {
