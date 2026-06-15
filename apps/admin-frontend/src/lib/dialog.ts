@@ -1,5 +1,5 @@
 /**
- * window.confirm / window.prompt 대체 — Promise 기반 인앱 다이얼로그 요청 채널.
+ * globalThis.confirm / globalThis.prompt 대체 — Promise 기반 인앱 다이얼로그 요청 채널.
  * 이 앱의 오버레이 컨벤션(CommandPalette/Toast = zustand 스토어 + App 레벨 호스트)을 따라
  * Context Provider 대신 전용 스토어 + <DialogHost /> 조합으로 동작한다.
  */
@@ -54,14 +54,14 @@ function enqueue(request: DialogRequest) {
   useDialogStore.setState({ request })
 }
 
-/** window.confirm 대체 — 확인이면 true, 취소/ESC/백드롭이면 false. */
+/** globalThis.confirm 대체 — 확인이면 true, 취소/ESC/백드롭이면 false. */
 export function confirmDialog(options: ConfirmDialogOptions): Promise<boolean> {
   return new Promise<boolean>((resolve) => {
     enqueue({ id: ++seq, kind: 'confirm', options, resolve })
   })
 }
 
-/** window.prompt 대체 — 확인이면 입력값(string), 취소/ESC/백드롭이면 null. */
+/** globalThis.prompt 대체 — 확인이면 입력값(string), 취소/ESC/백드롭이면 null. */
 export function promptDialog(options: PromptDialogOptions): Promise<string | null> {
   return new Promise<string | null>((resolve) => {
     enqueue({ id: ++seq, kind: 'prompt', options, resolve })

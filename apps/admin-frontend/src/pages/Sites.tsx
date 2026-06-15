@@ -48,10 +48,10 @@ function SitesBody() {
 
   useEffect(() => {
     if (typeof window === 'undefined') return
-    const check = () => setIsMobile(window.innerWidth < 768)
+    const check = () => setIsMobile(globalThis.innerWidth < 768)
     check()
-    window.addEventListener('resize', check)
-    return () => window.removeEventListener('resize', check)
+    globalThis.addEventListener('resize', check)
+    return () => globalThis.removeEventListener('resize', check)
   }, [])
 
   const {

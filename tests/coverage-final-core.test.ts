@@ -363,8 +363,8 @@ describe('url.buildTargetUrl host inference', () => {
 describe('cache.shutdownCache + SWR revalidation failure (lines 111, 132)', () => {
   it('SWR background revalidation logs warn when fetcher throws; original entry is returned (line 132)', async () => {
     const k = `swr-fail-${Math.random().toString(36).slice(2)}`
-    // Pre-set a stale entry: createdAt past TTL but within SWR window.
-    // Default ttlMs=24h, swrMs=1h → createdAt 24h + 30min ago is stale-but-in-window.
+    // Pre-set a stale entry: createdAt past TTL but within SWR globalThis.
+    // Default ttlMs=24h, swrMs=1h → createdAt 24h + 30min ago is stale-but-in-globalThis.
     const staleAt = Date.now() - (24 * 60 * 60 + 30 * 60) * 1000
     await cacheSet(k, {
       body: '<html>stale</html>',

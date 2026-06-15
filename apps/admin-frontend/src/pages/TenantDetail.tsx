@@ -127,8 +127,8 @@ function TenantDetailBody() {
         if (tenant && !saving) void save()
       }
     }
-    window.addEventListener('keydown', handler)
-    return () => window.removeEventListener('keydown', handler)
+    globalThis.addEventListener('keydown', handler)
+    return () => globalThis.removeEventListener('keydown', handler)
   }, [tenant, saving, save])
 
   // 종전 loading 의미: 초기 로드 또는 (save 후) 재로드 중에는 스켈레톤.

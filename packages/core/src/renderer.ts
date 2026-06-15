@@ -119,7 +119,7 @@ async function renderOnce(
 
     if (config.renderer.waitPrerenderReady) {
       await page
-        .waitForFunction('window.prerenderReady === true', {
+        .waitForFunction('globalThis.prerenderReady === true', {
           timeout: config.renderer.waitPrerenderReadyTimeoutMs,
         })
         .catch(() => {

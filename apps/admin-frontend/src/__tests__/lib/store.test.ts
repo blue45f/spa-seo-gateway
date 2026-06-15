@@ -31,7 +31,7 @@ describe('admin store', () => {
     useStore.getState().toggleTheme()
     expect(useStore.getState().theme).toBe('dark')
     expect(document.documentElement.classList.contains('dark')).toBe(true)
-    expect(window.localStorage?.getItem('seo-admin-theme')).toBe('dark')
+    expect(globalThis.localStorage?.getItem('seo-admin-theme')).toBe('dark')
     useStore.getState().toggleTheme()
     expect(useStore.getState().theme).toBe('light')
     expect(document.documentElement.classList.contains('dark')).toBe(false)
@@ -42,11 +42,11 @@ describe('admin store', () => {
     expect(useStore.getState().themeMode).toBe('dark')
     expect(useStore.getState().theme).toBe('dark')
     expect(document.documentElement.classList.contains('dark')).toBe(true)
-    expect(window.localStorage?.getItem('seo-admin-theme')).toBe('dark')
+    expect(globalThis.localStorage?.getItem('seo-admin-theme')).toBe('dark')
 
     useStore.getState().setThemeMode('system')
     expect(useStore.getState().themeMode).toBe('system')
-    expect(window.localStorage?.getItem('seo-admin-theme')).toBe('system')
+    expect(globalThis.localStorage?.getItem('seo-admin-theme')).toBe('system')
     expect(['light', 'dark']).toContain(useStore.getState().theme)
   })
 
@@ -55,7 +55,7 @@ describe('admin store', () => {
     useStore.getState().toggleDensity()
     expect(useStore.getState().density).toBe('compact')
     expect(document.documentElement.getAttribute('data-density')).toBe('compact')
-    expect(window.localStorage?.getItem('seo-admin-density')).toBe('compact')
+    expect(globalThis.localStorage?.getItem('seo-admin-density')).toBe('compact')
     useStore.getState().toggleDensity()
     expect(useStore.getState().density).toBe('comfortable')
   })
@@ -63,7 +63,7 @@ describe('admin store', () => {
   it('toggleLang persists to localStorage', () => {
     useStore.getState().toggleLang()
     expect(useStore.getState().lang).toBe('en')
-    expect(window.localStorage?.getItem('seo-admin-lang')).toBe('en')
+    expect(globalThis.localStorage?.getItem('seo-admin-lang')).toBe('en')
   })
 
   it('t() resolves keys for the current language', () => {
@@ -100,7 +100,7 @@ describe('admin store', () => {
   it('endTour persists tourSeen', () => {
     useStore.getState().endTour()
     expect(useStore.getState().tourSeen).toBe(true)
-    expect(window.localStorage?.getItem('seo-admin-tour-seen')).toBe('1')
+    expect(globalThis.localStorage?.getItem('seo-admin-tour-seen')).toBe('1')
   })
 
   it('setGlobalError stores text', () => {

@@ -18,7 +18,7 @@ function systemPrefersDark(): boolean {
 
 function detectInitialThemeMode(): ThemeMode {
   if (typeof window === 'undefined') return 'system'
-  const saved = window.localStorage?.getItem(THEME_KEY)
+  const saved = globalThis.localStorage?.getItem(THEME_KEY)
   return saved === 'dark' || saved === 'light' || saved === 'system' ? saved : 'system'
 }
 
@@ -29,12 +29,12 @@ function resolveTheme(mode: ThemeMode): Theme {
 
 function detectInitialDensity(): Density {
   if (typeof window === 'undefined') return 'comfortable'
-  return window.localStorage?.getItem(DENSITY_KEY) === 'compact' ? 'compact' : 'comfortable'
+  return globalThis.localStorage?.getItem(DENSITY_KEY) === 'compact' ? 'compact' : 'comfortable'
 }
 
 function detectInitialLang(): Lang {
   if (typeof window === 'undefined') return 'ko'
-  const saved = window.localStorage?.getItem(LANG_KEY) as Lang | null
+  const saved = globalThis.localStorage?.getItem(LANG_KEY) as Lang | null
   if (saved === 'ko' || saved === 'en') return saved
   return navigator.language?.startsWith('ko') ? 'ko' : 'en'
 }
@@ -87,10 +87,10 @@ export const useStore = create<State & Actions>((set, get) => ({
   themeMode: detectInitialThemeMode(),
   density: detectInitialDensity(),
   lang: detectInitialLang(),
-  sidebarOpen: typeof window !== 'undefined' ? window.innerWidth >= 1024 : true,
+  sidebarOpen: typeof window !== 'undefined' ? globalThis.innerWidth >= 1024 : true,
   cmdPaletteOpen: false,
   shortcutsOpen: false,
-  tourSeen: typeof window !== 'undefined' ? window.localStorage?.getItem(TOUR_KEY) === '1' : true,
+  tourSeen: typeof window !== 'undefined' ? globalThis.localStorage?.getItem(TOUR_KEY) === '1' : true,
   tourStep: 0,
   toasts: [],
   globalError: '',
@@ -114,7 +114,7 @@ export const useStore = create<State & Actions>((set, get) => ({
     const eff = resolveTheme(mode)
     if (typeof document !== 'undefined') {
       document.documentElement.classList.toggle('dark', eff === 'dark')
-      window.localStorage?.setItem(THEME_KEY, mode)
+      globalThis.localStorage?.setItem(THEME_KEY, mode)
     }
     set({ themeMode: mode, theme: eff })
   },
@@ -122,14 +122,14 @@ export const useStore = create<State & Actions>((set, get) => ({
     const next: Density = get().density === 'compact' ? 'comfortable' : 'compact'
     if (typeof document !== 'undefined') {
       document.documentElement.setAttribute('data-density', next)
-      window.localStorage?.setItem(DENSITY_KEY, next)
+      globalThis.localStorage?.setItem(DENSITY_KEY, next)
     }
     set({ density: next })
   },
 
   toggleLang() {
     const next: Lang = get().lang === 'ko' ? 'en' : 'ko'
-    if (typeof window !== 'undefined') window.localStorage?.setItem(LANG_KEY, next)
+    if (typeof window !== 'undefined') globalThis.localStorage?.setItem(LANG_KEY, next)
     set({ lang: next })
   },
 
@@ -158,7 +158,7 @@ export const useStore = create<State & Actions>((set, get) => ({
     set({ tourStep: 0, tourSeen: false })
   },
   endTour() {
-    if (typeof window !== 'undefined') window.localStorage?.setItem(TOUR_KEY, '1')
+    if (typeof window !== 'undefined') globalThis.localStorage?.setItem(TOUR_KEY, '1')
     set({ tourSeen: true, tourStep: -1 })
   },
   tourNext() {

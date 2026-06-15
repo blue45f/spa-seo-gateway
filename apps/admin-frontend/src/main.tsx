@@ -14,7 +14,7 @@ import './styles.css'
  */
 function detectBasename(): string {
   if (typeof window === 'undefined') return '/admin/ui'
-  return window.location.pathname.startsWith('/admin/ui') ? '/admin/ui' : '/'
+  return globalThis.location.pathname.startsWith('/admin/ui') ? '/admin/ui' : '/'
 }
 
 const root = document.getElementById('root')

@@ -4,6 +4,7 @@ import { Route, Routes } from 'react-router-dom'
 import { CommandPalette } from './components/CommandPalette'
 import { DialogHost } from './components/DialogHost'
 import { ErrorBoundary } from './components/ErrorBoundary'
+import { FeedbackWidget } from './components/feedback/FeedbackWidget'
 import { Layout } from './components/Layout'
 import { ShortcutsModal } from './components/ShortcutsModal'
 import { ToastContainer } from './components/ToastContainer'
@@ -26,7 +27,7 @@ const CHUNK_RETRY_KEY = 'seo-admin-chunk-retry'
 // 던질 수 있다 — 가드를 못 읽으면 '이미 재시도함'으로 취급해 새로고침 루프를 원천 차단한다.
 function hasRetryGuard(): boolean {
   try {
-    return window.sessionStorage.getItem(CHUNK_RETRY_KEY) !== null
+    return globalThis.sessionStorage.getItem(CHUNK_RETRY_KEY) !== null
   } catch {
     return true
   }
@@ -34,7 +35,7 @@ function hasRetryGuard(): boolean {
 
 function armRetryGuard(): boolean {
   try {
-    window.sessionStorage.setItem(CHUNK_RETRY_KEY, '1')
+    globalThis.sessionStorage.setItem(CHUNK_RETRY_KEY, '1')
     return true
   } catch {
     return false
@@ -43,7 +44,7 @@ function armRetryGuard(): boolean {
 
 function clearRetryGuard(): void {
   try {
-    window.sessionStorage.removeItem(CHUNK_RETRY_KEY)
+    globalThis.sessionStorage.removeItem(CHUNK_RETRY_KEY)
   } catch {
     // 스토리지 접근 불가 환경 — 가드 자체가 없으니 지울 것도 없다
   }
@@ -60,7 +61,7 @@ function lazyRetry<T extends ComponentType<any>>(load: () => Promise<{ default: 
       .catch((error: unknown) => {
         // 가드를 기록할 수 있을 때만 새로고침 — 기록 실패 시 reload 하면 무한 루프가 된다
         if (!hasRetryGuard() && armRetryGuard()) {
-          window.location.reload()
+          globalThis.location.reload()
           // 새로고침이 끼어들 때까지 Suspense fallback 유지
           return new Promise<{ default: T }>(() => {})
         }
@@ -164,8 +165,8 @@ export function App() {
         openShortcuts()
       }
     }
-    window.addEventListener('keydown', handler)
-    return () => window.removeEventListener('keydown', handler)
+    globalThis.addEventListener('keydown', handler)
+    return () => globalThis.removeEventListener('keydown', handler)
   }, [openCmd, closeCmd, openShortcuts, closeShortcuts])
 
   return (
@@ -207,6 +208,11 @@ export function App() {
         <ToastContainer />
         {/* useDialog() 의 confirm/prompt 요청을 네이티브 <dialog> 로 그리는 호스트 */}
         <DialogHost />
+        {/* SurveyDesk 피드백 위젯 — fixed 플로팅 버튼. VITE_SURVEYDESK_URL 이 설정된 경우에만
+            렌더한다(SurveyDesk 미배포 기본값에서는 앱에 아무 영향 없음). */}
+        {import.meta.env.VITE_SURVEYDESK_URL && (
+          <FeedbackWidget appId="spaseo" endpoint={import.meta.env.VITE_SURVEYDESK_URL} />
+        )}
       </ErrorBoundary>
     </>
   )

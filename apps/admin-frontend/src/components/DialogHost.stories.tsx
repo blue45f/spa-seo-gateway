@@ -15,7 +15,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'In-app replacement for window.confirm/window.prompt, built on the native <dialog> + showModal(). ' +
+          'In-app replacement for globalThis.confirm/globalThis.prompt, built on the native <dialog> + showModal(). ' +
           'Promise-based via useDialog(); Escape / backdrop click cancel, focus trap and focus restore are platform-provided.',
       },
     },

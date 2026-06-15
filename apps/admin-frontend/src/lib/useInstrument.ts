@@ -18,13 +18,13 @@ function easeOutQuart(t: number): number {
  */
 export function useReducedMotion(): boolean {
   const [reduced, setReduced] = useState(() => {
-    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return true
-    return window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (typeof window === 'undefined' || typeof globalThis.matchMedia !== 'function') return true
+    return globalThis.matchMedia('(prefers-reduced-motion: reduce)').matches
   })
 
   useEffect(() => {
-    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return undefined
-    const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
+    if (typeof window === 'undefined' || typeof globalThis.matchMedia !== 'function') return undefined
+    const mq = globalThis.matchMedia('(prefers-reduced-motion: reduce)')
     const onChange = () => setReduced(mq.matches)
     mq.addEventListener('change', onChange)
     return () => mq.removeEventListener('change', onChange)

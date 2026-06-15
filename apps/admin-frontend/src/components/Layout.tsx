@@ -24,7 +24,7 @@ export function Layout() {
 
   // 라우트 변경 시 모바일 사이드바 닫기 — UX 일관성
   useEffect(() => {
-    if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+    if (typeof window !== 'undefined' && globalThis.innerWidth < 1024) {
       setSidebarOpen(false)
     }
   }, [location.pathname, setSidebarOpen])
