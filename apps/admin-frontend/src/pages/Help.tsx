@@ -5,11 +5,13 @@ import {
   Globe,
   type LucideIcon,
   Network,
+  Palette,
   Rocket,
   Settings,
   TrendingUp,
   Zap,
 } from 'lucide-react'
+import { Link } from 'react-router-dom'
 
 import { useStore } from '../lib/store'
 
@@ -67,6 +69,16 @@ export function Help() {
               </a>
             </li>
           ))}
+          <li className="mt-1.5 border-t border-line pt-1.5">
+            <Link to="/design" className="link inline-flex items-center gap-2">
+              <Palette
+                className="h-4 w-4 shrink-0 text-ink-subtle"
+                strokeWidth={1.75}
+                aria-hidden="true"
+              />
+              {t('help.designLink')}
+            </Link>
+          </li>
         </ul>
       </div>
     </section>

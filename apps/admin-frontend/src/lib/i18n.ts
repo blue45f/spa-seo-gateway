@@ -38,6 +38,9 @@ const ko: Strings = {
   'nav.library.sub': 'npm 패키지 사용',
   'nav.help': '도움말',
   'nav.help.sub': 'FAQ · 트러블슈팅',
+  'nav.design': '디자인 시스템',
+  'nav.design.sub': '토큰 · 컴포넌트 레퍼런스',
+  'help.designLink': '디자인 시스템 — 토큰 · 컴포넌트 스타일 가이드',
 
   // Auth
   'auth.login': '로그인',
@@ -416,6 +419,7 @@ const ko: Strings = {
   'a11y.skipToContent': '메인 콘텐츠로 건너뛰기',
   'a11y.routeChanged': '{page} 페이지로 이동했습니다',
   'a11y.routeUnknown': '페이지',
+  'a11y.loading': '불러오는 중',
   'app.title': 'spa-seo-gateway 관리자',
 
   // Tour
@@ -486,6 +490,9 @@ const en: Strings = {
   'nav.library.sub': 'npm package usage',
   'nav.help': 'Help',
   'nav.help.sub': 'FAQ · troubleshooting',
+  'nav.design': 'Design System',
+  'nav.design.sub': 'Tokens · component reference',
+  'help.designLink': 'Design system — token & component style guide',
 
   // Auth
   'auth.login': 'Login',
@@ -866,6 +873,7 @@ const en: Strings = {
   'a11y.skipToContent': 'Skip to main content',
   'a11y.routeChanged': 'Navigated to {page}',
   'a11y.routeUnknown': 'Page',
+  'a11y.loading': 'Loading',
   'app.title': 'spa-seo-gateway admin',
 
   // Tour
