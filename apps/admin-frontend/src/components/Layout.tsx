@@ -10,6 +10,7 @@ import { Header } from './Header'
 import { MobileMenu } from './MobileMenu'
 import { RouteAnnouncer } from './RouteAnnouncer'
 import { Sidebar } from './Sidebar'
+import { Skeleton } from './Skeleton'
 
 import type { PublicInfo } from '../lib/types'
 
@@ -75,9 +76,19 @@ export function Layout() {
           <ErrorBoundary key={location.pathname}>
             <Suspense
               fallback={
-                <p role="status" aria-live="polite" className="text-sm text-ink-subtle">
-                  loading…
-                </p>
+                // Structure-preserving skeleton instead of a bare text line — the page
+                // frame holds its shape while the lazy chunk loads. SR-announced via the
+                // status region; the pulse is disabled under reduced-motion (see Skeleton).
+                <div role="status" aria-live="polite" className="space-y-4">
+                  <span className="sr-only">{t('a11y.loading', 'Loading')}</span>
+                  <Skeleton className="h-7 w-48" label={t('a11y.loading', 'Loading')} />
+                  <Skeleton className="h-4 w-72" />
+                  <div className="panel space-y-3 p-5">
+                    <Skeleton className="h-4 w-40" />
+                    <Skeleton className="h-9 w-full" />
+                    <Skeleton className="h-9 w-full" />
+                  </div>
+                </div>
               }
             >
               <Outlet context={{ publicInfo }} />

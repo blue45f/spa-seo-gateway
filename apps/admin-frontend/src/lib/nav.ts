@@ -114,6 +114,13 @@ export const NAV_ITEMS: NavItem[] = [
  */
 export const AUX_NAV_ITEMS: NavItem[] = [
   {
+    id: 'design',
+    path: '/design',
+    labelKey: 'nav.design',
+    subtitleKey: 'nav.design.sub',
+    public: true,
+  },
+  {
     id: 'terms',
     path: '/terms',
     labelKey: 'policy.terms.title',

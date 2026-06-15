@@ -133,6 +133,20 @@ export function Welcome() {
           </div>
           <span className="font-mono text-sm text-ink">{demoRate}%</span>
         </div>
+        {/* progress readout — accent fill on the inset track, width-only transition (reduced-motion safe) */}
+        <div
+          className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-panel-2"
+          role="progressbar"
+          aria-valuenow={demoRate}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-label="Demo readiness"
+        >
+          <span
+            className="block h-full rounded-full bg-accent transition-[width] duration-200 ease-out motion-reduce:transition-none"
+            style={{ width: `${demoRate}%` }}
+          />
+        </div>
         <div className="mt-4 grid grid-cols-1 sm:grid-cols-4 gap-2 text-sm">
           {[
             ['test', '테스트 렌더 완료'],
@@ -143,6 +157,7 @@ export function Welcome() {
             <label key={key} className="panel-inset flex items-center gap-2 rounded-lg px-3 py-2">
               <input
                 type="checkbox"
+                className="checkbox h-4 w-4"
                 checked={demoChecks[key as keyof typeof demoChecks]}
                 onChange={(event) =>
                   setDemoChecks((current) => ({ ...current, [key]: event.target.checked }))

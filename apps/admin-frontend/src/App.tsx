@@ -81,6 +81,7 @@ const ApiExplorer = lazyRetry(() =>
 )
 const AuditLog = lazyRetry(() => import('./pages/AuditLog').then((m) => ({ default: m.AuditLog })))
 const Cache = lazyRetry(() => import('./pages/Cache').then((m) => ({ default: m.Cache })))
+const Design = lazyRetry(() => import('./pages/Design').then((m) => ({ default: m.Design })))
 const Help = lazyRetry(() => import('./pages/Help').then((m) => ({ default: m.Help })))
 const Library = lazyRetry(() => import('./pages/Library').then((m) => ({ default: m.Library })))
 const Lighthouse = lazyRetry(() =>
@@ -189,6 +190,7 @@ export function App() {
           <Route path="tenants/:id" element={<TenantDetail />} />
           <Route path="api" element={<ApiExplorer />} />
           <Route path="library" element={<Library />} />
+          <Route path="design" element={<Design />} />
           <Route path="help" element={<Help />} />
           <Route path="terms" element={<Policy slug="terms-of-service" />} />
           <Route path="privacy" element={<Policy slug="privacy-policy" />} />
