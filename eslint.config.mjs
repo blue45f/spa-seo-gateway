@@ -13,10 +13,10 @@ export default defineConfig(
     '**/.venv/**',
     '**/*.d.ts',
     '**/*.config.*',
-    // 벤더링된 단일 파일 위젯(DeskCloud/SurveyDesk) — npm publish 막힌 동안 형제 앱에
+    // 벤더링된 단일 파일 위젯(SurveyDesk FeedbackWidget) — npm publish 막힌 동안 형제 앱에
     // 그대로 복붙해 쓰는 사본이라 react-compiler/react-hooks/jsx-a11y strict 규칙을
     // 설계상 통과 못 한다. 소스는 외부 패키지가 원본이므로 여기서 린트 대상에서 제외한다.
-    '**/components/deskcloud/**',
+    // (DeskCloud 연동은 @heejun/deskcloud SDK 기반 네이티브 컴포넌트로 전환되어 린트 대상에 포함된다.)
     '**/components/feedback/**',
   ]),
 
