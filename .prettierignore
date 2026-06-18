@@ -19,9 +19,9 @@ charts/**
 # 자동 생성 스키마(scripts/generate-schema.ts).
 schema/
 
-# 벤더링된 단일 파일 위젯(DeskCloud/SurveyDesk) — 외부 패키지 사본이라 포맷 대상 아님
+# 벤더링된 단일 파일 위젯(SurveyDesk FeedbackWidget) — 외부 패키지 사본이라 포맷 대상 아님
 # (eslint.config.mjs 의 globalIgnores 와 동일 범위).
-**/components/deskcloud/**
+# DeskCloud 연동은 @heejun/deskcloud SDK 기반 네이티브 컴포넌트로 전환되어 포맷 대상에 포함된다.
 **/components/feedback/**
 
 # 마크다운/HTML — 기존 biome 설정도 제외했던 범위(불필요한 대량 reformat 방지).

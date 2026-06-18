@@ -2,8 +2,8 @@ import { type ComponentType, lazy, useEffect } from 'react'
 import { Route, Routes } from 'react-router-dom'
 
 import { CommandPalette } from './components/CommandPalette'
-import { ChangelogWidget } from './components/deskcloud/changelog/ChangelogWidget'
-import { NotificationBell } from './components/deskcloud/notify/NotificationBell'
+import { ChangelogPanel } from './components/deskcloud/changelog/ChangelogPanel'
+import { NotificationInbox } from './components/deskcloud/notify/NotificationInbox'
 import { SearchPalette } from './components/deskcloud/search/SearchPalette'
 import { DialogHost } from './components/DialogHost'
 import { ErrorBoundary } from './components/ErrorBoundary'
@@ -216,35 +216,16 @@ export function App() {
         {import.meta.env.VITE_SURVEYDESK_URL && (
           <FeedbackWidget appId="spaseo" endpoint={import.meta.env.VITE_SURVEYDESK_URL} />
         )}
-        {/* DeskCloud — 각 위젯은 해당 VITE_*_URL 이 설정된 경우에만 렌더(미배포 기본값=비활성).
-            모두 react-only · self-contained · 스코프 CSS(cd-/nd-/sk- 프리픽스)라 앱 스타일과 충돌 없음. */}
-        {/* ChangelogDesk 변경 이력 — fixed 플로팅 벨. SurveyDesk 가 우하단을 쓰므로 좌하단에 배치. */}
-        {import.meta.env.VITE_CHANGELOGDESK_URL && (
-          <ChangelogWidget
-            publishableKey={import.meta.env.VITE_CHANGELOGDESK_PK ?? 'pk_demo'}
-            endpoint={import.meta.env.VITE_CHANGELOGDESK_URL}
-            position="bottom-left"
-          />
-        )}
-        {/* NotifyDesk 알림 벨 — inline 컴포넌트라 fixed 컨테이너로 감싸 우상단에 띄운다. */}
-        {import.meta.env.VITE_NOTIFYDESK_URL && (
-          <div style={{ position: 'fixed', top: 12, right: 12, zIndex: 2147483000 }}>
-            <NotificationBell
-              recipientId="admin"
-              publishableKey={import.meta.env.VITE_NOTIFYDESK_PK ?? 'pk_demo'}
-              endpoint={import.meta.env.VITE_NOTIFYDESK_URL}
-            />
-          </div>
-        )}
-        {/* SearchDesk ⌘K 팔레트 — 앱 자체 CommandPalette 가 ⌘K 를 이미 쓰므로, 충돌 방지를 위해
-            ⌘⇧K(mod+shift+k) 핫키로 마운트한다(기존 기능을 덮어쓰지 않음). */}
-        {import.meta.env.VITE_SEARCHDESK_URL && (
-          <SearchPalette
-            publishableKey={import.meta.env.VITE_SEARCHDESK_PK ?? 'pk_demo'}
-            endpoint={import.meta.env.VITE_SEARCHDESK_URL}
-            hotkey="mod+shift+k"
-          />
-        )}
+        {/* DeskCloud — @heejun/deskcloud 의 pk_ 브라우저 클라이언트로 데이터만 받아
+            앱 자체 컴포넌트(Modal/EmptyState/Skeleton)·디자인 토큰으로 네이티브 렌더한다.
+            외부 위젯 CSS·번들 없음. 각 컴포넌트는 해당 VITE_<DESK>DESK_URL 이 설정됐을 때만
+            마운트되고(clients.ts 에서 env-gating), 미설정이면 아무것도 렌더하지 않는다. */}
+        {/* ChangelogDesk 변경 이력 — 좌하단 플로팅 런처 + Modal 패널. */}
+        <ChangelogPanel />
+        {/* NotifyDesk 알림 인박스 — 우상단 플로팅 벨 + Modal 인박스. */}
+        <NotificationInbox />
+        {/* SearchDesk 검색 팔레트 — 앱 CommandPalette 의 ⌘K 와 충돌 회피를 위해 ⌘⇧K 핫키. */}
+        <SearchPalette />
       </ErrorBoundary>
     </>
   )

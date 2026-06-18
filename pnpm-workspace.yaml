@@ -13,6 +13,7 @@ minimumReleaseAgeExclude:
   - '@vercel/static-config@3.4.0'
   - '@heejun/eslint-config@5.0.0'
   - '@heejun/prettier-config@3.0.0'
+  - '@heejun/deskcloud@0.1.0'
 
 overrides:
   minimatch: '>=10.2.3'
