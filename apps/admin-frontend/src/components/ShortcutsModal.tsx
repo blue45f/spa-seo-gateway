@@ -27,6 +27,18 @@ export function ShortcutsModal() {
             {t('shortcuts.title')}
           </Dialog.Title>
           <table className="w-full text-sm">
+            {/* header row gives the key/action table a programmatic structure (WCAG 1.3.1 /
+                Sonar S5256); kept visually quiet with subtle ink-subtle labels. */}
+            <thead>
+              <tr className="border-b border-line text-left text-xs font-medium text-ink-subtle">
+                <th scope="col" className="pb-2 font-medium">
+                  {t('shortcuts.col.key')}
+                </th>
+                <th scope="col" className="pb-2 font-medium">
+                  {t('shortcuts.col.action')}
+                </th>
+              </tr>
+            </thead>
             <tbody className="divide-y divide-line">
               <tr>
                 <td className="py-2">

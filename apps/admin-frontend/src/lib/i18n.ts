@@ -102,9 +102,12 @@ const ko: Strings = {
   url: 'URL',
 
   // Welcome
+  'welcome.eyebrow': '동적 렌더링 게이트웨이',
   'welcome.headline': 'SPA SEO Gateway',
   'welcome.intro':
     'React/Vue/Svelte 가 만드는 동적 콘텐츠를 봇 요청 시점에 헤드리스 Chromium 으로 실시간 렌더링 해, 봇에겐 완성된 HTML, 사람에겐 원본 SPA 를 전달하는 게이트웨이.',
+  'welcome.cta.primary': '렌더 테스트 실행',
+  'welcome.cta.secondary': '설치 가이드',
   'welcome.cards.bot': '봇이 들어오면 그 자리에서 렌더',
   'welcome.cards.bot.body':
     'isbot 의 1,000+ 패턴으로 봇 자동 식별 → 그 시점에 Chromium 으로 SPA 를 실행해 데이터 fetch / state 적용 / DOM 완성. 최종 HTML 을 봇에게 응답.',
@@ -450,6 +453,8 @@ const ko: Strings = {
   'warm.result': '결과',
   'test.responseHeaders': '응답 헤더',
   'shortcuts.title': '키보드 단축키',
+  'shortcuts.col.key': '단축키',
+  'shortcuts.col.action': '동작',
   'a11y.skipToContent': '메인 콘텐츠로 건너뛰기',
   'a11y.routeChanged': '{page} 페이지로 이동했습니다',
   'a11y.routeUnknown': '페이지',
@@ -587,7 +592,10 @@ const en: Strings = {
   url: 'URL',
 
   // Welcome
+  'welcome.eyebrow': 'Dynamic rendering gateway',
   'welcome.headline': 'SPA SEO Gateway',
+  'welcome.cta.primary': 'Run a render test',
+  'welcome.cta.secondary': 'Getting started',
   'welcome.intro':
     'React/Vue/Svelte SPAs delivered to bots as fully-rendered HTML on demand, while humans see the original SPA. Caching and SWR are bonus optimizations. The core is on-request real-time rendering.',
   'welcome.cards.bot': 'Bots get rendered HTML at request time',
@@ -938,6 +946,8 @@ const en: Strings = {
   'warm.result': 'Result',
   'test.responseHeaders': 'Response headers',
   'shortcuts.title': 'Keyboard shortcuts',
+  'shortcuts.col.key': 'Shortcut',
+  'shortcuts.col.action': 'Action',
   'a11y.skipToContent': 'Skip to main content',
   'a11y.routeChanged': 'Navigated to {page}',
   'a11y.routeUnknown': 'Page',

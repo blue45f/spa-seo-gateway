@@ -67,6 +67,7 @@ export function Tour() {
   const t = useStore((s) => s.t)
   const navigate = useNavigate()
   const titleId = useId()
+  const bodyId = useId()
   const tourVisible = !tourSeen && tourStep >= 0 && tourStep < STEPS.length
 
   // 첫 방문 시 자동 시작
@@ -98,6 +99,7 @@ export function Tour() {
           key={tourStep}
           data-testid="tour"
           aria-labelledby={titleId}
+          aria-describedby={bodyId}
           className="fixed left-1/2 top-1/2 z-[90] -translate-x-1/2 -translate-y-1/2 bg-panel border border-line rounded-xl shadow-2xl max-w-md w-full p-6 focus-visible:outline-none"
         >
           <div className="flex items-center gap-3 mb-3">
@@ -116,7 +118,9 @@ export function Tour() {
               </Dialog.Title>
             </div>
           </div>
-          <p className="text-sm text-ink-muted">{body}</p>
+          <Dialog.Description id={bodyId} className="text-sm text-ink-muted">
+            {body}
+          </Dialog.Description>
           <div className="flex gap-2 mt-5">
             <button
               type="button"
