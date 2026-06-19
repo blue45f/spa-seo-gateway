@@ -106,6 +106,13 @@ export const NAV_ITEMS: NavItem[] = [
     subtitleKey: 'nav.help.sub',
     public: true,
   },
+  {
+    id: 'support',
+    path: '/support',
+    labelKey: 'nav.support',
+    subtitleKey: 'nav.support.sub',
+    public: true,
+  },
 ]
 
 /**

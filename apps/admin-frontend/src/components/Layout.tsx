@@ -99,7 +99,8 @@ export function Layout() {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <span>spa-seo-gateway · open-source dynamic rendering</span>
             <nav aria-label={t('footer.legal')} className="flex flex-wrap gap-3">
-              {/* 약관/방침은 내부 페이지(/terms·/privacy)가 TermsDesk 정본을 렌더 — 지원만 외부 */}
+              {/* 약관/방침/문의 모두 내부 페이지 — /terms·/privacy 는 TermsDesk 정본,
+                  /support 는 desk-platform 문의 게시판(전화·이메일 연락 수단 대체). */}
               <Link
                 to="/terms"
                 className="rounded hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
@@ -112,14 +113,12 @@ export function Layout() {
               >
                 {t('footer.privacy')}
               </Link>
-              <a
-                href="https://termsdesk.vercel.app/support/spa-seo-gateway"
-                target="_blank"
-                rel="noreferrer"
+              <Link
+                to="/support"
                 className="rounded hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
               >
                 {t('footer.support')}
-              </a>
+              </Link>
             </nav>
             <a
               href="https://github.com/blue45f/spa-seo-gateway"

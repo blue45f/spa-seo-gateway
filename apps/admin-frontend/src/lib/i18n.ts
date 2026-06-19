@@ -38,6 +38,8 @@ const ko: Strings = {
   'nav.library.sub': 'npm 패키지 사용',
   'nav.help': '도움말',
   'nav.help.sub': 'FAQ · 트러블슈팅',
+  'nav.support': '문의',
+  'nav.support.sub': '문의 게시판 · 제휴/버그/의견',
   'nav.design': '디자인 시스템',
   'nav.design.sub': '토큰 · 컴포넌트 레퍼런스',
   'help.designLink': '디자인 시스템 — 토큰 · 컴포넌트 스타일 가이드',
@@ -454,7 +456,7 @@ const ko: Strings = {
   'footer.legal': '법적 고지 링크',
   'footer.terms': '이용약관',
   'footer.privacy': '개인정보처리방침',
-  'footer.support': '지원',
+  'footer.support': '문의',
 
   // Policy (TermsDesk 정본)
   'policy.terms.title': '이용약관',
@@ -504,6 +506,8 @@ const en: Strings = {
   'nav.library.sub': 'npm package usage',
   'nav.help': 'Help',
   'nav.help.sub': 'FAQ · troubleshooting',
+  'nav.support': 'Inquiry',
+  'nav.support.sub': 'Inquiry board · partnership/bug/feedback',
   'nav.design': 'Design System',
   'nav.design.sub': 'Tokens · component reference',
   'help.designLink': 'Design system — token & component style guide',
@@ -922,7 +926,7 @@ const en: Strings = {
   'footer.legal': 'Legal links',
   'footer.terms': 'Terms of Service',
   'footer.privacy': 'Privacy Policy',
-  'footer.support': 'Support',
+  'footer.support': 'Inquiry',
 
   // Policy (TermsDesk canonical copy)
   'policy.terms.title': 'Terms of Service',

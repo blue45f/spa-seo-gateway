@@ -12,6 +12,7 @@ import {
   Image,
   LayoutDashboard,
   type LucideIcon,
+  MessageSquare,
   Package,
   Plug,
   Route,
@@ -42,6 +43,7 @@ const NAV_ICONS: Record<string, LucideIcon> = {
   api: Plug,
   library: Package,
   help: CircleQuestionMark,
+  support: MessageSquare,
 }
 
 export function NavIcon({ id, className }: { id: string; className?: string }) {

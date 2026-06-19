@@ -46,8 +46,8 @@ describe('Sidebar', () => {
   it('shows public badge for public tabs only', () => {
     renderWithRouter(<Sidebar />)
     const badges = screen.getAllByText('public')
-    // welcome / antigravity / api / library / help → 5 public badges
-    expect(badges).toHaveLength(5)
+    // welcome / antigravity / api / library / help / support → 6 public badges
+    expect(badges).toHaveLength(6)
   })
 
   it('theme button cycles system → light → dark → system', () => {

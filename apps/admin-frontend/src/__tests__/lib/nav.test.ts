@@ -10,8 +10,8 @@ import {
 } from '../../lib/nav'
 
 describe('navItems', () => {
-  it('contains all 17 tabs (15 base + sites + tenants)', () => {
-    expect(NAV_ITEMS).toHaveLength(17)
+  it('contains all 18 tabs (16 base + sites + tenants)', () => {
+    expect(NAV_ITEMS).toHaveLength(18)
     const ids = NAV_ITEMS.map((n) => n.id)
     for (const id of [
       'welcome',
@@ -31,6 +31,7 @@ describe('navItems', () => {
       'api',
       'library',
       'help',
+      'support',
     ]) {
       expect(ids).toContain(id)
     }
@@ -76,6 +77,7 @@ describe('navItems', () => {
     expect(requiresAuth('api')).toBe(false)
     expect(requiresAuth('library')).toBe(false)
     expect(requiresAuth('help')).toBe(false)
+    expect(requiresAuth('support')).toBe(false)
   })
 
   it('requires auth for sites + tenants', () => {

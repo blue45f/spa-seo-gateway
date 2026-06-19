@@ -43,11 +43,11 @@ describe('Layout footer legal links', () => {
     expect(privacy).not.toHaveAttribute('target')
   })
 
-  it('keeps the support link external to TermsDesk', () => {
+  it('routes the inquiry link to the internal /support page (no new tab)', () => {
     renderLayout()
     const legalNav = screen.getByRole('navigation', { name: '법적 고지 링크' })
-    const support = within(legalNav).getByRole('link', { name: '지원' })
-    expect(support).toHaveAttribute('href', 'https://termsdesk.vercel.app/support/spa-seo-gateway')
-    expect(support).toHaveAttribute('target', '_blank')
+    const support = within(legalNav).getByRole('link', { name: '문의' })
+    expect(support).toHaveAttribute('href', '/support')
+    expect(support).not.toHaveAttribute('target')
   })
 })

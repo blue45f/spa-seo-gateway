@@ -16,6 +16,8 @@ interface ImportMetaEnv {
   readonly VITE_SEARCHDESK_URL?: string
   /** SearchDesk 테넌트 퍼블리시 키(pk_…). 미설정 시 'pk_demo'. */
   readonly VITE_SEARCHDESK_PK?: string
+  /** desk-platform 문의(Inquiry) 백엔드 URL. 미설정 시 prod 기본값(desk-platform.vercel.app). */
+  readonly VITE_DESK_PLATFORM_URL?: string
 }
 
 interface ImportMeta {

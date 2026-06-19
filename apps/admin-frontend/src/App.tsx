@@ -100,6 +100,7 @@ const SiteDetail = lazyRetry(() =>
   import('./pages/SiteDetail').then((m) => ({ default: m.SiteDetail }))
 )
 const Sites = lazyRetry(() => import('./pages/Sites').then((m) => ({ default: m.Sites })))
+const Support = lazyRetry(() => import('./pages/Support').then((m) => ({ default: m.Support })))
 const TenantDetail = lazyRetry(() =>
   import('./pages/TenantDetail').then((m) => ({ default: m.TenantDetail }))
 )
@@ -194,6 +195,7 @@ export function App() {
           <Route path="tenants/:id" element={<TenantDetail />} />
           <Route path="api" element={<ApiExplorer />} />
           <Route path="library" element={<Library />} />
+          <Route path="support" element={<Support />} />
           <Route path="design" element={<Design />} />
           <Route path="help" element={<Help />} />
           <Route path="terms" element={<Policy slug="terms-of-service" />} />
