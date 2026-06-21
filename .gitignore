@@ -10,6 +10,7 @@ dist/
 !.vscode/extensions.json
 coverage/
 .cache/
+.turbo/
 # Python virtualenv (scratch tooling)
 .venv/
 puppeteer-cache/

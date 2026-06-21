@@ -7,6 +7,7 @@
 **/.venv/**
 **/.vercel/**
 **/.cache/**
+**/.turbo/**
 **/puppeteer-cache/**
 test-results/
 playwright-report/
