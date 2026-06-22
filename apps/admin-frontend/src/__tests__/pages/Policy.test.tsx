@@ -61,7 +61,7 @@ describe('Policy page', () => {
     expect(hash).toHaveAttribute('title', TERMS_PAYLOAD.contentHash)
     expect(screen.getByRole('link', { name: /TermsDesk 원문/ })).toHaveAttribute(
       'href',
-      'https://termsdesk.vercel.app/p/spa-seo-gateway/terms-of-service'
+      'https://desk-platform.vercel.app/termsdesk/p/spa-seo-gateway/terms-of-service'
     )
 
     expect(fetchMock).toHaveBeenCalledWith(policyApiUrl('terms-of-service'), expect.anything())
@@ -88,7 +88,7 @@ describe('Policy page', () => {
     // 문서 로드가 끝나면 신뢰 표면(원문 링크)이 footer 에 렌더된다.
     expect(await screen.findByRole('link', { name: /TermsDesk 원문/ })).toHaveAttribute(
       'href',
-      'https://termsdesk.vercel.app/p/spa-seo-gateway/privacy-policy'
+      'https://desk-platform.vercel.app/termsdesk/p/spa-seo-gateway/privacy-policy'
     )
   })
 
@@ -109,7 +109,7 @@ describe('Policy page', () => {
     expect(alert).toHaveTextContent('문서를 불러오지 못했습니다.')
     expect(screen.getByRole('link', { name: /TermsDesk 원문/ })).toHaveAttribute(
       'href',
-      'https://termsdesk.vercel.app/p/spa-seo-gateway/terms-of-service'
+      'https://desk-platform.vercel.app/termsdesk/p/spa-seo-gateway/terms-of-service'
     )
 
     // 재시도 — 성공 응답으로 교체 후 본문이 렌더되는지

@@ -14,7 +14,7 @@ import type { Lang } from './types'
 export const POLICY_SLUGS = ['terms-of-service', 'privacy-policy'] as const
 export type PolicySlug = (typeof POLICY_SLUGS)[number]
 
-export const TERMSDESK_BASE_URL = 'https://termsdesk.vercel.app'
+export const TERMSDESK_BASE_URL = 'https://desk-platform.vercel.app/termsdesk'
 export const POLICY_ORG_SLUG = 'spa-seo-gateway'
 
 export function policyApiUrl(slug: PolicySlug): string {

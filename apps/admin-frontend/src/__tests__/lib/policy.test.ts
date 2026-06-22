@@ -38,16 +38,16 @@ const VALID_PAYLOAD = {
 describe('policy URLs', () => {
   it('builds the public API URL per slug', () => {
     expect(policyApiUrl('terms-of-service')).toBe(
-      'https://termsdesk.vercel.app/api/public/spa-seo-gateway/policies/terms-of-service'
+      'https://desk-platform.vercel.app/termsdesk/api/public/spa-seo-gateway/policies/terms-of-service'
     )
     expect(policyApiUrl('privacy-policy')).toBe(
-      'https://termsdesk.vercel.app/api/public/spa-seo-gateway/policies/privacy-policy'
+      'https://desk-platform.vercel.app/termsdesk/api/public/spa-seo-gateway/policies/privacy-policy'
     )
   })
 
   it('builds the rendered fallback page URL per slug', () => {
     expect(policyPublicUrl('privacy-policy')).toBe(
-      'https://termsdesk.vercel.app/p/spa-seo-gateway/privacy-policy'
+      'https://desk-platform.vercel.app/termsdesk/p/spa-seo-gateway/privacy-policy'
     )
   })
 })
