@@ -207,6 +207,9 @@ importers:
 
   apps/demo:
     dependencies:
+      '@heejun/spa-seo-gateway-admin-ui':
+        specifier: workspace:*
+        version: link:../../packages/admin-ui
       '@vercel/node':
         specifier: ^5.8.17
         version: 5.8.17
