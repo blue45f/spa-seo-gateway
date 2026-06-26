@@ -30,14 +30,18 @@ export function Header() {
   }
 
   return (
-    <header className="bg-panel border-b border-line px-6 py-3 flex items-center justify-between gap-4 pl-16 lg:pl-6">
-      <div className="min-w-0">
+    <header className="bg-panel border-b border-line px-6 py-3 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 pl-16 lg:pl-6">
+      <div className="min-w-[8rem] flex-1">
         <h1 className="text-xl font-semibold tracking-tight text-ink truncate">
           {item ? t(item.labelKey) : ''}
         </h1>
         <p className="text-xs text-ink-subtle truncate">{item ? t(item.subtitleKey) : ''}</p>
       </div>
-      <div className="flex shrink-0 items-center gap-2">
+      <div
+        className={`flex shrink-0 items-center gap-2${
+          showLogin ? ' max-sm:order-last max-sm:w-full' : ''
+        }`}
+      >
         {showLogin ? <LoginForm /> : null}
         {authed ? (
           <button

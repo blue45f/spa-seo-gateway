@@ -234,12 +234,12 @@ export function ApiExplorer() {
           <details key={`${e.method}-${e.path}`} className="panel">
             <summary className="cursor-pointer px-4 py-3 flex items-center gap-3">
               <span
-                className={`px-2 py-0.5 rounded text-xs font-mono font-semibold ${methodPillClass(e.method)}`}
+                className={`shrink-0 px-2 py-0.5 rounded text-xs font-mono font-semibold ${methodPillClass(e.method)}`}
               >
                 {e.method}
               </span>
-              <code className="font-mono text-sm">{e.path}</code>
-              <span className="badge badge--neutral ml-auto">{e.auth}</span>
+              <code className="min-w-0 flex-1 truncate font-mono text-sm">{e.path}</code>
+              <span className="badge badge--neutral shrink-0">{e.auth}</span>
             </summary>
             <div className="px-4 pb-4 pt-2 text-sm text-ink-muted">
               <p className="mb-2">{t(e.descKey)}</p>

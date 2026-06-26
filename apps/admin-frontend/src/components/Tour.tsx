@@ -124,7 +124,7 @@ export function Tour() {
           <div className="flex gap-2 mt-5">
             <button
               type="button"
-              className="text-sm text-ink-subtle hover:text-ink-muted rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+              className="rounded-lg px-3 py-2 text-sm text-ink-subtle hover:text-ink-muted hover:bg-panel-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
               onClick={endTour}
             >
               {t('tour.skip')}

@@ -32,7 +32,11 @@ export function LoginForm() {
   }
 
   return (
-    <form onSubmit={submit} className="flex items-center gap-2" data-testid="login-form">
+    <form
+      onSubmit={submit}
+      className="flex items-center gap-2 max-sm:w-full"
+      data-testid="login-form"
+    >
       <input
         type="password"
         placeholder={t('auth.token-placeholder')}
@@ -46,7 +50,7 @@ export function LoginForm() {
         type="submit"
         disabled={submitting || !token.trim()}
         aria-busy={submitting}
-        className="btn-primary px-3 py-1.5 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 dark:focus-visible:ring-offset-[var(--color-surface)]"
+        className="btn-primary shrink-0 whitespace-nowrap px-3 py-1.5 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 dark:focus-visible:ring-offset-[var(--color-surface)]"
       >
         {submitting ? '…' : t('auth.login')}
       </button>
