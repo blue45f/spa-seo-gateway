@@ -22,7 +22,7 @@
   "dependencies": {
     "@heejun/spa-seo-gateway-admin-ui": "workspace:*",
     "@heejun/spa-seo-gateway-core": "workspace:*",
-    "fastify": "^5.8.5",
+    "fastify": "^5.9.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {
