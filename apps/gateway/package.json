@@ -20,7 +20,7 @@
     "@heejun/spa-seo-gateway-cms": "workspace:*",
     "@heejun/spa-seo-gateway-core": "workspace:*",
     "@heejun/spa-seo-gateway-multi-tenant": "workspace:*",
-    "fastify": "^5.8.5"
+    "fastify": "^5.9.0"
   },
   "devDependencies": {
     "tsx": "^4.22.4",
