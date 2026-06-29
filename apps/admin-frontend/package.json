@@ -32,7 +32,7 @@
   "devDependencies": {
     "@axe-core/playwright": "^4.11.3",
     "@babel/core": "^8.0.1",
-    "@playwright/test": "^1.61.0",
+    "@playwright/test": "^1.61.1",
     "@rolldown/plugin-babel": "^0.2.3",
     "@storybook/addon-docs": "^10.4.6",
     "@storybook/addon-themes": "^10.4.6",
