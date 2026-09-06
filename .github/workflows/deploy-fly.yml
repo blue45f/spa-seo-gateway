@@ -40,7 +40,7 @@ jobs:
     env:
       FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Skip deployment when FLY_API_TOKEN is not configured
         if: env.FLY_API_TOKEN == ''
