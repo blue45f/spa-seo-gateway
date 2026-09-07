@@ -50,7 +50,7 @@
     "@vitest/coverage-v8": "^4.1.9",
     "autocannon": "^8.0.0",
     "eslint": "^10.4.1",
-    "fastify": "^5.8.5",
+    "fastify": "^5.12.1",
     "globals": "^17.7.0",
     "husky": "^9.1.7",
     "lint-staged": "^17.0.8",
@@ -60,7 +60,7 @@
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.61.1",
     "vitest": "^4.1.9",
-    "zod": "^4.4.3"
+    "zod": "^4.5.4"
   },
   "prettier": "@heejun/prettier-config",
   "lint-staged": {
