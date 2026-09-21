@@ -45,7 +45,7 @@
     "@heejun/eslint-config": "^5.0.0",
     "@heejun/prettier-config": "^3.0.0",
     "@types/autocannon": "^7.12.7",
-    "@types/node": "^26.5.1",
+    "@types/node": "^26.6.1",
     "@vercel/node": "^5.8.17",
     "@vitest/coverage-v8": "^5.0.1",
     "autocannon": "^8.0.0",
