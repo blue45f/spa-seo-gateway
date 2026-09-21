@@ -12,7 +12,7 @@
     "check": "tsx scripts/check.ts"
   },
   "dependencies": {
-    "@fastify/compress": "^9.0.0",
+    "@fastify/compress": "^9.2.0",
     "@fastify/cors": "^11.2.0",
     "@fastify/http-proxy": "^11.5.0",
     "@fastify/rate-limit": "^11.0.0",
