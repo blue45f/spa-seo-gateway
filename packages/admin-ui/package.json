@@ -21,7 +21,7 @@
     "clean": "rm -rf dist public/assets public/index.html"
   },
   "dependencies": {
-    "@fastify/static": "^9.1.3",
+    "@fastify/static": "^10.1.4",
     "@heejun/spa-seo-gateway-core": "workspace:*",
     "fastify": "^5.8.5"
   },
