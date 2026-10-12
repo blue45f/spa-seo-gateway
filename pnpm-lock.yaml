@@ -318,8 +318,8 @@ importers:
   packages/core:
     dependencies:
       '@cacheable/memory':
-        specifier: ^2.0.9
-        version: 2.0.9
+        specifier: ^2.2.0
+        version: 2.2.0
       '@cacheable/utils':
         specifier: ^2.5.0
         version: 2.5.0
@@ -8842,7 +8842,7 @@ snapshots:
 
   cacheable@2.3.5:
     dependencies:
-      '@cacheable/memory': 2.0.9
+      '@cacheable/memory': 2.2.0
       '@cacheable/utils': 2.5.0
       hookified: 1.15.1
       keyv: 5.6.0
