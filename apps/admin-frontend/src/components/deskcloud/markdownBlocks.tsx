@@ -11,9 +11,7 @@
 import { Fragment, type ReactNode } from 'react'
 
 type Block =
-  | { kind: 'p'; text: string }
-  | { kind: 'ul'; items: string[] }
-  | { kind: 'ol'; items: string[] }
+  { kind: 'p'; text: string } | { kind: 'ul'; items: string[] } | { kind: 'ol'; items: string[] }
 
 const BULLET_RE = /^[-*]\s+(.+)$/
 const ORDERED_RE = /^\d+\.\s+(.+)$/

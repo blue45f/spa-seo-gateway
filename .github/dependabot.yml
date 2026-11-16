@@ -46,6 +46,15 @@ updates:
           - 'puppeteer*'
           - '@keyv/*'
           - 'keyv'
+    ignore:
+      # typescript-eslint 8.x 는 TypeScript 6.x JS 컴파일러 API(<6.1.0)에 의존하므로 TS 7 네이티브 전환 전까지 제외
+      - dependency-name: 'typescript'
+        versions: ['>= 7.0.0']
+      # cacheable 2.x / @cacheable/memory 2.x 는 keyv 5.x 계약에 의존하므로 keyv 6 메이저는 업스트림 지원 전까지 제외
+      - dependency-name: 'keyv'
+        versions: ['>= 6.0.0']
+      - dependency-name: '@keyv/redis'
+        versions: ['>= 6.0.0']
 
   - package-ecosystem: github-actions
     directory: '/'

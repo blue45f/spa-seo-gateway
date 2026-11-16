@@ -47,6 +47,7 @@ function f(path: string, init: RequestInit = {}): Promise<Response> {
 describe('gateway security headers — baseline (every route)', () => {
   it('GET /health carries nosniff + referrer-policy + dns-prefetch-control', async () => {
     const res = await f('/health')
+    await res.text()
     expect(res.status).toBe(200)
     expect(res.headers.get('x-content-type-options')).toBe('nosniff')
     expect(res.headers.get('referrer-policy')).toBe('strict-origin-when-cross-origin')
@@ -55,6 +56,7 @@ describe('gateway security headers — baseline (every route)', () => {
 
   it('GET /metrics keeps Prometheus content-type AND gains nosniff', async () => {
     const res = await f('/metrics')
+    await res.text()
     expect(res.status).toBe(200)
     // Security header is additive — it must not clobber the exposition type.
     expect(res.headers.get('content-type') ?? '').toMatch(/text\/plain/)
@@ -67,6 +69,7 @@ describe('gateway security headers — admin surface (frame + CORP)', () => {
     // Use the admin JSON endpoint (not the SPA index) so we avoid the
     // @fastify/compress readFile path and assert purely on /admin headers.
     const res = await f('/admin/api/public/info')
+    await res.text()
     expect(res.status).toBe(200)
     expect(res.headers.get('x-frame-options')).toBe('SAMEORIGIN')
     expect(res.headers.get('cross-origin-resource-policy')).toBe('same-origin')
@@ -76,6 +79,7 @@ describe('gateway security headers — admin surface (frame + CORP)', () => {
 
   it('GET /health (non-admin) does NOT set the admin-only frame guard', async () => {
     const res = await f('/health')
+    await res.text()
     expect(res.status).toBe(200)
     expect(res.headers.get('x-frame-options')).toBeNull()
     expect(res.headers.get('cross-origin-resource-policy')).toBeNull()

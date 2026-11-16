@@ -66,9 +66,7 @@ function InquiryCard({ inquiry }: { inquiry: Inquiry }) {
 }
 
 type BoardState =
-  | { phase: 'loading' }
-  | { phase: 'error'; message: string }
-  | { phase: 'ready'; items: Inquiry[] }
+  { phase: 'loading' } | { phase: 'error'; message: string } | { phase: 'ready'; items: Inquiry[] }
 
 function InquiryBoard() {
   const [state, setState] = useState<BoardState>({ phase: 'loading' })
