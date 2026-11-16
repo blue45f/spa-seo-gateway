@@ -23,7 +23,7 @@
     "@cacheable/memory": "^2.2.0",
     "@cacheable/utils": "^2.5.0",
     "@keyv/redis": "^5.1.6",
-    "@opentelemetry/api": "^1.9.1",
+    "@opentelemetry/api": "^1.10.0",
     "cacheable": "^2.5.0",
     "dotenv": "^18.0.10",
     "fast-xml-parser": "^5.11.2",
