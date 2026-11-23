@@ -8,6 +8,6 @@
   },
   "dependencies": {
     "@heejun/spa-seo-gateway-admin-ui": "workspace:*",
-    "@vercel/node": "^5.8.17"
+    "@vercel/node": "^32.0.0"
   }
 }
